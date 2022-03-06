@@ -26,6 +26,8 @@ public class ClientTrainThread extends Thread {
             weightUpdates = Nd4j.fromByteArray(clientHandler.train());
         } catch (IOException e) {
             e.printStackTrace();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
         }
     }
 }

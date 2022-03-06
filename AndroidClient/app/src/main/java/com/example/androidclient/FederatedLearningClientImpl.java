@@ -13,14 +13,21 @@ import org.nd4j.shade.guava.primitives.Ints;
 
 import java.io.*;
 import java.net.Socket;
+import java.nio.charset.StandardCharsets;
+import java.util.zip.GZIPInputStream;
 
-public class FederatedLearningClientImpl implements FederatedLearningClient {
+public class FederatedLearningClientImpl extends Thread implements FederatedLearningClient {
     private Socket socket;
     private Context appContext;
 
     FederatedLearningClientImpl(String serverAddr, int serverPort, Context ctx) throws IOException {
         socket = new Socket(serverAddr, serverPort);
         appContext = ctx;
+    }
+
+    @Override
+    public void run() {
+
     }
 
     @Override
@@ -46,54 +53,71 @@ public class FederatedLearningClientImpl implements FederatedLearningClient {
         }
     }
 
+    public File getModel() throws IOException {
+        // get model length
+        byte[] modelLengthBytes = new byte[4];
+        socket.getInputStream().read(modelLengthBytes);
+        int modelLength = Ints.fromByteArray(modelLengthBytes);
+        System.out.println("got model length = " + modelLength);
+
+        socket.getOutputStream().write("ok".getBytes(StandardCharsets.US_ASCII));
+        socket.getOutputStream().flush();
+
+        // save model to file
+        File path = appContext.getFilesDir();
+        System.out.println(path.getAbsolutePath());
+        File f = new File(path, "testmodel.zip");
+        if (!f.exists()) f.createNewFile();
+        FileOutputStream fos = new FileOutputStream(f);
+        BufferedOutputStream bos = new BufferedOutputStream(fos);
+
+        byte[] buf = new byte[2048];
+        int cnt = 0;
+        while (cnt < modelLength) {
+            int c = socket.getInputStream().read(buf, 0, Math.min(2048, modelLength - cnt));
+            cnt += c;
+            bos.write(buf, 0, c);
+            System.out.println("yo" + cnt);
+        }
+        bos.close();
+        fos.close();
+        System.out.println("saved model");
+
+        assert f.length() == modelLength;
+
+        return f;
+    }
+
     @Override
     public void train() throws IOException {
 
-//        // get model length
-//        byte[] modelLengthBytes = new byte[4];
-//        socket.getInputStream().read(modelLengthBytes);
-//        int modelLength = Ints.fromByteArray(modelLengthBytes);
-//        System.out.println("got model length = " + modelLength);
-//
-//
-//        // get model
-//        byte[] bytes = new byte[modelLength];
-//        socket.getInputStream().read(bytes);
-//
-//        // save model to file
-//        File path = appContext.getFilesDir();
-//        System.out.println(path.getAbsolutePath());
-//        File f = new File(path, "testmodel.zip");
-//        if (!f.exists()) f.createNewFile();
-//        FileOutputStream fos = new FileOutputStream(f);
-//        fos.write(bytes);
-//        fos.close();
-//        System.out.println("saved model");
+        File f = getModel();
 
-        MultiLayerNetwork model = ModelSerializer.restoreMultiLayerNetwork("model.zip", true);
+        try {
+            Thread.sleep(5000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        MultiLayerNetwork model = ModelSerializer.restoreMultiLayerNetwork(f, true);
         System.out.println("loaded model");
-//
-//        // get ready for training
-//        Cifar10DataSetIterator cifar = new Cifar10DataSetIterator(
-//                96,
-//                new int[] { 32, 32 },
-//                DataSetType.TRAIN,
-//                null,
-//                123L);
-//
-//        model.setListeners(new ScoreIterationListener(10));
-//        model.fit(cifar, 10);
-//
-//        // get update from layer
-//        // reference from mccorby's PhotoLabeller
-//        INDArray weights = model.getLayer(3).params();
-//        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-//        Nd4j.write(outputStream, weights);
-//        outputStream.flush();
-//        byte[] bytes = outputStream.toByteArray();
-//        outputStream.close();
-//
-//        // send update to server
-//        socket.getOutputStream().write(bytes);
+
+        // get ready for training
+        MyCifar10Loader loader = new MyCifar10Loader(appContext.getAssets(), DataSetType.TRAIN);
+        MyCifar10DataSetIterator cifar = new MyCifar10DataSetIterator(loader, 10, 1, 1000);
+
+        model.setListeners(new ScoreIterationListener(10));
+        model.fit(cifar, 3);
+
+        // get update from layer
+        INDArray weights = model.getLayer(0).params();
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        Nd4j.write(outputStream, weights);
+        outputStream.flush();
+        byte[] bytes1 = outputStream.toByteArray();
+        outputStream.close();
+
+        // send update to server
+        socket.getOutputStream().write(bytes1);
     }
 }

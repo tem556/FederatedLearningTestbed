@@ -2,6 +2,8 @@ package org.example;
 
 import java.io.*;
 import java.net.Socket;
+import java.nio.charset.StandardCharsets;
+import java.util.zip.GZIPInputStream;
 
 import com.google.common.primitives.Ints;
 import org.apache.commons.io.IOUtils;
@@ -30,7 +32,7 @@ public class ClientHandlerImpl implements ClientHandler {
     }
 
     @Override
-    public byte[] train() throws IOException {
+    public byte[] train() throws IOException, InterruptedException {
         output.println("train");
 
         // push model
@@ -44,23 +46,36 @@ public class ClientHandlerImpl implements ClientHandler {
     }
 
     @Override
-    public void pushModel() throws IOException {
+    public void pushModel() throws IOException, InterruptedException {
         System.out.println("loading model");
 
+//        GZIPInputStream gis = new GZIPInputStream();
+
         // send model to client
-        File f = new File("C:/Users/buinn/DoNotTouch/crap/photolabeller/model.zip");
+        File f = new File("C:/Users/buinn/DoNotTouch/crap/photolabeller/newmodel.zip");
+        int modelLength = (int)f.length();
         FileInputStream fis = new FileInputStream(f);
-        byte[] bytes = IOUtils.toByteArray(fis);
+        byte[] bytes = new byte[modelLength];
+        fis.read(bytes, 0, modelLength);
 
         System.out.println("pushing");
 
-//        socket.getOutputStream().write(Ints.toByteArray(bytes.length), 0, 4);
-//        socket.getOutputStream().flush();
-//        System.out.println("pushed model length = " + bytes.length);
-//
-//        socket.getOutputStream().write(bytes, 0, bytes.length);
-//        socket.getOutputStream().flush();
+        socket.getOutputStream().write(Ints.toByteArray(modelLength), 0, 4);
+        socket.getOutputStream().flush();
+        System.out.println("pushed model length = " + bytes.length);
+
+        byte[] okBytes = new byte[2];
+        socket.getInputStream().read(okBytes);
+        if (!new String(okBytes, StandardCharsets.US_ASCII).equals("ok")) {
+            throw new IOException("did not receive model length");
+        }
+
+        socket.getOutputStream().write(bytes, 0, modelLength);
+        socket.getOutputStream().flush();
+
         System.out.println("pushed model");
+
+//        Thread.sleep(30000);
     }
 
     @Override

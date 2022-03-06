@@ -25,7 +25,7 @@ public class FederatedLearningServerImpl implements FederatedLearningServer {
     private ArrayList<ClientHandler> clientPool;
 
     FederatedLearningServerImpl() throws IOException {
-        clientPool = new ArrayList<ClientHandler>();
+        clientPool = new ArrayList<>();
         serverSocket = new ServerSocket(PORT);
     }
 

@@ -39,10 +39,12 @@ import java.net.URI;
 import java.net.URISyntaxException;
 
 public class MainActivity extends AppCompatActivity {
+    static {
+        System.loadLibrary("opencv_java");
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        System.loadLibrary("opencv_java");
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
     }
@@ -96,21 +98,21 @@ public class MainActivity extends AppCompatActivity {
 
 
         // get ready for training
-        Cifar10DataSetIterator cifar = new Cifar10DataSetIterator(
-                batchSize,
-                new int[] { 32, 32 },
-                DataSetType.TRAIN,
-                null,
-                123L);
-        Cifar10DataSetIterator cifarEval = new Cifar10DataSetIterator(batchSize, new int[]{height, width}, DataSetType.TEST, null, seed);
+//        Cifar10DataSetIterator cifar = new Cifar10DataSetIterator(
+//                batchSize,
+//                new int[] { 32, 32 },
+//                DataSetType.TRAIN,
+//                null,
+//                123L);
+//        Cifar10DataSetIterator cifarEval = new Cifar10DataSetIterator(batchSize, new int[]{height, width}, DataSetType.TEST, null, seed);
 
 //        model.setListeners(new ScoreIterationListener(10));
 //        model.fit(cifar, 10);
 
-        System.out.println("trained");
+//        System.out.println("trained");
 
-//        FederatedLearningClient client = new FederatedLearningClientImpl("10.27.56.25", 4602, getApplicationContext());
-//        client.register();
+        FederatedLearningClient client = new FederatedLearningClientImpl("172.20.102.177", 4602, getApplicationContext());
+        client.register();
     }
 
     private static int height = 32;
