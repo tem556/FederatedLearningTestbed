@@ -7,5 +7,4 @@ import java.util.List;
 
 public interface FederatedLearningServer {
     public void startServer() throws IOException, InterruptedException;
-    public void aggregate(List<INDArray> updates) throws IOException;
 }

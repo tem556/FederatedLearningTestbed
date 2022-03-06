@@ -13,20 +13,15 @@ public class ClientTrainThread extends Thread {
 
     ClientTrainThread(ClientHandler clientHandler, int rounds) {
         super();
-
         this.clientHandler = clientHandler;
         this.rounds = rounds;
     }
 
     @Override
     public void run() {
-        // TODO: train process here
-
         try {
-            weightUpdates = Nd4j.fromByteArray(clientHandler.train());
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (InterruptedException e) {
+            weightUpdates = clientHandler.train();
+        } catch (IOException | InterruptedException e) {
             e.printStackTrace();
         }
     }

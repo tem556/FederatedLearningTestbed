@@ -112,7 +112,7 @@ public class MainActivity extends AppCompatActivity {
 //        System.out.println("trained");
 
         FederatedLearningClient client = new FederatedLearningClientImpl("172.20.102.177", 4602, getApplicationContext());
-        client.register();
+        client.serve();
     }
 
     private static int height = 32;

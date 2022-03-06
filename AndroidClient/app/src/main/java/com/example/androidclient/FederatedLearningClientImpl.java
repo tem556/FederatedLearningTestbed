@@ -19,40 +19,60 @@ import java.util.zip.GZIPInputStream;
 public class FederatedLearningClientImpl extends Thread implements FederatedLearningClient {
     private Socket socket;
     private Context appContext;
+    private boolean isTraining;
+    private TrainingThread trainingThread = null;
 
     FederatedLearningClientImpl(String serverAddr, int serverPort, Context ctx) throws IOException {
         socket = new Socket(serverAddr, serverPort);
         appContext = ctx;
+        isTraining = false;
+    }
+
+    @Override
+    public void serve() throws IOException {
+        this.start();
     }
 
     @Override
     public void run() {
+        try {
+            while (socket.isConnected()) {
+                if (socket.getInputStream().available() <= 0) {
+                    Thread.sleep(5000);
+                    continue;
+                }
 
-    }
+                byte[] bytes = new byte[4];
+                socket.getInputStream().read(bytes);
 
-    @Override
-    public void register() throws IOException {
-        BufferedReader socketInput = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-
-        while (true) {
-            String s = socketInput.readLine();
-            System.out.println(s);
-            if (s.equals("registered")) {
-                System.out.println("registered");
-            } else if (s.equals("rejected")) {
-                socket.close();
-                System.out.println("rejected");
-            } else if (s.equals("closed")) {
-                System.out.println("done");
-                socketInput.close();
-                socket.close();
-                break;
-            } else if (s.equals("train")) {
-                train();
+                System.out.println("received " + Ints.fromByteArray(bytes));
+                switch (Ints.fromByteArray(bytes)) {
+                    case 0: // registered
+                        break;
+                    case 1: // rejected
+                        close();
+                        return;
+                    case 2: // done
+                        return;
+                    case 3: // train
+                        train();
+                        break;
+                    case 4: // trainstatus
+                        trainStatus();
+                        break;
+                    case 5: // trainresult
+                        trainResult();
+                        break;
+                    default:
+                        throw new UnsupportedOperationException("invalid verb");
+                }
             }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 
+    @Override
     public File getModel() throws IOException {
         // get model length
         byte[] modelLengthBytes = new byte[4];
@@ -60,8 +80,8 @@ public class FederatedLearningClientImpl extends Thread implements FederatedLear
         int modelLength = Ints.fromByteArray(modelLengthBytes);
         System.out.println("got model length = " + modelLength);
 
-        socket.getOutputStream().write("ok".getBytes(StandardCharsets.US_ASCII));
-        socket.getOutputStream().flush();
+//        socket.getOutputStream().write("ok".getBytes(StandardCharsets.US_ASCII));
+//        socket.getOutputStream().flush();
 
         // save model to file
         File path = appContext.getFilesDir();
@@ -93,31 +113,66 @@ public class FederatedLearningClientImpl extends Thread implements FederatedLear
 
         File f = getModel();
 
-        try {
-            Thread.sleep(5000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
+//        try {
+//            Thread.sleep(5000);
+//        } catch (InterruptedException e) {
+//            e.printStackTrace();
+//        }
+//
+//        MultiLayerNetwork model = ModelSerializer.restoreMultiLayerNetwork(f, true);
+//        System.out.println("loaded model");
+//
+//        // get ready for training
+//        MyCifar10Loader loader = new MyCifar10Loader(appContext.getAssets(), DataSetType.TRAIN);
+//        MyCifar10DataSetIterator cifar = new MyCifar10DataSetIterator(loader, 10, 1, 1000);
+//
+//        model.setListeners(new ScoreIterationListener(10));
+//        model.fit(cifar, 3);
+
+        trainingThread = new TrainingThread(appContext.getAssets(), f, 10, 1, 1000);
+        trainingThread.start();
+
+//        // get update from layer
+//        INDArray weights = model.getLayer(0).params();
+//        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+//        Nd4j.write(outputStream, weights);
+//        outputStream.flush();
+//        byte[] bytes1 = outputStream.toByteArray();
+//        outputStream.close();
+//
+//        // send update to server
+//        socket.getOutputStream().write(bytes1);
+    }
+
+    public void close() throws IOException {
+        socket.close();
+    }
+
+    @Override
+    public void trainStatus() throws IOException {
+        if (trainingThread == null || trainingThread.isAlive()) {
+            socket.getOutputStream().write(Ints.toByteArray(0));
+            System.out.println("responded 4 - still training");
+        } else {
+            socket.getOutputStream().write(Ints.toByteArray(1));
+            System.out.println("responded 4 - done");
         }
+    }
 
-        MultiLayerNetwork model = ModelSerializer.restoreMultiLayerNetwork(f, true);
-        System.out.println("loaded model");
-
-        // get ready for training
-        MyCifar10Loader loader = new MyCifar10Loader(appContext.getAssets(), DataSetType.TRAIN);
-        MyCifar10DataSetIterator cifar = new MyCifar10DataSetIterator(loader, 10, 1, 1000);
-
-        model.setListeners(new ScoreIterationListener(10));
-        model.fit(cifar, 3);
-
-        // get update from layer
-        INDArray weights = model.getLayer(0).params();
+    @Override
+    public void trainResult() throws IOException {
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-        Nd4j.write(outputStream, weights);
+        Nd4j.write(outputStream, trainingThread.result);
         outputStream.flush();
-        byte[] bytes1 = outputStream.toByteArray();
-        outputStream.close();
+        byte[] bytes = outputStream.toByteArray();
+        int length = bytes.length;
 
-        // send update to server
-        socket.getOutputStream().write(bytes1);
+        // send length
+        socket.getOutputStream().write(Ints.toByteArray(length), 0, 4);
+        socket.getOutputStream().flush();
+
+        // send result
+        socket.getOutputStream().write(bytes, 0, length);
+        socket.getOutputStream().flush();
     }
 }
