@@ -9,12 +9,10 @@ public class ClientTrainThread extends Thread {
 
     public INDArray weightUpdates;
     private ClientHandler clientHandler;
-    private int rounds;
 
-    ClientTrainThread(ClientHandler clientHandler, int rounds) {
+    ClientTrainThread(ClientHandler clientHandler) {
         super();
         this.clientHandler = clientHandler;
-        this.rounds = rounds;
     }
 
     @Override

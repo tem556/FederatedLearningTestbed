@@ -10,13 +10,9 @@ import org.nd4j.linalg.factory.Nd4j;
 
 public class ClientHandlerImpl implements ClientHandler {
     private Socket socket;
-    private BufferedReader input;
-    private PrintWriter output;
 
     ClientHandlerImpl(Socket socket) throws IOException {
         this.socket = socket;
-        this.input = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-        this.output = new PrintWriter(socket.getOutputStream(), true);
     }
 
     @Override
@@ -92,13 +88,9 @@ public class ClientHandlerImpl implements ClientHandler {
     }
 
     @Override
-    public void close() throws IOException {
-        // send message to the client to end connection
-//        output.println("closed");
-
-        // Close the socket
-        input.close();
-        output.close();
+    public void done() throws IOException {
+        socket.getOutputStream().write(Ints.toByteArray(2));
+        socket.getOutputStream().flush();
         socket.close();
     }
 }

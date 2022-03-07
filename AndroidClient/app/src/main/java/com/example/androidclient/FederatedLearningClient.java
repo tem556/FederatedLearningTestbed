@@ -4,9 +4,11 @@ import java.io.File;
 import java.io.IOException;
 
 public interface FederatedLearningClient {
-    public void serve() throws IOException;
-    public void train() throws IOException;
-    public File getModel() throws IOException;
-    public void trainStatus() throws IOException;
-    public void trainResult() throws IOException;
+    void serve() throws IOException;
+    void register() throws IOException;
+    void train() throws IOException;
+    File getModel() throws IOException;
+    void trainStatus() throws IOException;
+    void trainResult() throws IOException;
+    boolean isRunning();
 }

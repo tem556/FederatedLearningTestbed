@@ -17,15 +17,18 @@ import java.nio.charset.StandardCharsets;
 import java.util.zip.GZIPInputStream;
 
 public class FederatedLearningClientImpl extends Thread implements FederatedLearningClient {
-    private Socket socket;
+    private String serverAddr;
+    private int serverPort;
     private Context appContext;
-    private boolean isTraining;
+    private Socket socket = null;
     private TrainingThread trainingThread = null;
 
     FederatedLearningClientImpl(String serverAddr, int serverPort, Context ctx) throws IOException {
-        socket = new Socket(serverAddr, serverPort);
-        appContext = ctx;
-        isTraining = false;
+        this.serverAddr = serverAddr;
+        this.serverPort = serverPort;
+        this.appContext = ctx;
+        this.socket = null;
+        this.trainingThread = null;
     }
 
     @Override
@@ -34,9 +37,18 @@ public class FederatedLearningClientImpl extends Thread implements FederatedLear
     }
 
     @Override
+    public boolean isRunning() {
+        return isAlive();
+    }
+
+    @Override
     public void run() {
         try {
+            // register to the server
+            register();
+
             while (socket.isConnected()) {
+                // poll for coordination
                 if (socket.getInputStream().available() <= 0) {
                     Thread.sleep(5000);
                     continue;
@@ -45,14 +57,14 @@ public class FederatedLearningClientImpl extends Thread implements FederatedLear
                 byte[] bytes = new byte[4];
                 socket.getInputStream().read(bytes);
 
-                System.out.println("received " + Ints.fromByteArray(bytes));
+                System.out.println("received code " + Ints.fromByteArray(bytes));
                 switch (Ints.fromByteArray(bytes)) {
                     case 0: // registered
                         break;
                     case 1: // rejected
-                        close();
-                        return;
                     case 2: // done
+                        socket.close();
+                        System.out.println("done");
                         return;
                     case 3: // train
                         train();
@@ -70,6 +82,11 @@ public class FederatedLearningClientImpl extends Thread implements FederatedLear
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    @Override
+    public void register() throws IOException {
+        this.socket = new Socket(serverAddr, serverPort);
     }
 
     @Override
@@ -91,13 +108,14 @@ public class FederatedLearningClientImpl extends Thread implements FederatedLear
         FileOutputStream fos = new FileOutputStream(f);
         BufferedOutputStream bos = new BufferedOutputStream(fos);
 
+        // download model
         byte[] buf = new byte[2048];
         int cnt = 0;
         while (cnt < modelLength) {
             int c = socket.getInputStream().read(buf, 0, Math.min(2048, modelLength - cnt));
             cnt += c;
             bos.write(buf, 0, c);
-            System.out.println("yo" + cnt);
+            System.out.println("model downloaded " + cnt);
         }
         bos.close();
         fos.close();
@@ -110,42 +128,15 @@ public class FederatedLearningClientImpl extends Thread implements FederatedLear
 
     @Override
     public void train() throws IOException {
-
         File f = getModel();
-
-//        try {
-//            Thread.sleep(5000);
-//        } catch (InterruptedException e) {
-//            e.printStackTrace();
-//        }
-//
-//        MultiLayerNetwork model = ModelSerializer.restoreMultiLayerNetwork(f, true);
-//        System.out.println("loaded model");
-//
-//        // get ready for training
-//        MyCifar10Loader loader = new MyCifar10Loader(appContext.getAssets(), DataSetType.TRAIN);
-//        MyCifar10DataSetIterator cifar = new MyCifar10DataSetIterator(loader, 10, 1, 1000);
-//
-//        model.setListeners(new ScoreIterationListener(10));
-//        model.fit(cifar, 3);
 
         trainingThread = new TrainingThread(appContext.getAssets(), f, 10, 1, 1000);
         trainingThread.start();
-
-//        // get update from layer
-//        INDArray weights = model.getLayer(0).params();
-//        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-//        Nd4j.write(outputStream, weights);
-//        outputStream.flush();
-//        byte[] bytes1 = outputStream.toByteArray();
-//        outputStream.close();
-//
-//        // send update to server
-//        socket.getOutputStream().write(bytes1);
     }
 
     public void close() throws IOException {
         socket.close();
+        socket = null;
     }
 
     @Override
