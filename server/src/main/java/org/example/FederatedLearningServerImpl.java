@@ -11,15 +11,13 @@ public class FederatedLearningServerImpl implements FederatedLearningServer {
     private static final int MIN_CLIENTS = 1;
     private static final int TRAINING_ROUNDS = 2;
 
-    private ServerSocket serverSocket;
-    private ArrayList<ClientHandler> clientPool;
-//    private TrainCoordinatorThread trainCoordinatorThread = null;
+    private final ServerSocket serverSocket;
+    private final ArrayList<ClientHandler> clientPool;
     private TrainIteratorThread trainIteratorThread = null;
 
     FederatedLearningServerImpl() throws IOException {
         clientPool = new ArrayList<>();
         serverSocket = new ServerSocket(PORT);
-//        trainCoordinatorThread = null;
         trainIteratorThread = null;
     }
 
@@ -27,12 +25,18 @@ public class FederatedLearningServerImpl implements FederatedLearningServer {
     public void startServer() throws IOException, InterruptedException {
         System.out.println("server starting...");
 
-        while (true) {
+        do {
             Socket client = serverSocket.accept();
             ClientHandler clientHandler = new ClientHandlerImpl(client);
 
             boolean running = trainIteratorThread != null && trainIteratorThread.isAlive();
-            if (!running) trainIteratorThread = null;
+            if (!running) {
+                // clean garbage from previous training
+                if (trainIteratorThread != null) {
+                    trainIteratorThread = null;
+                    clientPool.clear();
+                }
+            }
 
             if (!running && clientPool.size() < MIN_CLIENTS) {
                 clientHandler.register();
@@ -41,17 +45,6 @@ public class FederatedLearningServerImpl implements FederatedLearningServer {
                 if (clientPool.size() >= MIN_CLIENTS) {
                     System.out.println("init training...");
 
-//                    List<ClientTrainThread> trainThreads = clientPool
-//                            .stream()
-//                            .map(x -> new ClientTrainThread(x, 1))
-//                            .collect(Collectors.toList());
-//
-//                    String baseModelPath = "C:/Users/buinn/DoNotTouch/crap/photolabeller/newmodel.zip";
-//                    DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd-HH-mm-ss");
-//                    String newModelPath = String.format("C:/Users/buinn/DoNotTouch/crap/photolabeller/newtest-%s.zip", dtf.format(LocalDateTime.now()));
-//                    AggregationStrategy fedAvg = new FedAvg();
-//                    trainCoordinatorThread = new TrainCoordinatorThread(trainThreads, fedAvg, baseModelPath, newModelPath);
-//                    trainCoordinatorThread.start();
                     trainIteratorThread = new TrainIteratorThread(
                             clientPool,
                             "C:/Users/buinn/DoNotTouch/crap/photolabeller/newmodel.zip",
@@ -61,6 +54,6 @@ public class FederatedLearningServerImpl implements FederatedLearningServer {
             } else {
                 clientHandler.reject();
             }
-        }
+        } while (true);
     }
 }
