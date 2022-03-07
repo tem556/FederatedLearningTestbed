@@ -66,8 +66,6 @@ public class ClientHandlerImpl implements ClientHandler {
     public void pushModel() throws IOException, InterruptedException {
         System.out.println("loading model");
 
-//        GZIPInputStream gis = new GZIPInputStream();
-
         // send model to client
         File f = new File("C:/Users/buinn/DoNotTouch/crap/photolabeller/newmodel.zip");
         int modelLength = (int)f.length();
@@ -91,8 +89,6 @@ public class ClientHandlerImpl implements ClientHandler {
         socket.getOutputStream().flush();
 
         System.out.println("pushed model");
-
-//        Thread.sleep(30000);
     }
 
     @Override

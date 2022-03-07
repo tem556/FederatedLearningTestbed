@@ -21,7 +21,7 @@ public class ClientTrainThread extends Thread {
     public void run() {
         try {
             weightUpdates = clientHandler.train();
-        } catch (IOException | InterruptedException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }

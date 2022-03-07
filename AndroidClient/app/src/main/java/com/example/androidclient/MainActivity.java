@@ -52,66 +52,10 @@ public class MainActivity extends AppCompatActivity {
     public void startbutton_onclick(View view) throws IOException, URISyntaxException {
         System.out.println("starting");
 
-        // TODO: move this to another thread
-        StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
-        StrictMode.setThreadPolicy(policy);
+//        StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
+//        StrictMode.setThreadPolicy(policy);
 
-//
-//        String[] files = getApplicationContext().fileList();
-//        for (int i = 0; i < files.length; ++i) {
-//            System.out.println(files[i]);
-//        }
-
-//        String[] t = getAssets().list("cifar10/train/0/9853_airplane.png");
-//        for (String i : t) {
-//            System.out.println(i);
-//        }
-
-//        InputStream is = getAssets().open("cifar10/train/0/9853_airplane.png");
-//        System.out.println(is.available());
-//        File f = new File("cifar10/train/0/9853_airplane.png");
-//        if (f.exists()) {
-//            System.out.println("yay");
-//        }
-
-//        InputStream is = getAssets().open();
-//        BufferedReader reader = new BufferedReader(new InputStreamReader(is));
-//        String s = reader.readLine();
-//        System.out.println(s);
-
-//        InputStream is = getAssets().open("model.zip");
-//        int n = 10;
-//        byte[] b = new byte[n];
-//        is.read(b);
-//        for (int i = 0; i < n; ++i)
-//            System.out.println((int)b[i]);
-//        try {
-//            MultiLayerNetwork model = ModelSerializer.restoreMultiLayerNetwork(is, true);
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//        }
-//        MultiLayerNetwork model = getModel();
-//        System.out.println("flag1");
-//        MyCifar10Loader loader = new MyCifar10Loader(getAssets(), DataSetType.TRAIN);
-//        MyCifar10DataSetIterator cifar = new MyCifar10DataSetIterator(loader, 10, 1, 1000);
-//        System.out.println("flag2");
-
-
-        // get ready for training
-//        Cifar10DataSetIterator cifar = new Cifar10DataSetIterator(
-//                batchSize,
-//                new int[] { 32, 32 },
-//                DataSetType.TRAIN,
-//                null,
-//                123L);
-//        Cifar10DataSetIterator cifarEval = new Cifar10DataSetIterator(batchSize, new int[]{height, width}, DataSetType.TEST, null, seed);
-
-//        model.setListeners(new ScoreIterationListener(10));
-//        model.fit(cifar, 10);
-
-//        System.out.println("trained");
-
-        FederatedLearningClient client = new FederatedLearningClientImpl("172.20.102.177", 4602, getApplicationContext());
+        FederatedLearningClient client = new FederatedLearningClientImpl("10.27.56.226", 4602, getApplicationContext());
         client.serve();
     }
 
