@@ -1,7 +1,14 @@
 package com.example.androidclient;
 
 import android.content.Context;
+import android.os.Build;
 
+import androidx.annotation.RequiresApi;
+
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+
+import org.apache.commons.lang3.SerializationUtils;
 import org.deeplearning4j.datasets.iterator.impl.Cifar10DataSetIterator;
 import org.deeplearning4j.datasets.fetchers.DataSetType;
 import org.deeplearning4j.nn.multilayer.MultiLayerNetwork;
@@ -50,6 +57,7 @@ public class FederatedLearningClientImpl extends Thread implements FederatedLear
             while (socket.isConnected()) {
                 // poll for coordination
                 if (socket.getInputStream().available() <= 0) {
+                    // TODO: change this
                     Thread.sleep(5000);
                     continue;
                 }
@@ -58,6 +66,7 @@ public class FederatedLearningClientImpl extends Thread implements FederatedLear
                 socket.getInputStream().read(bytes);
 
                 System.out.println("received code " + Ints.fromByteArray(bytes));
+                // TODO: create common utils project?
                 switch (Ints.fromByteArray(bytes)) {
                     case 0: // registered
                         break;
@@ -103,6 +112,7 @@ public class FederatedLearningClientImpl extends Thread implements FederatedLear
         // save model to file
         File path = appContext.getFilesDir();
         System.out.println(path.getAbsolutePath());
+        // TODO: change hard-coded value
         File f = new File(path, "testmodel.zip");
         if (!f.exists()) f.createNewFile();
         FileOutputStream fos = new FileOutputStream(f);
@@ -130,7 +140,8 @@ public class FederatedLearningClientImpl extends Thread implements FederatedLear
     public void train() throws IOException {
         File f = getModel();
 
-        trainingThread = new TrainingThread(appContext.getAssets(), f, 10, 1, 1000);
+        // TODO: change hard-coded value
+        trainingThread = new TrainingThread(appContext.getAssets(), f, 10, 1, 567);
         trainingThread.start();
     }
 
@@ -150,12 +161,12 @@ public class FederatedLearningClientImpl extends Thread implements FederatedLear
         }
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.KITKAT)
     @Override
     public void trainResult() throws IOException {
-        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-        Nd4j.write(outputStream, trainingThread.result);
-        outputStream.flush();
-        byte[] bytes = outputStream.toByteArray();
+        String json = new GsonBuilder().setPrettyPrinting().create().toJson(trainingThread.result);
+//        System.out.println(json);
+        byte[] bytes = json.getBytes(StandardCharsets.US_ASCII);
         int length = bytes.length;
 
         // send length

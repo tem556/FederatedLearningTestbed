@@ -5,6 +5,9 @@ import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 
 import com.google.common.primitives.Ints;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import org.apache.commons.lang3.SerializationUtils;
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.factory.Nd4j;
 
@@ -23,12 +26,13 @@ public class ClientHandlerImpl implements ClientHandler {
 
     @Override
     public void reject() throws IOException {
+        System.out.println("rejected a device");
         socket.getOutputStream().write(Ints.toByteArray(1));
         socket.getOutputStream().flush();
     }
 
     @Override
-    public INDArray train() throws IOException, InterruptedException {
+    public TrainResult train() throws IOException, InterruptedException {
         socket.getOutputStream().write(Ints.toByteArray(3));
         socket.getOutputStream().flush();
         System.out.println("init training...");
@@ -50,12 +54,13 @@ public class ClientHandlerImpl implements ClientHandler {
             rs = Ints.fromByteArray(res);
         } while (rs == 0);
 
-        // get update
+        // get train result
         socket.getOutputStream().write(Ints.toByteArray(5));
         socket.getOutputStream().flush();
         int length = Ints.fromByteArray(socket.getInputStream().readNBytes(4));
         byte[] bytes = socket.getInputStream().readNBytes(length);
-        return Nd4j.fromByteArray(bytes);
+        String json = new String(bytes, StandardCharsets.US_ASCII);
+        return new Gson().fromJson(json, TrainResult.class);
     }
 
     @Override
@@ -63,6 +68,7 @@ public class ClientHandlerImpl implements ClientHandler {
         System.out.println("loading model");
 
         // send model to client
+        // TODO: change the hard-coded value
         File f = new File("C:/Users/buinn/DoNotTouch/crap/photolabeller/newmodel.zip");
         int modelLength = (int)f.length();
         FileInputStream fis = new FileInputStream(f);

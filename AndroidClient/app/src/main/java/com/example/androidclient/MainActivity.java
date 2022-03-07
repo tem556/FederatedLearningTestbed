@@ -31,9 +31,11 @@ public class MainActivity extends AppCompatActivity {
         System.out.println("starting");
 
         if (client == null || !client.isRunning()) {
+            // TODO: change hard coded value
             client = new FederatedLearningClientImpl("172.20.102.177", 4602, getApplicationContext());
             client.serve();
         } else {
+//            System.out.println("training already running");
             Snackbar snackbar = Snackbar.make(getWindow().getDecorView().getRootView(), "training already running", Snackbar.LENGTH_LONG);
             snackbar.show();
         }

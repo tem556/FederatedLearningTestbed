@@ -1,8 +1,14 @@
 package org.example;
 
+import com.google.common.primitives.Longs;
+import org.apache.commons.lang.time.DurationFormatUtils;
 import org.nd4j.evaluation.IEvaluation;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -27,38 +33,49 @@ public class TrainIteratorThread extends Thread {
     public void run() {
         System.out.println("init training...");
 
-        for (int currentRound = 0; currentRound < numRounds; ++currentRound) {
-            List<ClientTrainThread> trainThreads = clients
-                    .stream()
-                    .map(ClientTrainThread::new)
-                    .collect(Collectors.toList());
+        // TODO: change hard-coded value
+        DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd-HH-mm-ss");
+        Path resultPath = Path.of(String.format("C:/Users/buinn/DoNotTouch/crap/photolabeller/result-%s.txt",
+                dtf.format(LocalDateTime.now())));
+        try {
+            Files.createFile(resultPath);
 
-            System.out.println("round " + currentRound);
+            for (int currentRound = 0; currentRound < numRounds; ++currentRound) {
+                List<ClientTrainThread> trainThreads = clients
+                        .stream()
+                        .map(ClientTrainThread::new)
+                        .collect(Collectors.toList());
 
-            DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd-HH-mm-ss");
-            String newModelPath = String.format("C:/Users/buinn/DoNotTouch/crap/photolabeller/newtest-%s.zip",
-                    dtf.format(LocalDateTime.now()));
-            AggregationStrategy fedAvg = new FedAvg();
+                System.out.println("round " + currentRound);
 
-            TrainCoordinatorThread trainCoordinatorThread =
-                    new TrainCoordinatorThread(trainThreads, fedAvg, baseModelPath, newModelPath);
-            trainCoordinatorThread.run();
+                // TODO: change hard-coded value
+                String newModelPath = String.format("C:/Users/buinn/DoNotTouch/crap/photolabeller/newtest-%s.zip",
+                        dtf.format(LocalDateTime.now()));
+                AggregationStrategy fedAvg = new FedAvg();
 
-            // TODO: print to an external file
-            System.out.println(trainCoordinatorThread.evaluation.stats());
+                TrainCoordinatorThread trainCoordinatorThread =
+                        new TrainCoordinatorThread(trainThreads, fedAvg, baseModelPath, newModelPath);
+                trainCoordinatorThread.run();
 
-            // prepare for next round
-            baseModelPath = newModelPath;
-            trainThreads.clear();
-        }
+                // TODO: print to an external file
+                String statStr = trainCoordinatorThread.evaluation.stats();
+                // TODO: change to a dependency
+                Files.write(resultPath, ("\nRound " + currentRound + "---------\n").getBytes(StandardCharsets.UTF_8),
+                        StandardOpenOption.APPEND);
+                Files.write(resultPath, statStr.getBytes(StandardCharsets.UTF_8), StandardOpenOption.APPEND);
+                Files.write(resultPath, Longs.toByteArray(trainCoordinatorThread.avgTrainingTimeInSecs), StandardOpenOption.APPEND);
 
-        // close connections
-        for (ClientHandler client : clients) {
-            try {
-                client.done();
-            } catch (IOException e) {
-                e.printStackTrace();
+                // prepare for next round
+                baseModelPath = newModelPath;
+                trainThreads.clear();
             }
+
+            // close connections
+            for (ClientHandler client : clients) {
+                client.done();
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 }

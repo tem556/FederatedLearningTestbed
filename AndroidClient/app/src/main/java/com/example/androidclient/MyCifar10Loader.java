@@ -24,10 +24,12 @@ import java.util.stream.Collectors;
 public class MyCifar10Loader {
     private AssetManager assetManager;
     private List<Pair<byte[], Byte>> imagesWithLabel;
+    private int maxSamples;
 
-    public MyCifar10Loader(AssetManager assetManager, DataSetType set) throws IOException {
+    public MyCifar10Loader(AssetManager assetManager, DataSetType set, int maxSamples) throws IOException {
         this.assetManager = assetManager;
         this.imagesWithLabel = new ArrayList<>();
+        this.maxSamples = maxSamples;
 
         switch (set) {
             case TRAIN:
@@ -38,6 +40,12 @@ public class MyCifar10Loader {
                 break;
             default:
                 throw new UnsupportedOperationException("unsupported dataset");
+        }
+
+        Collections.shuffle(imagesWithLabel);
+        // remove residual images
+        if (imagesWithLabel.size() > maxSamples) {
+            imagesWithLabel.subList(maxSamples, imagesWithLabel.size()).clear();
         }
     }
 

@@ -81,6 +81,3 @@ public class MyCifar10DataSetIterator extends RecordReaderDataSetIterator {
         return false;
     }
 }
-//public class MyCifar10DataSetIterator {
-//
-//}

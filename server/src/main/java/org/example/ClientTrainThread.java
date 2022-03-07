@@ -1,24 +1,22 @@
 package org.example;
 
 import org.nd4j.linalg.api.ndarray.INDArray;
-import org.nd4j.linalg.factory.Nd4j;
-
-import java.io.IOException;
 
 public class ClientTrainThread extends Thread {
 
-    public INDArray weightUpdates;
+    public TrainResult trainResult;
     private ClientHandler clientHandler;
 
     ClientTrainThread(ClientHandler clientHandler) {
         super();
+        this.trainResult = null;
         this.clientHandler = clientHandler;
     }
 
     @Override
     public void run() {
         try {
-            weightUpdates = clientHandler.train();
+            trainResult = clientHandler.train();
         } catch (Exception e) {
             e.printStackTrace();
         }

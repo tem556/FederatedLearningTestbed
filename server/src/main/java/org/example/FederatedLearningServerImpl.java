@@ -7,6 +7,7 @@ import java.io.*;
 
 
 public class FederatedLearningServerImpl implements FederatedLearningServer {
+    // TODO: change hard-coded values
     private static final int PORT = 4602;
     private static final int MIN_CLIENTS = 1;
     private static final int TRAINING_ROUNDS = 2;
@@ -45,6 +46,7 @@ public class FederatedLearningServerImpl implements FederatedLearningServer {
                 if (clientPool.size() >= MIN_CLIENTS) {
                     System.out.println("init training...");
 
+                    // TODO: change hard-coded path
                     trainIteratorThread = new TrainIteratorThread(
                             clientPool,
                             "C:/Users/buinn/DoNotTouch/crap/photolabeller/newmodel.zip",
