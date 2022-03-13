@@ -1,5 +1,7 @@
 package com.bnnthang.fltestbed.Server;
 
+import com.bnnthang.fltestbed.Server.AggregationStrategies.AggregationStrategy;
+import com.bnnthang.fltestbed.Server.AggregationStrategies.FedAvg;
 import org.nd4j.evaluation.IEvaluation;
 
 import java.io.IOException;

@@ -12,7 +12,7 @@ public final class SocketUtils {
      * Send a sequence of bytes via the given socket.
      * @param socket some socket
      * @param bytes byte array to send
-     * @throws IOException if problems happen when calling socket's methods
+     * @throws IOException
      */
     public static void sendBytes(final Socket socket,
                                  final byte[] bytes) throws IOException {
@@ -25,7 +25,7 @@ public final class SocketUtils {
      * @param socket some socket
      * @param expectedBytes number of bytes to read
      * @return byte array contains `expectedBytes` bytes
-     * @throws IOException if problems happen when calling socket's methods
+     * @throws IOException
      */
     public static byte[] readBytes(final Socket socket,
                                    final Integer expectedBytes)
@@ -43,7 +43,7 @@ public final class SocketUtils {
      * Send an integer (4 bytes) via the given socket.
      * @param socket some socket
      * @param integer the integer to send
-     * @throws IOException if problems happen when calling socket's methods
+     * @throws IOException
      */
     public static void sendInteger(final Socket socket,
                                    final Integer integer) throws IOException {
@@ -54,10 +54,21 @@ public final class SocketUtils {
      * Read an integer (4 bytes) from the given socket.
      * @param socket some socket
      * @return an integer read from the given socket
-     * @throws IOException if problems happen when calling socket's methods
+     * @throws IOException
      */
     public static Integer readInteger(final Socket socket) throws IOException {
         byte[] bytes = readBytes(socket, Integer.BYTES);
         return Ints.fromByteArray(bytes);
+    }
+
+    /**
+     * Check if there are bytes to read.
+     * @param socket some socket
+     * @return <code>true</code> iff there is at least 1 byte to read
+     * @throws IOException
+     */
+    public static Boolean availableToRead(final Socket socket)
+            throws IOException {
+        return socket.getInputStream().available() > 0;
     }
 }

@@ -8,7 +8,7 @@ import java.io.Serializable;
 import java.util.List;
 
 /**
- * Report model for each training
+ * Report model for each training.
  */
 public class TrainingReport implements Serializable {
     /**

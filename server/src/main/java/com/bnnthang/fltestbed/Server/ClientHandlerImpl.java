@@ -95,4 +95,9 @@ public class ClientHandlerImpl implements ClientHandler {
         socket.getOutputStream().flush();
         socket.close();
     }
+
+    @Override
+    public void pushData() {
+
+    }
 }

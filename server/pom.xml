@@ -49,6 +49,11 @@
       <artifactId>deeplearning4j-ui</artifactId>
       <version>1.0.0-M2</version>
     </dependency>
+    <dependency>
+      <groupId>com.bnnthang.fltestbed</groupId>
+      <artifactId>commonutils</artifactId>
+      <version>1.0-SNAPSHOT</version>
+    </dependency>
   </dependencies>
 
   <build>

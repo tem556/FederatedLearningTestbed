@@ -1,5 +1,6 @@
-package com.bnnthang.fltestbed.Server;
+package com.bnnthang.fltestbed.Server.AggregationStrategies;
 
+import com.bnnthang.fltestbed.Server.AggregationStrategies.AggregationStrategy;
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.factory.Nd4j;
 

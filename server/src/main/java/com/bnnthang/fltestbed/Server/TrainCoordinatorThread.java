@@ -1,5 +1,6 @@
 package com.bnnthang.fltestbed.Server;
 
+import com.bnnthang.fltestbed.Server.AggregationStrategies.AggregationStrategy;
 import org.deeplearning4j.datasets.fetchers.DataSetType;
 import org.deeplearning4j.datasets.iterator.impl.Cifar10DataSetIterator;
 import org.deeplearning4j.nn.multilayer.MultiLayerNetwork;

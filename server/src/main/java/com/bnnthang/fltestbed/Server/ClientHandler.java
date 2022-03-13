@@ -8,4 +8,5 @@ public interface ClientHandler {
     void pushModel() throws IOException, InterruptedException;
     TrainResult train() throws IOException, InterruptedException;
     void done() throws IOException;
+    void pushData();
 }
