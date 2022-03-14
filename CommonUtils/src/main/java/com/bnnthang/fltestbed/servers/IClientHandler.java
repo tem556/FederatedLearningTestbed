@@ -4,7 +4,7 @@ import com.bnnthang.fltestbed.models.TrainingReport;
 
 public interface IClientHandler {
     /**
-     * Push dataset to client
+     * Push dataset to client.
      * @param bytes serialized dataset
      * @throws Exception
      */

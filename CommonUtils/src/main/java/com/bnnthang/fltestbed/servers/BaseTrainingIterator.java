@@ -34,14 +34,17 @@ public final class BaseTrainingIterator extends Thread {
     @Override
     public void run() {
         try {
+            // offload dataset to client
+            operations.pushDatasetToClients(clients);
+
             // repeat the process a certain number of times
             for (Integer currentRound = 1;
                  currentRound <= configuration.getRounds();
                  ++currentRound) {
 
-                // offload model and dataset to clients
+                // offload model to clients
+                // TODO: add logic for sending weights only
                 operations.pushModelToClients(clients);
-                operations.pushDatasetToClients(clients);
 
                 for (IClientHandler client : clients) {
                     client.startTraining();

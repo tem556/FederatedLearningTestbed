@@ -76,10 +76,10 @@ public class BaseClient {
             case REJECTED:
                 throw new Exception("unexpected command");
             case MODELPUSH:
-                operations.handleModelPush();
+                operations.handleModelPush(socket);
                 break;
             case DATASETPUSH:
-                operations.handleDatasetPush();
+                operations.handleDatasetPush(socket);
                 break;
             case TRAIN:
                 operations.handleTrain();
@@ -108,8 +108,10 @@ public class BaseClient {
             case 0:
                 SocketUtils.sendInteger(socket,
                         operations.hasLocalModel() ? 1 : 0);
+                operations.handleAccepted();
                 return true;
             case 1:
+                operations.handleRejected();
                 return false;
             default:
                 throw new Exception("unrecognized command");

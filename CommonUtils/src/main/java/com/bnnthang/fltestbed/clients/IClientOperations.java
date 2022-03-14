@@ -1,5 +1,7 @@
 package com.bnnthang.fltestbed.clients;
 
+import java.net.Socket;
+
 /**
  * Required operations that client has to support.
  */
@@ -17,12 +19,12 @@ public interface IClientOperations {
     /**
      * Handle <code>MODELPUSH</code> command.
      */
-    void handleModelPush();
+    void handleModelPush(Socket socket);
 
     /**
      * Handle <code>DATASETPUSH</code> command.
      */
-    void handleDatasetPush();
+    void handleDatasetPush(Socket socket);
 
     /**
      * Handle <code>TRAIN</code> command.
