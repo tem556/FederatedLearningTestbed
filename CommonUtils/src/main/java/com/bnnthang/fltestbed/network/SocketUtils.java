@@ -9,7 +9,7 @@ public final class SocketUtils {
     private SocketUtils() { }
 
     /**
-     * Enhanced wrapper for <code>sendBytes</code>
+     * Enhanced wrapper for <code>sendBytes</code>.
      * @param socket some socket
      * @param bytes byte array to send
      * @throws IOException
@@ -22,7 +22,7 @@ public final class SocketUtils {
     }
 
     /**
-     * Enhanced wrapper for <code>readBytes</code>
+     * Enhanced wrapper for <code>readBytes</code>.
      * @param socket some socket
      * @return read buffer
      * @throws IOException

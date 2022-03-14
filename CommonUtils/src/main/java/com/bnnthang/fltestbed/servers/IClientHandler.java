@@ -2,20 +2,20 @@ package com.bnnthang.fltestbed.servers;
 
 import com.bnnthang.fltestbed.models.TrainingReport;
 
-import java.net.Socket;
-
 public interface IClientHandler {
     /**
-     * Push dataset to client.
-     * @throws Exception if problems happen
+     * Push dataset to client
+     * @param bytes serialized dataset
+     * @throws Exception
      */
-    void pushDataset() throws Exception;
+    void pushDataset(byte[] bytes) throws Exception;
 
     /**
      * Push model to client.
+     * @param bytes serialized model
      * @throws Exception if problems happen
      */
-    void pushModel() throws Exception;
+    void pushModel(byte[] bytes) throws Exception;
 
     /**
      * Initiate training process at client.
@@ -44,16 +44,13 @@ public interface IClientHandler {
 
     /**
      * Accept client to training queue.
-     * @param socket socket connection to client
-     * @return a <code>IClientHandler</code> based on the given socket
      * @throws Exception if problems happen
      */
-    IClientHandler accept(Socket socket) throws Exception;
+    void accept() throws Exception;
 
     /**
      * Deny client connection.
-     * @param socket socket connection to client
      * @throws Exception if problems happen
      */
-    void reject(Socket socket) throws Exception;
+    void reject() throws Exception;
 }

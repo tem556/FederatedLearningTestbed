@@ -3,6 +3,6 @@
  * Federated Learning server.
  * @since 1.1
  * @author Thang Bui
- * @version 1.0
+ * @version 1.1
  */
 package com.bnnthang.fltestbed.servers;
