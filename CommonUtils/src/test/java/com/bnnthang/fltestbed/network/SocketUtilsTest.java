@@ -1,12 +1,12 @@
 package com.bnnthang.fltestbed.network;
 
-import com.google.common.primitives.Ints;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.nd4j.shade.guava.primitives.Ints;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;

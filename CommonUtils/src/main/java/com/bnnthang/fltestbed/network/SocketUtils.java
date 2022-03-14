@@ -1,6 +1,6 @@
 package com.bnnthang.fltestbed.network;
 
-import com.google.common.primitives.Ints;
+import org.nd4j.shade.guava.primitives.Ints;
 
 import java.io.IOException;
 import java.net.Socket;

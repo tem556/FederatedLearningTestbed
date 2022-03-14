@@ -4,9 +4,13 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
+    <name>Thang Bui's Federated Learning Testbed Common Utils</name>
+    <url>https://github.com/bnnthang/FederatedLearningTestbed</url>
+    <description>Shared resources between different components in my implementation of a Federated Learning system.</description>
+
     <groupId>com.bnnthang.fltestbed</groupId>
     <artifactId>commonutils</artifactId>
-    <version>1.3-SNAPSHOT</version>
+    <version>1.5-SNAPSHOT</version>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -26,11 +30,6 @@
             <artifactId>mockito-core</artifactId>
             <version>4.4.0</version>
             <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.google.guava</groupId>
-            <artifactId>guava</artifactId>
-            <version>31.1-jre</version>
         </dependency>
         <dependency>
             <groupId>org.nd4j</groupId>

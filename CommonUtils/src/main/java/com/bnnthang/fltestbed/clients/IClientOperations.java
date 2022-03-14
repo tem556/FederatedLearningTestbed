@@ -18,11 +18,13 @@ public interface IClientOperations {
 
     /**
      * Handle <code>MODELPUSH</code> command.
+     * @param socket some socket
      */
     void handleModelPush(Socket socket);
 
     /**
      * Handle <code>DATASETPUSH</code> command.
+     * @param socket some socket
      */
     void handleDatasetPush(Socket socket);
 
