@@ -9,6 +9,33 @@ public final class SocketUtils {
     private SocketUtils() { }
 
     /**
+     * Enhanced wrapper for <code>sendBytes</code>
+     * @param socket some socket
+     * @param bytes byte array to send
+     * @throws IOException
+     */
+    public static void sendBytesWrapper(final Socket socket,
+                                        final byte[] bytes)
+            throws IOException {
+        sendInteger(socket, bytes.length);
+        sendBytes(socket, bytes);
+    }
+
+    /**
+     * Enhanced wrapper for <code>readBytes</code>
+     * @param socket some socket
+     * @return read buffer
+     * @throws IOException
+     */
+    public static byte[] readBytesWrapper(final Socket socket)
+            throws IOException {
+        int size = readInteger(socket);
+        byte[] bytes = new byte[size];
+        sendBytes(socket, bytes);
+        return bytes;
+    }
+
+    /**
      * Send a sequence of bytes via the given socket.
      * @param socket some socket
      * @param bytes byte array to send
