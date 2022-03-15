@@ -24,8 +24,10 @@ public class NewFedAvg implements IAggregationStrategy {
             if (reports.get(0).getLayerParams().get(i) == null) {
                 continue;
             }
-            INDArray base = Nd4j.zeros(reports.get(0).getLayerParams().get(i).shape());
-            INDArray sumUpdates = reports.get(0).getLayerParams().stream().reduce(base, INDArray::add);
+
+            INDArray identity = Nd4j.zeros(reports.get(0).getLayerParams().get(i).shape());
+            int finalI = i;
+            INDArray sumUpdates = reports.stream().map(x -> x.getLayerParams().get(finalI)).reduce(identity, INDArray::add);
             INDArray avgUpdates = sumUpdates.div(reports.size());
             model.getLayer(i).setParams(avgUpdates);
         }

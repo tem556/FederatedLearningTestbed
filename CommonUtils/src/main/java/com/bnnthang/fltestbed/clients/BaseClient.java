@@ -53,11 +53,12 @@ public class BaseClient {
         }
 
         do {
-            // wait
-            Thread.sleep(DELAY_INTERVAL);
+            System.out.println("polling...");
 
             // skip if there is nothing to read
             if (!SocketUtils.availableToRead(socket)) {
+                System.out.println("sleeping...");
+                Thread.sleep(DELAY_INTERVAL);
                 continue;
             }
 
@@ -71,6 +72,11 @@ public class BaseClient {
      * @throws Exception
      */
     private void coordinate(final Integer commandIndex) throws Exception {
+        System.out.println("read command = " + commandIndex);
+        if (commandIndex < 0 || commandIndex > ClientCommandEnum.values().length) {
+            // TODO: investigate why there is negative command
+            return;
+        }
         switch (ClientCommandEnum.values()[commandIndex]) {
             case ACCEPTED:
             case REJECTED:
@@ -85,10 +91,10 @@ public class BaseClient {
                 operations.handleTrain();
                 break;
             case ISTRAINING:
-                operations.handleIsTraining();
+                operations.handleIsTraining(socket);
                 break;
             case REPORT:
-                operations.handleReport();
+                operations.handleReport(socket);
                 break;
             case DONE:
                 operations.handleDone();

@@ -37,24 +37,24 @@ public class TrainingThread extends Thread {
         try {
             MultiLayerNetwork model = ModelSerializer.restoreMultiLayerNetwork(modelFile, true);
             System.out.println("loaded model");
-
-            MyCifar10Loader loader = new MyCifar10Loader(assetManager, DataSetType.TRAIN, samples);
-            MyCifar10DataSetIterator cifar = new MyCifar10DataSetIterator(loader, batchSize, 1, samples);
-
-            model.setListeners(new ScoreIterationListener(10));
-
-            LocalDateTime startTime = LocalDateTime.now();
-            model.fit(cifar, epochs);
-            LocalDateTime endTime = LocalDateTime.now();
-
-            // get layers' weights
-            List<INDArray> layerParams = new ArrayList<>();
-            for (int i = 0; i < model.getnLayers(); ++i) {
-                layerParams.add(model.getLayer(i).params());
-            }
-
-            // summarize result
-            result = new TrainResult(layerParams, Duration.between(startTime, endTime).getSeconds());
+//
+//            MyCifar10Loader loader = new MyCifar10Loader(assetManager, DataSetType.TRAIN, samples);
+//            MyCifar10DataSetIterator cifar = new MyCifar10DataSetIterator(loader, batchSize, 1, samples);
+//
+//            model.setListeners(new ScoreIterationListener(10));
+//
+//            LocalDateTime startTime = LocalDateTime.now();
+//            model.fit(cifar, epochs);
+//            LocalDateTime endTime = LocalDateTime.now();
+//
+//            // get layers' weights
+//            List<INDArray> layerParams = new ArrayList<>();
+//            for (int i = 0; i < model.getnLayers(); ++i) {
+//                layerParams.add(model.getLayer(i).params());
+//            }
+//
+//            // summarize result
+//            result = new TrainResult(layerParams, Duration.between(startTime, endTime).getSeconds());
         } catch (IOException e) {
             e.printStackTrace();
         }

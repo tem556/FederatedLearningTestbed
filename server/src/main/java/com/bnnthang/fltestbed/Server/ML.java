@@ -16,10 +16,13 @@ import org.deeplearning4j.nn.weights.WeightInit;
 import org.deeplearning4j.optimize.api.InvocationType;
 import org.deeplearning4j.optimize.listeners.EvaluativeListener;
 import org.deeplearning4j.optimize.listeners.ScoreIterationListener;
+import org.deeplearning4j.util.ModelSerializer;
 import org.nd4j.evaluation.IEvaluation;
 import org.nd4j.linalg.activations.Activation;
 import org.nd4j.linalg.learning.config.AdaDelta;
 import org.nd4j.linalg.lossfunctions.LossFunctions;
+
+import java.io.IOException;
 
 public class ML {
     private static int height = 32;
@@ -92,5 +95,21 @@ public class ML {
         model.setListeners(new ScoreIterationListener(50), new EvaluativeListener(cifarEval, 1, InvocationType.EPOCH_END));
 
         model.fit(cifar, epochs);
+    }
+
+    public static void eval() throws IOException {
+//        Cifar10DataSetIterator cifar = new Cifar10DataSetIterator(batchSize, new int[]{height, width}, DataSetType.TRAIN, null, seed);
+        Cifar10DataSetIterator cifarEval = new Cifar10DataSetIterator(batchSize, new int[]{height, width}, DataSetType.TEST, null, seed);
+
+        //train model and eval model
+        MultiLayerNetwork model = ModelSerializer.restoreMultiLayerNetwork("C:\\Users\\buinn\\DoNotTouch\\crap\\photolabeller\\newmodel.zip");
+        IEvaluation evaluation = model.evaluate(cifarEval);
+        System.out.println(evaluation.stats());
+//        System.out.println(evaluation.stats());
+//        System.out.println("====================================");
+//        System.out.println("Run training...");
+//        model.setListeners(new ScoreIterationListener(50), new EvaluativeListener(cifarEval, 1, InvocationType.EPOCH_END));
+
+//        model.fit(cifar, epochs);
     }
 }

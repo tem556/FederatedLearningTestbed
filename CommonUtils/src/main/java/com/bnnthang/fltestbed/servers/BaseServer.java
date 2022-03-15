@@ -51,13 +51,17 @@ public class BaseServer {
         do {
             Socket client = serverSocket.accept();
 
+            System.out.println("got connection");
+
             IServerOperations serverOperations =
                     serverParameters.getServerOperations();
 
             if (serverOperations.isTraining()) {
+                System.out.println("training. rejected");
                 // reject client if server is training
                 serverOperations.rejectClient(client);
             } else {
+                System.out.println("not training. adding to queue...");
                 // accept client to training queue if server is not training
                 serverOperations.acceptClient(client, acceptedClients);
             }

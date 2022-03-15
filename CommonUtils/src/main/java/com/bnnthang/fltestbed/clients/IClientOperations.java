@@ -35,13 +35,15 @@ public interface IClientOperations {
 
     /**
      * Handle <code>ISTRAINING</code> command.
+     * @param socket some socket
      */
-    void handleIsTraining();
+    void handleIsTraining(Socket socket);
 
     /**
      * Handle <code>REPORTED</code> command.
+     * @param socket some socket
      */
-    void handleReport();
+    void handleReport(Socket socket);
 
     /**
      * Handle <code>DONE</code> command.

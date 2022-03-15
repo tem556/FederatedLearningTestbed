@@ -7,7 +7,11 @@ import com.bnnthang.fltestbed.servers.IClientHandler;
 import com.google.common.primitives.Ints;
 import org.apache.commons.lang3.SerializationUtils;
 import org.apache.commons.lang3.tuple.Pair;
+import org.deeplearning4j.nn.multilayer.MultiLayerNetwork;
+import org.deeplearning4j.util.ModelSerializer;
+import org.nd4j.shade.guava.primitives.Booleans;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.net.Socket;
@@ -25,9 +29,10 @@ public class NewClientHandler implements IClientHandler {
     @Override
     public Boolean isTraining() {
         try {
+            System.out.println("checking client training...");
             SocketUtils.sendInteger(socket, ClientCommandEnum.ISTRAINING.ordinal());
-            byte[] bytes = SocketUtils.readBytes(socket, 1);
-            return bytes[0] != 0;
+            int flag = SocketUtils.readInteger(socket);
+            return flag != 0;
         } catch (Exception e) {
             e.printStackTrace();
             return false;
@@ -65,8 +70,14 @@ public class NewClientHandler implements IClientHandler {
     public TrainingReport getTrainingReport() {
         try {
             SocketUtils.sendInteger(socket, ClientCommandEnum.REPORT.ordinal());
-            byte[] bytes = SocketUtils.readBytesWrapper(socket);
-            return SerializationUtils.<TrainingReport>deserialize(bytes);
+            int length = SocketUtils.readInteger(socket);
+            System.out.println("got report length = " + length);
+            byte[] bytes = socket.getInputStream().readNBytes(length);
+//            byte[] bytes = SocketUtils.readBytes(socket, length);
+//            return SerializationUtils.deserialize(bytes);
+//            byte[] bytes = SocketUtils.readBytesWrapper(socket);
+            TrainingReport report = SerializationUtils.deserialize(bytes);
+            return report;
         } catch (Exception e) {
             e.printStackTrace();
             return null;
@@ -84,7 +95,8 @@ public class NewClientHandler implements IClientHandler {
         // send accepted message
         SocketUtils.sendInteger(socket, ClientCommandEnum.ACCEPTED.ordinal());
 
-        // TODO: get update if the client has local model
+        // check if client has local model
+        hasLocalModel = SocketUtils.readInteger(socket) == 1;
     }
 
     @Override

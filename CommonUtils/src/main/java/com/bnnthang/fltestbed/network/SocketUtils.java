@@ -9,6 +9,11 @@ public final class SocketUtils {
     private SocketUtils() { }
 
     /**
+     * Maximum buffer size.
+     */
+    private static final int BUFFER_SIZE = 2048;
+
+    /**
      * Enhanced wrapper for <code>sendBytes</code>.
      * @param socket some socket
      * @param bytes byte array to send
@@ -31,7 +36,19 @@ public final class SocketUtils {
             throws IOException {
         int size = readInteger(socket);
         byte[] bytes = new byte[size];
-        sendBytes(socket, bytes);
+        byte[] buffer = new byte[BUFFER_SIZE];
+        int current = 0;
+        while (current < size) {
+            // read to buffer
+            int readBytes = socket.getInputStream()
+                    .read(buffer, 0, Integer.min(BUFFER_SIZE, size - current));
+
+            // copy to result
+            System.arraycopy(buffer, 0, bytes, current, readBytes);
+
+            // increase counter
+            current += readBytes;
+        }
         return bytes;
     }
 

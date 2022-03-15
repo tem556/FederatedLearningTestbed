@@ -5,6 +5,7 @@ import com.bnnthang.fltestbed.models.TrainingReport;
 import lombok.AllArgsConstructor;
 import lombok.NonNull;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -42,6 +43,8 @@ public final class BaseTrainingIterator extends Thread {
                  currentRound <= configuration.getRounds();
                  ++currentRound) {
 
+                System.out.println("current round = " + currentRound);
+
                 // offload model to clients
                 // TODO: add logic for sending weights only
                 operations.pushModelToClients(clients);
@@ -58,8 +61,9 @@ public final class BaseTrainingIterator extends Thread {
                     // check if clients finish
                     Boolean areClientsTraining = clients.stream()
                             .map(IClientHandler::isTraining)
-                            .reduce((x, y) -> x && y)
-                            .orElse(false);
+                            .reduce(false, Boolean::logicalOr);
+
+                    System.out.println("are clients training? = " + areClientsTraining);
 
                     // break if clients finish
                     if (!areClientsTraining) {
@@ -68,9 +72,17 @@ public final class BaseTrainingIterator extends Thread {
                 } while (true);
 
                 // aggregate results
-                List<TrainingReport> reports = clients.stream()
-                        .map(IClientHandler::getTrainingReport)
-                        .collect(Collectors.toList());
+//                List<TrainingReport> reports = clients.stream()
+//                        .map(IClientHandler::getTrainingReport)
+//                        .collect(Collectors.toList());
+                List<TrainingReport> reports = new ArrayList<>();
+                for (IClientHandler client : clients) {
+                    TrainingReport report = client.getTrainingReport();
+                    if (report == null) {
+                        System.out.println("sos");
+                    }
+                    reports.add(report);
+                }
                 operations.aggregateResults(reports,
                         configuration.getAggregationStrategy());
 

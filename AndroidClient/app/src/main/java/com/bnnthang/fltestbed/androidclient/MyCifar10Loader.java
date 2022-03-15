@@ -1,6 +1,5 @@
 package com.bnnthang.fltestbed.androidclient;
 
-import android.annotation.SuppressLint;
 import android.content.res.AssetManager;
 import android.util.Pair;
 
@@ -12,57 +11,37 @@ import org.nd4j.linalg.util.FeatureUtil;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class MyCifar10Loader {
-    private AssetManager assetManager;
+    private File datasetFile;
     private List<Pair<byte[], Byte>> imagesWithLabel;
+    private Map<Byte, Integer> cnt;
     private int maxSamples;
 
-    public MyCifar10Loader(AssetManager assetManager, DataSetType set, int maxSamples) throws IOException {
-        this.assetManager = assetManager;
+    public MyCifar10Loader(File datasetFile, int maxSamples) throws IOException {
+        this.datasetFile = datasetFile;
         this.imagesWithLabel = new ArrayList<>();
         this.maxSamples = maxSamples;
-
-        switch (set) {
-            case TRAIN:
-                loadTrainData();
-                break;
-            case TEST:
-                loadTestData();
-                break;
-            default:
-                throw new UnsupportedOperationException("unsupported dataset");
-        }
-
+        this.cnt = new HashMap<>();
+        load();
         Collections.shuffle(imagesWithLabel);
-        // remove residual images
-        if (imagesWithLabel.size() > maxSamples) {
-            imagesWithLabel.subList(maxSamples, imagesWithLabel.size()).clear();
-        }
     }
 
-    private void loadTrainData() throws IOException {
-        imagesWithLabel.clear();
-        load("cifar-10/data_batch_1.bin");
-        load("cifar-10/data_batch_2.bin");
-        load("cifar-10/data_batch_3.bin");
-        load("cifar-10/data_batch_4.bin");
-        load("cifar-10/data_batch_5.bin");
+    public int getSize() {
+        return imagesWithLabel.size();
     }
 
-    private void loadTestData() throws IOException {
-        imagesWithLabel.clear();
-        load("cifar-10/test_batch.bin");
-    }
-
-    @SuppressLint("DefaultLocale")
-    private void load(String path) throws IOException {
-        InputStream inputStream = assetManager.open(path);
+    private void load() throws IOException {
+        InputStream inputStream = new FileInputStream(datasetFile);
         int imageSize = 32 * 32 * 3;
         int labelSize = 1;
         int rowSize = imageSize + labelSize;
@@ -75,22 +54,31 @@ public class MyCifar10Loader {
                 throw new IOException("read invalid row");
             }
 
-            imagesWithLabel.add(new Pair<byte[], Byte>(imageBytes, labelBytes[0]));
+            cnt.put(labelBytes[0], cnt.getOrDefault(labelBytes[0], 0) + 1);
+
+            imagesWithLabel.add(new Pair<>(imageBytes, labelBytes[0]));
+        }
+
+        System.out.println("data distribution-------------");
+        for (Byte name: cnt.keySet()) {
+            String key = name.toString();
+            String value = cnt.get(name).toString();
+            System.out.println(key + " " + value);
         }
     }
 
     public DataSet createDataSet(int batchSize, int fromIndex) throws IOException {
         if (imagesWithLabel.isEmpty()) return DataSet.empty();
 
-        List<DataSet> atomicDataSet = new ArrayList<>();
+        List<DataSet> atomicDataSets = new ArrayList<>();
         int toIndex = Math.min(imagesWithLabel.size(), fromIndex + batchSize);
         for (int i = fromIndex; i < toIndex; ++i) {
             INDArray image = bytesToImage(imagesWithLabel.get(i).first);
             INDArray label = FeatureUtil.toOutcomeVector(imagesWithLabel.get(i).second, 10);
-            atomicDataSet.add(new DataSet(image, label));
+            atomicDataSets.add(new DataSet(image, label));
         }
 
-        return DataSet.merge(atomicDataSet);
+        return DataSet.merge(atomicDataSets);
     }
 
     private INDArray bytesToImage(byte[] imageBytes) throws IOException {

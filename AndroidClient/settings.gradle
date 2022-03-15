@@ -5,11 +5,20 @@ pluginManagement {
         mavenCentral()
     }
 }
+
 dependencyResolutionManagement {
     repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
     repositories {
         google()
         mavenCentral()
+        maven {
+            name = "GitHubPackages"
+            url = uri("https://maven.pkg.github.com/bnnthang/FederatedLearningTestbed")
+            credentials {
+                username = "bnnthang"
+                password = "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"
+            }
+        }
     }
 }
 rootProject.name = "AndroidClient"

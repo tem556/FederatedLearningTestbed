@@ -29,6 +29,7 @@ public class ServerOperations implements IServerOperations {
         NewClientHandler clientHandler = new NewClientHandler(socket);
         clientHandler.accept();
         clients.add(clientHandler);
+        System.out.println("accepted a client");
     }
 
     @Override
@@ -39,29 +40,20 @@ public class ServerOperations implements IServerOperations {
 
     @Override
     public void pushDatasetToClients(List<IClientHandler> clients) throws Exception {
+        System.out.println("spliting dataset");
         Cifar10Repository repository = new Cifar10Repository();
-        List<List<Pair<byte[], Byte>>> partitions = repository.splitDatasetIID(clients.size());
+        List<List<byte[]>> partitions = repository.splitDatasetIID(clients.size());
+        System.out.println("pushing to clients");
         for (int i = 0; i < clients.size(); ++i) {
-            // serialize dataset
-            byte[] datasetBytes = partitions.get(i).stream().map(x -> {
-                byte[] res = new byte[x.getLeft().length + 1];
-                res[0] = x.getRight();
-                System.arraycopy(x.getLeft(), 0, res, 1, x.getLeft().length);
-                return res;
-            }).reduce((x, y) -> {
-                byte[] res = new byte[x.length + y.length];
-                System.arraycopy(x, 0, res, 0, x.length);
-                System.arraycopy(y, 0, res, x.length, y.length);
-                return res;
-            }).orElse(new byte[0]);
-
             // send to client
-            clients.get(i).pushDataset(datasetBytes);
+            clients.get(i).pushDataset(Cifar10Repository.flatten(partitions.get(i)));
         }
+        System.out.println("pushed all clients");
     }
 
     @Override
     public void pushModelToClients(List<IClientHandler> clients) throws Exception {
+        System.out.println("pushing model to clients");
         File f = new File(MODEL_PATH);
         int modelLength = (int)f.length();
         FileInputStream fis = new FileInputStream(f);
@@ -71,18 +63,23 @@ public class ServerOperations implements IServerOperations {
         for (IClientHandler client : clients) {
             client.pushModel(bytes);
         }
+        System.out.println("pushed model to all clients");
     }
 
     @Override
     public void trainOrElse(List<IClientHandler> clients, ServerParameters serverParameters) throws Exception {
         if (clients.size() >= serverParameters.getTrainingConfiguration().getMinClients()) {
+            System.out.println("triggered training");
             trainingIteration = new BaseTrainingIterator(this, clients, serverParameters.getTrainingConfiguration());
             trainingIteration.start();
+        } else {
+            System.out.println("not good for training");
         }
     }
 
     @Override
     public void aggregateResults(List<TrainingReport> reports, IAggregationStrategy aggregationStrategy) throws Exception {
+        System.out.println("aggregating results");
         aggregationStrategy.aggregate(reports);
     }
 }
