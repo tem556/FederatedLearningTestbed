@@ -12,13 +12,13 @@ import java.io.IOException;
 public class MyCifar10DataSetIterator extends RecordReaderDataSetIterator {
     private int counter = 0;
     private int numSamples = 0;
-    private MyCifar10Loader loader;
+    public MyCifar10Loader loader;
 
-    public MyCifar10DataSetIterator(MyCifar10Loader loader, int batchSize,
-                                    int labelIndex, int numSamples) {
+    public MyCifar10DataSetIterator(MyCifar10Loader _loader, int batchSize,
+                                    int labelIndex, int _numSamples) {
         super(null, batchSize, labelIndex, 10);
-        this.loader = loader;
-        this.numSamples = numSamples;
+        loader = _loader;
+        numSamples = _numSamples;
     }
 
     @Override

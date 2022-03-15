@@ -15,8 +15,8 @@ dependencyResolutionManagement {
             name = "GitHubPackages"
             url = uri("https://maven.pkg.github.com/bnnthang/FederatedLearningTestbed")
             credentials {
-                username = "bnnthang"
-                password = "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"
+                username = System.getenv("GITHUB-USERNAME")
+                password = System.getenv("GITHUB-TOKEN")
             }
         }
     }
