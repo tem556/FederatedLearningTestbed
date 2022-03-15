@@ -102,5 +102,5 @@ dependencies {
     annotationProcessor group: 'org.projectlombok', name: 'lombok', version: '1.18.22'
 
     implementation 'org.slf4j:slf4j-simple:1.7.21'
-    implementation 'com.bnnthang.fltestbed:commonutils:1.15-SNAPSHOT'
+    implementation 'com.bnnthang.fltestbed:commonutils:1.18-SNAPSHOT'
 }

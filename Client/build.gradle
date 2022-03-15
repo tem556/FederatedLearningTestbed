@@ -1,0 +1,29 @@
+plugins {
+    id 'java'
+}
+
+group 'com.bnnthang.fltestbed'
+version '1.0-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+    maven {
+        name = "GitHubPackages"
+        url = uri("https://maven.pkg.github.com/bnnthang/FederatedLearningTestbed")
+        credentials {
+            username = System.getenv("GITHUB-USERNAME")
+            password = System.getenv("GITHUB-TOKEN")
+        }
+    }
+}
+
+dependencies {
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.1'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.1'
+
+    implementation 'com.bnnthang.fltestbed:commonutils:1.18-SNAPSHOT'
+}
+
+test {
+    useJUnitPlatform()
+}
