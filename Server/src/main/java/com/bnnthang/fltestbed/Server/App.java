@@ -4,6 +4,7 @@ import com.bnnthang.fltestbed.Server.AggregationStrategies.NewFedAvg;
 import com.bnnthang.fltestbed.models.ServerParameters;
 import com.bnnthang.fltestbed.models.TrainingConfiguration;
 import com.bnnthang.fltestbed.servers.BaseServer;
+import org.opencv.core.Core;
 
 import java.io.IOException;
 
@@ -13,7 +14,7 @@ import java.io.IOException;
  */
 public class App {
     public static void main(String[] args) throws Exception {
-        if (args.length > 0) {
+        if (args[0].equals("train")) {
 //            ML.trainAndEval();
             ML.eval();
         } else {
@@ -21,7 +22,7 @@ public class App {
 //            FederatedLearningServer server = new FederatedLearningServerImpl();
 //            server.startServer();
             NewFedAvg aggStrategy = new NewFedAvg();
-            TrainingConfiguration trainConf = new TrainingConfiguration(2, 50, 8765, aggStrategy);
+            TrainingConfiguration trainConf = new TrainingConfiguration(Integer.parseInt(args[1]), 50, 8765, aggStrategy);
             ServerOperations servOps = new ServerOperations();
             ServerParameters serverParameters = new ServerParameters(4602, trainConf, servOps);
             BaseServer server = new BaseServer(serverParameters);
