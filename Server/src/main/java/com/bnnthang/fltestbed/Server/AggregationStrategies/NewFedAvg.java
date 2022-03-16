@@ -6,19 +6,14 @@ import com.bnnthang.fltestbed.servers.IAggregationStrategy;
 import org.deeplearning4j.nn.api.Model;
 import org.deeplearning4j.nn.multilayer.MultiLayerNetwork;
 import org.deeplearning4j.util.ModelSerializer;
-import org.nd4j.enums.Mode;
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.factory.Nd4j;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class NewFedAvg implements IAggregationStrategy {
     @Override
-    public void aggregate(List<TrainingReport> reports) throws Exception {
-        // load old model
-        MultiLayerNetwork model = ModelSerializer.restoreMultiLayerNetwork(ServerOperations.MODEL_PATH);
-
+    public MultiLayerNetwork aggregate(MultiLayerNetwork model, List<TrainingReport> reports) throws Exception {
         int layers = reports.get(0).getLayerParams().size();
         for (int i = 0; i < layers; ++i) {
             if (reports.get(0).getLayerParams().get(i) == null) {
@@ -32,7 +27,9 @@ public class NewFedAvg implements IAggregationStrategy {
             model.getLayer(i).setParams(avgUpdates);
         }
 
-        // overwrite new model
-        ModelSerializer.writeModel(model, ServerOperations.MODEL_PATH, true);
+        return model;
+
+//        // overwrite new model
+//        ModelSerializer.writeModel(model, ServerOperations.MODEL_PATH, true);
     }
 }

@@ -8,16 +8,27 @@ import com.bnnthang.fltestbed.servers.IAggregationStrategy;
 import com.bnnthang.fltestbed.servers.IClientHandler;
 import com.bnnthang.fltestbed.servers.IServerOperations;
 import org.apache.commons.lang3.tuple.Pair;
+import org.deeplearning4j.nn.multilayer.MultiLayerNetwork;
+import org.deeplearning4j.util.ModelSerializer;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.net.Socket;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.List;
 
 public class ServerOperations implements IServerOperations {
-    public static String MODEL_PATH = "C:/Users/buinn/DoNotTouch/crap/photolabeller/newmodel.zip";
+//    public static String MODEL_PATH = "C:/Users/buinn/DoNotTouch/crap/photolabeller/newmodel.zip";
 
+    public String workDir = null;
+    public String currentModelFilename = null;
     private BaseTrainingIterator trainingIteration = null;
+
+    public ServerOperations(String _workDir, String baseModelFilename) {
+        workDir = _workDir;
+        currentModelFilename = baseModelFilename;
+    }
 
     @Override
     public Boolean isTraining() {
@@ -54,7 +65,7 @@ public class ServerOperations implements IServerOperations {
     @Override
     public void pushModelToClients(List<IClientHandler> clients) throws Exception {
         System.out.println("pushing model to clients");
-        File f = new File(MODEL_PATH);
+        File f = new File(workDir, currentModelFilename);
         int modelLength = (int)f.length();
         FileInputStream fis = new FileInputStream(f);
         byte[] bytes = new byte[modelLength];
@@ -80,6 +91,10 @@ public class ServerOperations implements IServerOperations {
     @Override
     public void aggregateResults(List<TrainingReport> reports, IAggregationStrategy aggregationStrategy) throws Exception {
         System.out.println("aggregating results");
-        aggregationStrategy.aggregate(reports);
+        MultiLayerNetwork model = ModelSerializer.restoreMultiLayerNetwork(workDir + "/" + currentModelFilename);
+        MultiLayerNetwork newModel = aggregationStrategy.aggregate(model, reports);
+        String newModelFilename = "model" + (new SimpleDateFormat("dd-MM-yyyy-HH-mm-ss").format(Calendar.getInstance().getTime()));
+        newModel.save(new File(workDir, newModelFilename));
+        currentModelFilename = newModelFilename;
     }
 }

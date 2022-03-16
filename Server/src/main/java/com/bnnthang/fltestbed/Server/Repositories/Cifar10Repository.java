@@ -6,26 +6,24 @@ import org.apache.commons.lang3.tuple.Pair;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class Cifar10Repository {
-    private Map<Byte, List<byte[]>> imagesByLabel;
+    private final Map<Byte, List<byte[]>> imagesByLabel;
 
     public Cifar10Repository() throws IOException {
         imagesByLabel = new HashMap<>();
-        load("C:/Users/buinn/Repos/FederatedLearningTestbed/Server/src/main/resources/cifar-10/data_batch_1.bin");
-        load("C:/Users/buinn/Repos/FederatedLearningTestbed/Server/src/main/resources/cifar-10/data_batch_2.bin");
-        load("C:/Users/buinn/Repos/FederatedLearningTestbed/Server/src/main/resources/cifar-10/data_batch_3.bin");
-        load("C:/Users/buinn/Repos/FederatedLearningTestbed/Server/src/main/resources/cifar-10/data_batch_4.bin");
-        load("C:/Users/buinn/Repos/FederatedLearningTestbed/Server/src/main/resources/cifar-10/data_batch_5.bin");
+
+        load(Objects.requireNonNull(Main.class.getClassLoader().getResourceAsStream("cifar-10/data_batch_1.bin")));
+        load(Objects.requireNonNull(Main.class.getClassLoader().getResourceAsStream("cifar-10/data_batch_2.bin")));
+        load(Objects.requireNonNull(Main.class.getClassLoader().getResourceAsStream("cifar-10/data_batch_3.bin")));
+        load(Objects.requireNonNull(Main.class.getClassLoader().getResourceAsStream("cifar-10/data_batch_4.bin")));
+        load(Objects.requireNonNull(Main.class.getClassLoader().getResourceAsStream("cifar-10/data_batch_5.bin")));
     }
 
-    private void load(String path) throws IOException {
-        InputStream inputStream = new FileInputStream(path);
+    private void load(InputStream inputStream) throws IOException {
+//        InputStream inputStream = new FileInputStream(path);
         int imageSize = 32 * 32 * 3;
         int labelSize = 1;
         int rowSize = imageSize + labelSize;

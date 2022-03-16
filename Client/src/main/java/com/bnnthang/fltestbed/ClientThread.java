@@ -30,15 +30,6 @@ public class ClientThread extends Thread {
         try {
             client = new BaseClient(servHost, servPort, clientOperations);
             client.serve();
-//            if (localFile.isDirectory()) {
-//                System.out.println("fuck");
-//            }
-//            Path path = Path.of(localFile.getAbsolutePath() + "/test.txt");
-//            if (!Files.exists(path)) {
-//                Files.createFile(path);
-//            }
-//            Files.writeString(path, "damn");
-//            sleep(10000);
         } catch (Exception e) {
             e.printStackTrace();
         }

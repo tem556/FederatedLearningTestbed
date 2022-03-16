@@ -65,9 +65,6 @@ public class ClientOperations implements IClientOperations {
     @Override
     public void handleReport(Socket socket) {
         try {
-            if (trainingThread.report == null || trainingThread.report.getLayerParams().size() == 0) {
-                System.out.println("fuck");
-            }
             ByteArrayOutputStream bos = new ByteArrayOutputStream();
             ObjectOutputStream out = new ObjectOutputStream(bos);
             out.writeObject(trainingThread.report);

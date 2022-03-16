@@ -7,6 +7,7 @@ import com.bnnthang.fltestbed.servers.BaseServer;
 import org.opencv.core.Core;
 
 import java.io.IOException;
+import java.util.Properties;
 
 /**
  * Hello world!
@@ -14,17 +15,23 @@ import java.io.IOException;
  */
 public class App {
     public static void main(String[] args) throws Exception {
-        if (args[0].equals("train")) {
-//            ML.trainAndEval();
-            ML.eval();
+        if (args.length > 0) {
+            ML.trainAndEval();
         } else {
-//            System.out.println("Hello World!");
-//            FederatedLearningServer server = new FederatedLearningServerImpl();
-//            server.startServer();
+            // load properties
+            Properties conf = new Properties();
+            conf.load(App.class.getClassLoader().getResourceAsStream("config.properties"));
+            String workDir = conf.getProperty("workDir");
+            String modelFile = conf.getProperty("modelFilename");
+            int minClients = Integer.parseInt(conf.getProperty("minClients"));
+            int port = Integer.parseInt(conf.getProperty("port"));
+            int trainingRounds = Integer.parseInt(conf.getProperty("trainingRounds"));
+            int pollInterval = Integer.parseInt(conf.getProperty("pollInterval"));
+
             NewFedAvg aggStrategy = new NewFedAvg();
-            TrainingConfiguration trainConf = new TrainingConfiguration(Integer.parseInt(args[1]), 50, 8765, aggStrategy);
-            ServerOperations servOps = new ServerOperations();
-            ServerParameters serverParameters = new ServerParameters(4602, trainConf, servOps);
+            TrainingConfiguration trainConf = new TrainingConfiguration(minClients, trainingRounds, pollInterval, aggStrategy);
+            ServerOperations servOps = new ServerOperations(workDir, modelFile);
+            ServerParameters serverParameters = new ServerParameters(port, trainConf, servOps);
             BaseServer server = new BaseServer(serverParameters);
             System.out.println("serving...");
             server.serve();
