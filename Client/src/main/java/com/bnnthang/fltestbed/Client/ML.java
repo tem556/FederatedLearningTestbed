@@ -1,34 +1,28 @@
-package com.bnnthang.fltestbed.Server;
+package com.bnnthang.fltestbed.Client;
 
 import org.datavec.image.loader.CifarLoader;
 import org.deeplearning4j.datasets.fetchers.DataSetType;
 import org.deeplearning4j.datasets.iterator.impl.Cifar10DataSetIterator;
 import org.deeplearning4j.nn.api.OptimizationAlgorithm;
-import org.deeplearning4j.nn.conf.ConvolutionMode;
 import org.deeplearning4j.nn.conf.MultiLayerConfiguration;
 import org.deeplearning4j.nn.conf.NeuralNetConfiguration;
-import org.deeplearning4j.nn.conf.Updater;
 import org.deeplearning4j.nn.conf.inputs.InputType;
-import org.deeplearning4j.nn.conf.layers.*;
-import org.deeplearning4j.nn.gradient.Gradient;
+import org.deeplearning4j.nn.conf.layers.BatchNormalization;
+import org.deeplearning4j.nn.conf.layers.ConvolutionLayer;
+import org.deeplearning4j.nn.conf.layers.OutputLayer;
+import org.deeplearning4j.nn.conf.layers.SubsamplingLayer;
 import org.deeplearning4j.nn.multilayer.MultiLayerNetwork;
 import org.deeplearning4j.nn.weights.WeightInit;
 import org.deeplearning4j.optimize.api.InvocationType;
 import org.deeplearning4j.optimize.listeners.EvaluativeListener;
 import org.deeplearning4j.optimize.listeners.ScoreIterationListener;
-import org.deeplearning4j.util.ModelSerializer;
-import org.nd4j.evaluation.IEvaluation;
+import org.nd4j.enums.Mode;
 import org.nd4j.linalg.activations.Activation;
-import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.learning.config.AdaDelta;
-import org.nd4j.linalg.learning.config.Adam;
 import org.nd4j.linalg.lossfunctions.LossFunctions;
 
 import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
-import java.io.OutputStream;
-import java.util.Map;
 
 public class ML {
     private static int height = 32;
@@ -89,69 +83,16 @@ public class ML {
     }
 
     public static void trainAndEval() throws IOException {
-        Cifar10DataSetIterator cifar = new Cifar10DataSetIterator(batchSize, new int[]{height, width}, DataSetType.TRAIN, null, seed);
-        Cifar10DataSetIterator cifarEval = new Cifar10DataSetIterator(batchSize, new int[]{height, width}, DataSetType.TEST, null, seed);
+        MyCifar10Loader loader = new MyCifar10Loader(new File("C:\\Users\\buinn\\DoNotTouch\\crap\\testbed\\dirclient0\\dataset"), 123456);
+        MyCifar10DataSetIterator dataSetIterator = new MyCifar10DataSetIterator(loader, batchSize, 1, 123456);
 
-        //train model and eval model
+//        Cifar10DataSetIterator cifarEval = new Cifar10DataSetIterator(batchSize, new int[]{height, width}, DataSetType.TEST, null, seed);
+        MyCifar10Loader loader1 = new MyCifar10Loader(new File("C:\\Users\\buinn\\cifar\\cifar-10-batches-bin\\test_batch.bin"), 123456);
+        MyCifar10DataSetIterator cifarEval = new MyCifar10DataSetIterator(loader1, batchSize, 1, 123456);
+
         MultiLayerNetwork model = getModel();
-
-        FileWriter writer = new FileWriter("C:\\Users\\buinn\\DoNotTouch\\crap\\testbed\\test1.txt");
-        Map<String, INDArray> t = model.paramTable();
-        for (String key : t.keySet()) {
-            writer.write(key + " -> " + t.get(key) + "\n\n");
-            writer.flush();
-        }
-
-        Gradient g = model.getGradient();
-        INDArray t1;
-        if (g != null) {
-            t1 = g.gradient();
-            writer.write(t1.toStringFull());
-            writer.flush();
-        }
-
-        writer.close();
-
-//        IEvaluation evaluation = model.evaluate(cifarEval);
-//        System.out.println(evaluation.stats());
-//        System.out.println("====================================");
-//        System.out.println("Run training...");
         model.setListeners(new ScoreIterationListener(50),
                 new EvaluativeListener(cifarEval, 1, InvocationType.EPOCH_END));
-//                new MyListener());
-
-        model.fit(cifar, 5);
-
-        writer = new FileWriter("C:\\Users\\buinn\\DoNotTouch\\crap\\testbed\\test2.txt");
-        t = model.paramTable();
-        for (String key : t.keySet()) {
-            writer.write(key + " -> " + t.get(key) + "\n\n");
-            writer.flush();
-        }
-
-        g = model.getGradient();
-        if (g != null) {
-            t1 = g.gradient();
-            writer.write(t1.toStringFull());
-            writer.flush();
-        }
-
-        writer.close();
-    }
-
-    public static void eval() throws IOException {
-//        Cifar10DataSetIterator cifar = new Cifar10DataSetIterator(batchSize, new int[]{height, width}, DataSetType.TRAIN, null, seed);
-        Cifar10DataSetIterator cifarEval = new Cifar10DataSetIterator(batchSize, new int[]{height, width}, DataSetType.TEST, null, seed);
-
-        //train model and eval model
-        MultiLayerNetwork model = ModelSerializer.restoreMultiLayerNetwork("C:\\Users\\buinn\\DoNotTouch\\crap\\photolabeller\\newmodel.zip");
-        IEvaluation evaluation = model.evaluate(cifarEval);
-        System.out.println(evaluation.stats());
-//        System.out.println(evaluation.stats());
-//        System.out.println("====================================");
-//        System.out.println("Run training...");
-//        model.setListeners(new ScoreIterationListener(50), new EvaluativeListener(cifarEval, 1, InvocationType.EPOCH_END));
-
-//        model.fit(cifar, epochs);
+        model.fit(dataSetIterator, epochs);
     }
 }

@@ -1,4 +1,4 @@
-package com.bnnthang.fltestbed;
+package com.bnnthang.fltestbed.Client;
 
 import org.datavec.image.loader.NativeImageLoader;
 import org.nd4j.common.primitives.Pair;

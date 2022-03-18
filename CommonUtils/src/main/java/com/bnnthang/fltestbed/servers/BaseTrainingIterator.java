@@ -63,7 +63,7 @@ public final class BaseTrainingIterator extends Thread {
                             .map(IClientHandler::isTraining)
                             .reduce(false, Boolean::logicalOr);
 
-                    System.out.println("are clients training? = " + areClientsTraining);
+//                    System.out.println("are clients training? = " + areClientsTraining);
 
                     // break if clients finish
                     if (!areClientsTraining) {

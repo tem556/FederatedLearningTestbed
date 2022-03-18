@@ -29,7 +29,7 @@ public class NewClientHandler implements IClientHandler {
     @Override
     public Boolean isTraining() {
         try {
-            System.out.println("checking client training...");
+//            System.out.println("checking client training...");
             SocketUtils.sendInteger(socket, ClientCommandEnum.ISTRAINING.ordinal());
             int flag = SocketUtils.readInteger(socket);
             return flag != 0;

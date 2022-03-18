@@ -15,6 +15,8 @@ import java.util.Properties;
  */
 public class App {
     public static void main(String[] args) throws Exception {
+//        String path = App.class.getClassLoader().getResource("cifar-10/test_batch.bin").getFile();
+//        System.out.println(path);
         if (args.length > 0) {
             ML.trainAndEval();
         } else {

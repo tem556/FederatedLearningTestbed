@@ -1,4 +1,4 @@
-package com.bnnthang.fltestbed;
+package com.bnnthang.fltestbed.Client;
 
 import com.bnnthang.fltestbed.clients.IClientOperations;
 import com.bnnthang.fltestbed.network.SocketUtils;
@@ -18,20 +18,20 @@ public class ClientOperations implements IClientOperations {
 
     @Override
     public void handleAccepted() {
-        System.out.println("accepted");
+//        System.out.println("accepted");
     }
 
     @Override
     public void handleRejected() {
-        System.out.println("rejected");
+//        System.out.println("rejected");
     }
 
     @Override
     public void handleDatasetPush(Socket socket) {
         try {
-            System.out.println("downloading dataset...");
+//            System.out.println("downloading dataset...");
             downloadFile(socket, DATASET_FILENAME);
-            System.out.println("downloaded dataset...");
+//            System.out.println("downloaded dataset...");
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -40,9 +40,9 @@ public class ClientOperations implements IClientOperations {
     @Override
     public void handleModelPush(Socket socket) {
         try {
-            System.out.println("downloading model...");
+//            System.out.println("downloading model...");
             downloadFile(socket, MODEL_FILENAME);
-            System.out.println("downloaded model");
+//            System.out.println("downloaded model");
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -50,7 +50,7 @@ public class ClientOperations implements IClientOperations {
 
     @Override
     public void handleDone() {
-        System.out.println("done");
+//        System.out.println("done");
     }
 
     @Override
@@ -70,9 +70,9 @@ public class ClientOperations implements IClientOperations {
             out.writeObject(trainingThread.report);
             out.flush();
             byte[] bytes = bos.toByteArray();
-            System.out.println("sending = " + bytes.length);
+//            System.out.println("sending = " + bytes.length);
             SocketUtils.sendBytesWrapper(socket, bytes);
-            System.out.println("report sent");
+//            System.out.println("report sent");
             bos.close();
         } catch (Exception e) {
             e.printStackTrace();
@@ -98,7 +98,7 @@ public class ClientOperations implements IClientOperations {
     private void downloadFile(Socket socket, String filename) throws Exception {
         // get length
         int length = SocketUtils.readInteger(socket);
-        System.out.println("got file length = " + length);
+//        System.out.println("got file length = " + length);
 
         // download
         File datasetFile = new File(localFileDir, filename);
@@ -111,10 +111,10 @@ public class ClientOperations implements IClientOperations {
             int c = socket.getInputStream().read(buf, 0, Math.min(2048, length - cnt));
             cnt += c;
             bos.write(buf, 0, c);
-            System.out.println("downloaded " + cnt);
+//            System.out.println("downloaded " + cnt);
         }
         bos.close();
         fos.close();
-        System.out.println("saved");
+//        System.out.println("saved");
     }
 }

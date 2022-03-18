@@ -64,7 +64,7 @@ public class ServerOperations implements IServerOperations {
 
     @Override
     public void pushModelToClients(List<IClientHandler> clients) throws Exception {
-        System.out.println("pushing model to clients");
+        System.out.println("pushing model to clients -> " + currentModelFilename);
         File f = new File(workDir, currentModelFilename);
         int modelLength = (int)f.length();
         FileInputStream fis = new FileInputStream(f);

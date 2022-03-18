@@ -52,7 +52,17 @@
     <dependency>
       <groupId>com.bnnthang.fltestbed</groupId>
       <artifactId>commonutils</artifactId>
-      <version>1.18-SNAPSHOT</version>
+      <version>1.19.1-SNAPSHOT</version>
+    </dependency>
+    <dependency>
+      <groupId>org.tensorflow</groupId>
+      <artifactId>tensorflow-core-api</artifactId>
+      <version>0.4.0</version>
+    </dependency>
+    <dependency>
+      <groupId>org.tensorflow</groupId>
+      <artifactId>tensorflow-framework</artifactId>
+      <version>0.4.0</version>
     </dependency>
   </dependencies>
 

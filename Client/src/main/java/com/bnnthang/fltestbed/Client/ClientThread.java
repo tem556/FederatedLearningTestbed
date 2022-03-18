@@ -1,15 +1,10 @@
-package com.bnnthang.fltestbed;
+package com.bnnthang.fltestbed.Client;
 
 import com.bnnthang.fltestbed.clients.BaseClient;
 import com.bnnthang.fltestbed.clients.IClientOperations;
 
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.OpenOption;
-import java.nio.file.Path;
 
 public class ClientThread extends Thread {
     String servHost;

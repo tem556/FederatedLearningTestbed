@@ -1,4 +1,4 @@
-package com.bnnthang.fltestbed;
+package com.bnnthang.fltestbed.Client;
 
 import org.deeplearning4j.datasets.datavec.RecordReaderDataSetIterator;
 import org.nd4j.linalg.dataset.DataSet;
