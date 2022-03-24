@@ -1,4 +1,4 @@
-package com.bnnthang.fltestbed.models;
+package com.bnnthang.fltestbed.commonutils.models;
 
 import lombok.Data;
 import lombok.Getter;

@@ -1,5 +1,7 @@
 package com.bnnthang.fltestbed.Server;
 
+import com.bnnthang.fltestbed.dataset.MyCifar10DataSetIterator;
+import com.bnnthang.fltestbed.dataset.MyCifar10Loader;
 import org.datavec.image.loader.CifarLoader;
 import org.deeplearning4j.datasets.fetchers.DataSetType;
 import org.deeplearning4j.datasets.iterator.impl.Cifar10DataSetIterator;
@@ -90,27 +92,29 @@ public class ML {
 
     public static void trainAndEval() throws IOException {
         Cifar10DataSetIterator cifar = new Cifar10DataSetIterator(batchSize, new int[]{height, width}, DataSetType.TRAIN, null, seed);
-        Cifar10DataSetIterator cifarEval = new Cifar10DataSetIterator(batchSize, new int[]{height, width}, DataSetType.TEST, null, seed);
+//        Cifar10DataSetIterator cifarEval = new Cifar10DataSetIterator(batchSize, new int[]{height, width}, DataSetType.TEST, null, seed);
+        MyCifar10Loader loader = new MyCifar10Loader(new File("C:\\Users\\buinn\\Repos\\FederatedLearningTestbed\\Server\\src\\main\\resources\\cifar-10\\test_batch.bin"), 12345);
+        MyCifar10DataSetIterator cifarEval = new MyCifar10DataSetIterator(loader, 234, 1, 123456);
 
         //train model and eval model
         MultiLayerNetwork model = getModel();
 
-        FileWriter writer = new FileWriter("C:\\Users\\buinn\\DoNotTouch\\crap\\testbed\\test1.txt");
-        Map<String, INDArray> t = model.paramTable();
-        for (String key : t.keySet()) {
-            writer.write(key + " -> " + t.get(key) + "\n\n");
-            writer.flush();
-        }
-
-        Gradient g = model.getGradient();
-        INDArray t1;
-        if (g != null) {
-            t1 = g.gradient();
-            writer.write(t1.toStringFull());
-            writer.flush();
-        }
-
-        writer.close();
+//        FileWriter writer = new FileWriter("C:\\Users\\buinn\\DoNotTouch\\crap\\testbed\\test1.txt");
+//        Map<String, INDArray> t = model.paramTable();
+//        for (String key : t.keySet()) {
+//            writer.write(key + " -> " + t.get(key) + "\n\n");
+//            writer.flush();
+//        }
+//
+//        Gradient g = model.getGradient();
+//        INDArray t1;
+//        if (g != null) {
+//            t1 = g.gradient();
+//            writer.write(t1.toStringFull());
+//            writer.flush();
+//        }
+//
+//        writer.close();
 
 //        IEvaluation evaluation = model.evaluate(cifarEval);
 //        System.out.println(evaluation.stats());
@@ -120,23 +124,23 @@ public class ML {
                 new EvaluativeListener(cifarEval, 1, InvocationType.EPOCH_END));
 //                new MyListener());
 
-        model.fit(cifar, 5);
+        model.fit(cifar, 34);
 
-        writer = new FileWriter("C:\\Users\\buinn\\DoNotTouch\\crap\\testbed\\test2.txt");
-        t = model.paramTable();
-        for (String key : t.keySet()) {
-            writer.write(key + " -> " + t.get(key) + "\n\n");
-            writer.flush();
-        }
-
-        g = model.getGradient();
-        if (g != null) {
-            t1 = g.gradient();
-            writer.write(t1.toStringFull());
-            writer.flush();
-        }
-
-        writer.close();
+//        writer = new FileWriter("C:\\Users\\buinn\\DoNotTouch\\crap\\testbed\\test2.txt");
+//        t = model.paramTable();
+//        for (String key : t.keySet()) {
+//            writer.write(key + " -> " + t.get(key) + "\n\n");
+//            writer.flush();
+//        }
+//
+//        g = model.getGradient();
+//        if (g != null) {
+//            t1 = g.gradient();
+//            writer.write(t1.toStringFull());
+//            writer.flush();
+//        }
+//
+//        writer.close();
     }
 
     public static void eval() throws IOException {

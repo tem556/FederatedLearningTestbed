@@ -1,4 +1,4 @@
-package com.bnnthang.fltestbed.dataset;
+package com.bnnthang.fltestbed.commonutils.clients;
 
 import org.deeplearning4j.datasets.datavec.RecordReaderDataSetIterator;
 import org.nd4j.linalg.dataset.DataSet;
@@ -10,8 +10,16 @@ public class MyCifar10DataSetIterator extends RecordReaderDataSetIterator {
     private int numSamples = 0;
     public MyCifar10Loader loader;
 
-    public MyCifar10DataSetIterator(MyCifar10Loader _loader, int batchSize,
-                                    int labelIndex, int _numSamples) {
+    public MyCifar10DataSetIterator(MyCifar10Loader _loader,
+                                    int batchSize,
+                                    int labelIndex) {
+        this(_loader, batchSize, labelIndex, 123456789);
+    }
+
+    public MyCifar10DataSetIterator(MyCifar10Loader _loader,
+                                    int batchSize,
+                                    int labelIndex,
+                                    int _numSamples) {
         super(null, batchSize, labelIndex, 10);
         loader = _loader;
         numSamples = _numSamples;
@@ -37,7 +45,7 @@ public class MyCifar10DataSetIterator extends RecordReaderDataSetIterator {
 
     @Override
     public boolean hasNext() {
-        return counter < loader.getSize();
+        return counter < loader.count();
     }
 
     @Override

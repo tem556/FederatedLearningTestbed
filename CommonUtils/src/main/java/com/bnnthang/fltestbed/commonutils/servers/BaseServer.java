@@ -1,6 +1,6 @@
-package com.bnnthang.fltestbed.servers;
+package com.bnnthang.fltestbed.commonutils.servers;
 
-import com.bnnthang.fltestbed.models.ServerParameters;
+import com.bnnthang.fltestbed.commonutils.models.ServerParameters;
 import lombok.Getter;
 
 import java.io.IOException;
@@ -29,12 +29,12 @@ public class BaseServer {
      * Encapsulated server parameters.
      */
     @Getter
-    private ServerParameters serverParameters;
+    private final ServerParameters serverParameters;
 
     /**
      * Instantiate a <code>BaseServer</code> object.
      * @param myServerParameters server parameters
-     * @throws IOException
+     * @throws IOException if I/O errors happen
      */
     public BaseServer(final ServerParameters myServerParameters)
             throws IOException {
@@ -51,17 +51,13 @@ public class BaseServer {
         do {
             Socket client = serverSocket.accept();
 
-            System.out.println("got connection");
-
             IServerOperations serverOperations =
                     serverParameters.getServerOperations();
 
             if (serverOperations.isTraining()) {
-                System.out.println("training. rejected");
                 // reject client if server is training
                 serverOperations.rejectClient(client);
             } else {
-                System.out.println("not training. adding to queue...");
                 // accept client to training queue if server is not training
                 serverOperations.acceptClient(client, acceptedClients);
             }

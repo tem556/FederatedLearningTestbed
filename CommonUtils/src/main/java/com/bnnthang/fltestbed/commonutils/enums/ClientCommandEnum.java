@@ -1,4 +1,4 @@
-package com.bnnthang.fltestbed.enums;
+package com.bnnthang.fltestbed.commonutils.enums;
 
 /**
  * Commands for server to send or request information from clients.

@@ -1,7 +1,7 @@
-package com.bnnthang.fltestbed.servers;
+package com.bnnthang.fltestbed.commonutils.servers;
 
-import com.bnnthang.fltestbed.models.ServerParameters;
-import com.bnnthang.fltestbed.models.TrainingReport;
+import com.bnnthang.fltestbed.commonutils.models.ServerParameters;
+import com.bnnthang.fltestbed.commonutils.models.TrainingReport;
 
 import java.net.Socket;
 import java.util.List;

@@ -1,8 +1,10 @@
-package com.bnnthang.fltestbed.network;
+package com.bnnthang.fltestbed.commonutils.network;
 
 import org.nd4j.shade.guava.primitives.Ints;
 
+import java.io.File;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.net.Socket;
 
 public final class SocketUtils {
@@ -17,7 +19,7 @@ public final class SocketUtils {
      * Enhanced wrapper for <code>sendBytes</code>.
      * @param socket some socket
      * @param bytes byte array to send
-     * @throws IOException
+     * @throws IOException if I/O errors occur
      */
     public static void sendBytesWrapper(final Socket socket,
                                         final byte[] bytes)
@@ -30,7 +32,7 @@ public final class SocketUtils {
      * Enhanced wrapper for <code>readBytes</code>.
      * @param socket some socket
      * @return read buffer
-     * @throws IOException
+     * @throws IOException if I/O errors occur
      */
     public static byte[] readBytesWrapper(final Socket socket)
             throws IOException {
@@ -53,10 +55,39 @@ public final class SocketUtils {
     }
 
     /**
+     * Read from a socket and directly write to another output stream
+     * @param socket some socket
+     * @param outputStream some output stream
+     * @throws IOException if I/O errors occur
+     */
+    public static void readAndSaveBytes(final Socket socket, final OutputStream outputStream) throws IOException {
+        // read the expected length
+        int size = readInteger(socket);
+
+        // initialize the buffer and counter
+        byte[] buffer = new byte[BUFFER_SIZE];
+        int current = 0;
+
+        // read until reach the expected length
+        while (current < size) {
+            // read to buffer
+            int readBytes = socket.getInputStream()
+                    .read(buffer, 0, Integer.min(BUFFER_SIZE, size - current));
+
+            // save to file
+            outputStream.write(buffer);
+            outputStream.flush();
+
+            // increase the counter
+            current += readBytes;
+        }
+    }
+
+    /**
      * Send a sequence of bytes via the given socket.
      * @param socket some socket
      * @param bytes byte array to send
-     * @throws IOException
+     * @throws IOException if I/O errors occur
      */
     public static void sendBytes(final Socket socket,
                                  final byte[] bytes) throws IOException {
@@ -68,8 +99,8 @@ public final class SocketUtils {
      * Read a sequence of bytes from the given socket.
      * @param socket some socket
      * @param expectedBytes number of bytes to read
-     * @return byte array contains `expectedBytes` bytes
-     * @throws IOException
+     * @return byte array contains <code>expectedBytes</code> bytes
+     * @throws IOException if I/O errors occur
      */
     public static byte[] readBytes(final Socket socket,
                                    final Integer expectedBytes)
@@ -87,7 +118,7 @@ public final class SocketUtils {
      * Send an integer (4 bytes) via the given socket.
      * @param socket some socket
      * @param integer the integer to send
-     * @throws IOException
+     * @throws IOException if I/O errors occur
      */
     public static void sendInteger(final Socket socket,
                                    final Integer integer) throws IOException {
@@ -98,7 +129,7 @@ public final class SocketUtils {
      * Read an integer (4 bytes) from the given socket.
      * @param socket some socket
      * @return an integer read from the given socket
-     * @throws IOException
+     * @throws IOException if I/O errors occur
      */
     public static Integer readInteger(final Socket socket) throws IOException {
         byte[] bytes = readBytes(socket, Integer.BYTES);
@@ -109,7 +140,7 @@ public final class SocketUtils {
      * Check if there are bytes to read.
      * @param socket some socket
      * @return <code>true</code> iff there is at least 1 byte to read
-     * @throws IOException
+     * @throws IOException if I/O errors occur
      */
     public static Boolean availableToRead(final Socket socket)
             throws IOException {

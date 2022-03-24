@@ -28,23 +28,23 @@ import java.util.stream.Collectors;
 public class NewFedAvg implements IAggregationStrategy {
     @Override
     public MultiLayerNetwork aggregate(MultiLayerNetwork model, List<TrainingReport> reports) throws Exception {
-//        List<Gradient> gradients = reports.stream().map(TrainingReport::getGradient).collect(Collectors.toList());
-//        List<Map<String, INDArray>> gradientTables = gradients.stream().map(Gradient::gradientForVariable).collect(Collectors.toList());
-//        Set<String> variables = gradientTables.get(0).keySet();
-//        Map<String, INDArray> avgGradientTable = new HashMap<>();
-//        for (String key : variables) {
-//            INDArray sum = gradientTables.get(0).get(key);
-//            for (int i = 1; i < gradientTables.size(); ++i) {
-//                sum = sum.add(gradientTables.get(i).get(key));
-//            }
-//            INDArray avg = sum.div(reports.size());
-//            avgGradientTable.put(key, avg);
-//        }
-//        Gradient g = new DefaultGradient();
-//        for (String key : avgGradientTable.keySet()) {
-//            g.setGradientFor(key, avgGradientTable.get(key));
-//        }
-//        model.setGradient(g);
+        List<Gradient> gradients = reports.stream().map(TrainingReport::getGradient).collect(Collectors.toList());
+        List<Map<String, INDArray>> gradientTables = gradients.stream().map(Gradient::gradientForVariable).collect(Collectors.toList());
+        Set<String> variables = gradientTables.get(0).keySet();
+        Map<String, INDArray> avgGradientTable = new HashMap<>();
+        for (String key : variables) {
+            INDArray sum = gradientTables.get(0).get(key);
+            for (int i = 1; i < gradientTables.size(); ++i) {
+                sum = sum.add(gradientTables.get(i).get(key));
+            }
+            INDArray avg = sum.div(reports.size());
+            avgGradientTable.put(key, avg);
+        }
+        Gradient g = new DefaultGradient();
+        for (String key : avgGradientTable.keySet()) {
+            g.setGradientFor(key, avgGradientTable.get(key));
+        }
+        model.setGradient(g);
 
         INDArray sum = reports.get(0).getParams();
         for (int i = 1; i < reports.size(); ++i)
@@ -66,13 +66,13 @@ public class NewFedAvg implements IAggregationStrategy {
 //        }
 
         // eval
-        String path = App.class.getClassLoader().getResource("cifar-10/test_batch.bin").getPath();
-        System.out.println(path);
-        MyCifar10Loader loader = new MyCifar10Loader(new File(path), 123456);
+//        String path = App.class.getClassLoader().getResource("cifar-10/test_batch.bin").getPath();
+//        System.out.println(path);
+        MyCifar10Loader loader = new MyCifar10Loader(new File("C:\\Users\\buinn\\Repos\\FederatedLearningTestbed\\Server\\src\\main\\resources\\cifar-10\\test_batch.bin"), 123456);
         MyCifar10DataSetIterator cifarEval = new MyCifar10DataSetIterator(loader, 123, 1, 123456);
 //        Cifar10DataSetIterator cifarEval = new Cifar10DataSetIterator(123, new int[]{32, 32}, DataSetType.TEST, null, 245L);
         IEvaluation evaluation = model.evaluate(cifarEval);
-        FileWriter writer = new FileWriter("C:\\Users\\buinn\\DoNotTouch\\crap\\testbed\\test3.txt", true);
+        FileWriter writer = new FileWriter("C:\\Users\\buinn\\DoNotTouch\\crap\\testbed\\test5.txt", true);
         writer.write(evaluation.stats());
         writer.close();
 //        System.out.println(evaluation.stats());

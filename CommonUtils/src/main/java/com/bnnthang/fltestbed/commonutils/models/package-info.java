@@ -4,4 +4,4 @@
  * @author Thang Bui
  * @version 1.0
  */
-package com.bnnthang.fltestbed.models;
+package com.bnnthang.fltestbed.commonutils.models;

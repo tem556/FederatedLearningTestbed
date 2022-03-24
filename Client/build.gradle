@@ -1,6 +1,7 @@
 plugins {
     id 'java'
     id 'application'
+//    id 'jar'
 }
 
 group 'com.bnnthang.fltestbed'
@@ -32,4 +33,18 @@ dependencies {
 
 test {
     useJUnitPlatform()
+}
+
+task uberJar(type: Jar) {
+    manifest {
+        attributes 'Main-Class': 'com.bnnthang.fltestbed.Client.App'
+    }
+    from {
+        configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
+    }
+
+    exclude("META-INF/**")
+//    baseName = 'all-in-one-jar'
+//    from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
+//    with jar
 }

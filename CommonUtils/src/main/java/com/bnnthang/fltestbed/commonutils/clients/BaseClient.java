@@ -1,10 +1,11 @@
-package com.bnnthang.fltestbed.clients;
+package com.bnnthang.fltestbed.commonutils.clients;
 
-import com.bnnthang.fltestbed.enums.ClientCommandEnum;
-import com.bnnthang.fltestbed.network.SocketUtils;
+import com.bnnthang.fltestbed.commonutils.enums.ClientCommandEnum;
+import com.bnnthang.fltestbed.commonutils.network.SocketUtils;
 
 import java.io.IOException;
 import java.net.Socket;
+import java.rmi.UnexpectedException;
 
 /**
  * Simple implementation of a Federated Learning client.
@@ -13,8 +14,7 @@ public class BaseClient {
     /**
      * Delay interval (in milliseconds).
      */
-    // TODO: make this a variable
-    private static final Integer DELAY_INTERVAL = 5000;
+    private Integer delayInterval;
 
     /**
      * Socket connection to server.
@@ -30,35 +30,36 @@ public class BaseClient {
      * Constructor for <code>BaseClient</code>.
      * @param host address to connect
      * @param port port to connect
+     * @param delayInterval delay interval (in milliseconds)
      * @param clientOperations implementation of supported operations
-     * @throws IOException
+     * @throws IOException if errors happened when initiating the socket
      */
     public BaseClient(final String host,
                       final Integer port,
+                      final Integer _delayInterval,
                       final IClientOperations clientOperations)
             throws IOException {
         socket = new Socket(host, port);
         operations = clientOperations;
+        delayInterval = _delayInterval;
     }
 
     /**
      * Start serving instructions from server.
-     * @throws Exception
+     * @throws IOException if I/O errors happen
+     * @throws InterruptedException if something happens during sleep
      */
-    public void serve() throws Exception {
+    public void serve() throws IOException, InterruptedException {
         // close connection if rejected
         if (!acceptedOrRejected()) {
-            operations.handleDone();
+            operations.handleDone(socket);
             return;
         }
 
         do {
-//            System.out.println("polling...");
-
             // skip if there is nothing to read
             if (!SocketUtils.availableToRead(socket)) {
-//                System.out.println("sleeping...");
-                Thread.sleep(DELAY_INTERVAL);
+                Thread.sleep(delayInterval);
                 continue;
             }
 
@@ -68,19 +69,26 @@ public class BaseClient {
 
     /**
      * Branch processing based on server instruction.
-     * @param commandIndex integer denotes a command enum
-     * @throws Exception
+     * @param commandIndex an integer denotes a command enum
+     * @throws IllegalArgumentException if receives illegal command index
+     * @throws UnsupportedOperationException if receives unexpected command
+     * @throws IOException if I/O errors happen
      */
-    private void coordinate(final Integer commandIndex) throws Exception {
-//        System.out.println("read command = " + commandIndex);
+    private void coordinate(final Integer commandIndex) throws
+            IllegalArgumentException,
+            UnsupportedOperationException,
+            IOException {
         if (commandIndex < 0 || commandIndex > ClientCommandEnum.values().length) {
-            // TODO: investigate why there is negative command
-            return;
+            throw new IllegalArgumentException(
+                    String.format("got unexpected command index: %d",
+                            commandIndex));
         }
         switch (ClientCommandEnum.values()[commandIndex]) {
             case ACCEPTED:
             case REJECTED:
-                throw new Exception("unexpected command");
+                throw new UnsupportedOperationException(
+                        String.format("received unexpected command: %s",
+                                ClientCommandEnum.values()[commandIndex].toString()));
             case MODELPUSH:
                 operations.handleModelPush(socket);
                 break;
@@ -97,30 +105,34 @@ public class BaseClient {
                 operations.handleReport(socket);
                 break;
             case DONE:
-                operations.handleDone();
+                operations.handleDone(socket);
                 break;
             default:
-                throw new Exception("unrecognized command");
+                throw new UnsupportedOperationException(
+                        String.format("received unrecognized command index: %d",
+                                commandIndex));
         }
     }
 
     /**
      * Check if server rejects connection.
      * @return <code>true</code> iff client is moved to training queue
-     * @throws Exception
+     * @throws IOException if I/O errors happen
+     * @throws UnexpectedException if reads unexpected bytes
      */
-    private Boolean acceptedOrRejected() throws Exception {
+    private Boolean acceptedOrRejected() throws
+            IOException,
+            UnexpectedException {
         switch (SocketUtils.readInteger(socket)) {
             case 0:
-                SocketUtils.sendInteger(socket,
-                        operations.hasLocalModel() ? 1 : 0);
-                operations.handleAccepted();
+                SocketUtils.sendInteger(socket, operations.hasLocalModel() ? 1 : 0);
+                operations.handleAccepted(socket);
                 return true;
             case 1:
-                operations.handleRejected();
+                operations.handleRejected(socket);
                 return false;
             default:
-                throw new Exception("unrecognized command");
+                throw new UnexpectedException("unexpected command index");
         }
     }
 }

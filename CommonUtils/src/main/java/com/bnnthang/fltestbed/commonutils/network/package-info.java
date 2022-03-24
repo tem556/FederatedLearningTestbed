@@ -4,4 +4,4 @@
  * @author Thang Bui
  * @version 1.1
  */
-package com.bnnthang.fltestbed.network;
+package com.bnnthang.fltestbed.commonutils.network;

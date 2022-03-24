@@ -1,6 +1,6 @@
-package com.bnnthang.fltestbed.models;
+package com.bnnthang.fltestbed.commonutils.models;
 
-import com.bnnthang.fltestbed.servers.IServerOperations;
+import com.bnnthang.fltestbed.commonutils.servers.IServerOperations;
 import lombok.Data;
 import lombok.NonNull;
 

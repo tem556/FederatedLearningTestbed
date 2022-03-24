@@ -1,7 +1,6 @@
-package com.bnnthang.fltestbed.servers;
+package com.bnnthang.fltestbed.commonutils.servers;
 
-import com.bnnthang.fltestbed.models.TrainingReport;
-import org.deeplearning4j.nn.api.Model;
+import com.bnnthang.fltestbed.commonutils.models.TrainingReport;
 import org.deeplearning4j.nn.multilayer.MultiLayerNetwork;
 
 import java.util.List;

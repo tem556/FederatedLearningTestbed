@@ -81,6 +81,7 @@ public class ClientOperations implements IClientOperations {
 
     @Override
     public void handleTrain() {
+        System.gc();
         trainingThread = new TrainingThread(
                 new File(localFileDir, DATASET_FILENAME),
                 new File(localFileDir, MODEL_FILENAME),

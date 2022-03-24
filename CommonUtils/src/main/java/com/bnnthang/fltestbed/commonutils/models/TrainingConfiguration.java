@@ -1,6 +1,6 @@
-package com.bnnthang.fltestbed.models;
+package com.bnnthang.fltestbed.commonutils.models;
 
-import com.bnnthang.fltestbed.servers.IAggregationStrategy;
+import com.bnnthang.fltestbed.commonutils.servers.IAggregationStrategy;
 import lombok.Data;
 import lombok.NonNull;
 

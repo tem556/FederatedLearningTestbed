@@ -1,13 +1,12 @@
-package com.bnnthang.fltestbed.servers;
+package com.bnnthang.fltestbed.commonutils.servers;
 
-import com.bnnthang.fltestbed.models.TrainingConfiguration;
-import com.bnnthang.fltestbed.models.TrainingReport;
+import com.bnnthang.fltestbed.commonutils.models.TrainingConfiguration;
+import com.bnnthang.fltestbed.commonutils.models.TrainingReport;
 import lombok.AllArgsConstructor;
 import lombok.NonNull;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * Simple implementation for a training iteration.

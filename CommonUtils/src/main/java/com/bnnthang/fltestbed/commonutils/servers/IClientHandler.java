@@ -1,6 +1,6 @@
-package com.bnnthang.fltestbed.servers;
+package com.bnnthang.fltestbed.commonutils.servers;
 
-import com.bnnthang.fltestbed.models.TrainingReport;
+import com.bnnthang.fltestbed.commonutils.models.TrainingReport;
 
 public interface IClientHandler {
     /**

@@ -1,5 +1,6 @@
-package com.bnnthang.fltestbed.clients;
+package com.bnnthang.fltestbed.commonutils.clients;
 
+import java.io.IOException;
 import java.net.Socket;
 
 /**
@@ -9,12 +10,12 @@ public interface IClientOperations {
     /**
      * Handle <code>ACCEPTED</code> command.
      */
-    void handleAccepted();
+    void handleAccepted(Socket socket);
 
     /**
      * Handle <code>REJECTED</code> command.
      */
-    void handleRejected();
+    void handleRejected(Socket socket) throws IOException;
 
     /**
      * Handle <code>MODELPUSH</code> command.
@@ -37,18 +38,18 @@ public interface IClientOperations {
      * Handle <code>ISTRAINING</code> command.
      * @param socket some socket
      */
-    void handleIsTraining(Socket socket);
+    void handleIsTraining(Socket socket) throws IOException;
 
     /**
      * Handle <code>REPORTED</code> command.
      * @param socket some socket
      */
-    void handleReport(Socket socket);
+    void handleReport(Socket socket) throws IOException;
 
     /**
      * Handle <code>DONE</code> command.
      */
-    void handleDone();
+    void handleDone(Socket socket) throws IOException;
 
     /**
      * Check if client has model locally.

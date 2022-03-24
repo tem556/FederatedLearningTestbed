@@ -14,6 +14,10 @@ import java.util.Properties;
  *
  */
 public class App {
+    static {
+        System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
+    }
+
     public static void main(String[] args) throws Exception {
 //        String path = App.class.getClassLoader().getResource("cifar-10/test_batch.bin").getFile();
 //        System.out.println(path);

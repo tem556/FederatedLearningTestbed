@@ -4,4 +4,4 @@
  * @author Thang Bui
  * @version 1.0
  */
-package com.bnnthang.fltestbed.enums;
+package com.bnnthang.fltestbed.commonutils.enums;
