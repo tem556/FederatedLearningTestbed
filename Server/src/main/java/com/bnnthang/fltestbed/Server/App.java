@@ -1,46 +1,75 @@
 package com.bnnthang.fltestbed.Server;
 
 import com.bnnthang.fltestbed.Server.AggregationStrategies.NewFedAvg;
-import com.bnnthang.fltestbed.models.ServerParameters;
-import com.bnnthang.fltestbed.models.TrainingConfiguration;
-import com.bnnthang.fltestbed.servers.BaseServer;
+import com.bnnthang.fltestbed.Server.Repositories.Cifar10Repository;
+import com.bnnthang.fltestbed.commonutils.models.ServerParameters;
+import com.bnnthang.fltestbed.commonutils.models.TrainingConfiguration;
+import com.bnnthang.fltestbed.commonutils.servers.BaseServer;
+import com.bnnthang.fltestbed.commonutils.servers.BaseServerOperations;
+import com.bnnthang.fltestbed.commonutils.servers.IServerOperations;
 import org.opencv.core.Core;
 
 import java.io.IOException;
-import java.util.Properties;
 
-/**
- * Hello world!
- *
- */
 public class App {
+    private static final int DEFAULT_PORT = 4602;
+    private static final int DEFAULT_MIN_CLIENTS = 1;
+    private static final int DEFAULT_ROUNDS = 3;
+
     static {
         System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
     }
 
     public static void main(String[] args) throws Exception {
-//        String path = App.class.getClassLoader().getResource("cifar-10/test_batch.bin").getFile();
-//        System.out.println(path);
-        if (args.length > 0) {
-            ML.trainAndEval();
-        } else {
-            // load properties
-            Properties conf = new Properties();
-            conf.load(App.class.getClassLoader().getResourceAsStream("config.properties"));
-            String workDir = conf.getProperty("workDir");
-            String modelFile = conf.getProperty("modelFilename");
-            int minClients = Integer.parseInt(conf.getProperty("minClients"));
-            int port = Integer.parseInt(conf.getProperty("port"));
-            int trainingRounds = Integer.parseInt(conf.getProperty("trainingRounds"));
-            int pollInterval = Integer.parseInt(conf.getProperty("pollInterval"));
-
-            NewFedAvg aggStrategy = new NewFedAvg();
-            TrainingConfiguration trainConf = new TrainingConfiguration(minClients, trainingRounds, pollInterval, aggStrategy);
-            ServerOperations servOps = new ServerOperations(workDir, modelFile);
-            ServerParameters serverParameters = new ServerParameters(port, trainConf, servOps);
-            BaseServer server = new BaseServer(serverParameters);
-            System.out.println("serving...");
-            server.serve();
+        switch (args[0]) {
+            case "--help":
+                help();
+                break;
+            case "--ml":
+                ml();
+                break;
+            case "--fl":
+                fl(args);
+                break;
+            default:
+                throw new UnsupportedOperationException("unsupported argument: " + args[0]);
         }
+    }
+
+    private static void help() {
+        // TODO: print arguments documentation
+        System.out.println("help");
+    }
+
+    private static void ml() throws IOException {
+        ML.trainAndEval();
+    }
+
+    private static void fl(String[] args) throws IOException, InterruptedException {
+        int port = DEFAULT_PORT;
+        int minClients = DEFAULT_MIN_CLIENTS;
+        int rounds = DEFAULT_ROUNDS;
+        for (int i = 1; i < args.length; ++i) {
+            switch (args[i]) {
+                case "--port":
+                    port = Integer.parseInt(args[i + 1]);
+                    break;
+                case "--minClients":
+                    minClients = Integer.parseInt(args[i + 1]);
+                    break;
+                case "--rounds":
+                    rounds = Integer.parseInt(args[i + 1]);
+                    break;
+                default:
+                    throw new UnsupportedOperationException("unsupported argument: " + args[i]);
+            }
+        }
+
+        TrainingConfiguration trainingConfiguration = new TrainingConfiguration(minClients, rounds, 5000, new NewFedAvg());
+        IServerOperations serverOperations = new BaseServerOperations(new Cifar10Repository());
+        ServerParameters serverParameters = new ServerParameters(port, trainingConfiguration, serverOperations);
+        BaseServer server = new BaseServer(serverParameters);
+        server.start();
+        server.join();
     }
 }

@@ -12,18 +12,12 @@ import java.util.List;
 /**
  * Simple implementation of a Federated Learning server.
  */
-public class BaseServer {
+public class BaseServer extends Thread {
     /**
      * Socket opened for connections.
      */
     @Getter
     private final ServerSocket serverSocket;
-
-    /**
-     * Accepted clients waiting for training rounds.
-     */
-    @Getter
-    private final List<IClientHandler> acceptedClients;
 
     /**
      * Encapsulated server parameters.
@@ -33,21 +27,28 @@ public class BaseServer {
 
     /**
      * Instantiate a <code>BaseServer</code> object.
-     * @param myServerParameters server parameters
+     * @param _serverParameters server parameters
      * @throws IOException if I/O errors happen
      */
-    public BaseServer(final ServerParameters myServerParameters)
-            throws IOException {
-        serverParameters = myServerParameters;
-        serverSocket = new ServerSocket(myServerParameters.getPort());
-        acceptedClients = new ArrayList<>();
+    public BaseServer(final ServerParameters _serverParameters) throws IOException {
+        serverParameters = _serverParameters;
+        serverSocket = new ServerSocket(_serverParameters.getPort());
+    }
+
+    @Override
+    public void run() {
+        try {
+            serve();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     /**
      * Start serving connections.
-     * @throws Exception if problems happen when executing
+     * @throws IOException if I/O errors happen
      */
-    public void serve() throws Exception {
+    private void serve() throws IOException {
         do {
             Socket client = serverSocket.accept();
 
@@ -59,11 +60,11 @@ public class BaseServer {
                 serverOperations.rejectClient(client);
             } else {
                 // accept client to training queue if server is not training
-                serverOperations.acceptClient(client, acceptedClients);
+                serverOperations.acceptClient(client);
             }
 
             // check if should start training
-            serverOperations.trainOrElse(acceptedClients, serverParameters);
+            serverOperations.trainOrElse(serverParameters);
         } while (true);
     }
 }

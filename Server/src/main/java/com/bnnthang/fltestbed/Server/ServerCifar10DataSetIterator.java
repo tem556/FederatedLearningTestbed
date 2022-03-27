@@ -1,16 +1,16 @@
-package com.bnnthang.fltestbed.Client;
+package com.bnnthang.fltestbed.Server;
 
 import org.deeplearning4j.datasets.datavec.RecordReaderDataSetIterator;
 import org.nd4j.linalg.dataset.DataSet;
 
 import java.io.IOException;
 
-public class MyCifar10DataSetIterator extends RecordReaderDataSetIterator {
+public class ServerCifar10DataSetIterator extends RecordReaderDataSetIterator {
     private int counter = 0;
     private int numSamples = 0;
-    public MyCifar10Loader loader;
+    public ServerCifar10Loader loader;
 
-    public MyCifar10DataSetIterator(MyCifar10Loader _loader, int batchSize,
+    public ServerCifar10DataSetIterator(ServerCifar10Loader _loader, int batchSize,
                                     int labelIndex, int _numSamples) {
         super(null, batchSize, labelIndex, 10);
         loader = _loader;

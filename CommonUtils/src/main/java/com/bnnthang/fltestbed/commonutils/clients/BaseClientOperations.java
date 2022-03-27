@@ -7,14 +7,14 @@ import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
 
-public abstract class BaseClientOperations implements IClientOperations {
+public class BaseClientOperations implements IClientOperations {
     private static final int BATCH_SIZE = 45;
     private static final int EPOCHS = 2;
 
-    private final ILocalRepository localRepository;
+    private final IClientLocalRepository localRepository;
     private Cifar10TrainingWorker trainingWorker;
 
-    public BaseClientOperations(ILocalRepository _localRepository) {
+    public BaseClientOperations(IClientLocalRepository _localRepository) {
         localRepository = _localRepository;
     }
 
@@ -29,7 +29,7 @@ public abstract class BaseClientOperations implements IClientOperations {
     }
 
     @Override
-    public void handleModelPush(Socket socket) {
+    public void handleModelPush(Socket socket) throws IOException {
         if (localRepository.modelExists()) {
             localRepository.downloadModel(socket);
         } else {
@@ -38,7 +38,7 @@ public abstract class BaseClientOperations implements IClientOperations {
     }
 
     @Override
-    public void handleDatasetPush(Socket socket) {
+    public void handleDatasetPush(Socket socket) throws IOException {
         localRepository.downloadDataset(socket);
     }
 
@@ -55,6 +55,7 @@ public abstract class BaseClientOperations implements IClientOperations {
 
     @Override
     public void handleReport(Socket socket) throws IOException {
+        // TODO: handle report better
         // get and convert report to bytes
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
         ObjectOutputStream out = new ObjectOutputStream(bos);
@@ -70,5 +71,10 @@ public abstract class BaseClientOperations implements IClientOperations {
     @Override
     public void handleDone(Socket socket) throws IOException {
         socket.close();
+    }
+
+    @Override
+    public Boolean hasLocalModel() {
+        return localRepository.modelExists();
     }
 }

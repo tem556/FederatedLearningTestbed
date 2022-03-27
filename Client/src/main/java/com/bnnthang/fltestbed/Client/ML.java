@@ -83,16 +83,16 @@ public class ML {
     }
 
     public static void trainAndEval() throws IOException {
-        MyCifar10Loader loader = new MyCifar10Loader(new File("C:\\Users\\buinn\\DoNotTouch\\crap\\testbed\\dirclient0\\dataset"), 123456);
-        MyCifar10DataSetIterator dataSetIterator = new MyCifar10DataSetIterator(loader, batchSize, 1, 123456);
-
-//        Cifar10DataSetIterator cifarEval = new Cifar10DataSetIterator(batchSize, new int[]{height, width}, DataSetType.TEST, null, seed);
-        MyCifar10Loader loader1 = new MyCifar10Loader(new File("C:\\Users\\buinn\\cifar\\cifar-10-batches-bin\\test_batch.bin"), 123456);
-        MyCifar10DataSetIterator cifarEval = new MyCifar10DataSetIterator(loader1, batchSize, 1, 123456);
-
-        MultiLayerNetwork model = getModel();
-        model.setListeners(new ScoreIterationListener(50),
-                new EvaluativeListener(cifarEval, 1, InvocationType.EPOCH_END));
-        model.fit(dataSetIterator, epochs);
+//        MyCifar10Loader loader = new MyCifar10Loader(new File("C:\\Users\\buinn\\DoNotTouch\\crap\\testbed\\dirclient0\\dataset"), 123456);
+//        MyCifar10DataSetIterator dataSetIterator = new MyCifar10DataSetIterator(loader, batchSize, 1, 123456);
+//
+////        Cifar10DataSetIterator cifarEval = new Cifar10DataSetIterator(batchSize, new int[]{height, width}, DataSetType.TEST, null, seed);
+//        MyCifar10Loader loader1 = new MyCifar10Loader(new File("C:\\Users\\buinn\\cifar\\cifar-10-batches-bin\\test_batch.bin"), 123456);
+//        MyCifar10DataSetIterator cifarEval = new MyCifar10DataSetIterator(loader1, batchSize, 1, 123456);
+//
+//        MultiLayerNetwork model = getModel();
+//        model.setListeners(new ScoreIterationListener(50),
+//                new EvaluativeListener(cifarEval, 1, InvocationType.EPOCH_END));
+//        model.fit(dataSetIterator, epochs);
     }
 }

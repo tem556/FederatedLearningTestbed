@@ -45,14 +45,14 @@ public class MyCifar10Loader {
     /**
      * Local file repository.
      */
-    private ILocalRepository localRepository;
+    private IClientLocalRepository localRepository;
 
 
     /**
      * Instantiate <code>MyCifar10Loader</code>
      * @param _localRepository an instance of <code>ILocalRepository</code>
      */
-    public MyCifar10Loader(ILocalRepository _localRepository) {
+    public MyCifar10Loader(IClientLocalRepository _localRepository) {
         localRepository = _localRepository;
     }
 
@@ -60,7 +60,7 @@ public class MyCifar10Loader {
      * Count the number of elements in the dataset
      * @return the number of elements in the dataset
      */
-    public long count() {
+    public long count() throws IOException {
         return localRepository.getDatasetSize() / ROW_SIZE;
     }
 

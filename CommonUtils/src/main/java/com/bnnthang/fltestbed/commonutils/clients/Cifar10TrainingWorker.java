@@ -4,6 +4,7 @@ import com.bnnthang.fltestbed.commonutils.models.TrainingReport;
 import lombok.Getter;
 import org.deeplearning4j.nn.multilayer.MultiLayerNetwork;
 
+import java.io.IOException;
 import java.time.Duration;
 import java.time.LocalDateTime;
 
@@ -11,7 +12,7 @@ public class Cifar10TrainingWorker extends Thread {
     /**
      * An instance of local repository
      */
-    private ILocalRepository localRepository;
+    private IClientLocalRepository localRepository;
 
     /**
      * Batch size
@@ -31,7 +32,7 @@ public class Cifar10TrainingWorker extends Thread {
     @Getter
     private TrainingReport report;
 
-    public Cifar10TrainingWorker(ILocalRepository _localRepository,
+    public Cifar10TrainingWorker(IClientLocalRepository _localRepository,
                                  int _batchSize,
                                  int _epochs) {
         localRepository = _localRepository;
@@ -46,20 +47,24 @@ public class Cifar10TrainingWorker extends Thread {
         MyCifar10DataSetIterator cifar =
                 new MyCifar10DataSetIterator(loader, batchSize, 1);
 
-        // load model
-        MultiLayerNetwork model = localRepository.loadModel();
+        try {
+            // load model
+            MultiLayerNetwork model = localRepository.loadModel();
 
-        // run the training and measure the training time
-        LocalDateTime startTime = LocalDateTime.now();
-        model.fit(cifar, epochs);
-        LocalDateTime endTime = LocalDateTime.now();
+            // run the training and measure the training time
+            LocalDateTime startTime = LocalDateTime.now();
+            model.fit(cifar, epochs);
+            LocalDateTime endTime = LocalDateTime.now();
 
-        // clean memory
-        System.gc();
+            // update report
+            report = new TrainingReport(model.gradient(),
+                    model.params(),
+                    Duration.between(startTime, endTime).getSeconds());
 
-        // update report
-        report = new TrainingReport(model.gradient(),
-                model.params(),
-                Duration.between(startTime, endTime).getSeconds());
+            // clean memory
+            System.gc();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }

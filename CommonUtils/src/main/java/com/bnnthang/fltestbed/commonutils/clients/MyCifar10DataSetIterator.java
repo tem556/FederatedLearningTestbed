@@ -45,7 +45,13 @@ public class MyCifar10DataSetIterator extends RecordReaderDataSetIterator {
 
     @Override
     public boolean hasNext() {
-        return counter < loader.count();
+        boolean res = false;
+        try {
+            res = counter < loader.count();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return res;
     }
 
     @Override

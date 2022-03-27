@@ -1,12 +1,12 @@
-package com.bnnthang.fltestbed.Client;
+package com.bnnthang.fltestbed.Server;
 
 import org.datavec.image.loader.NativeImageLoader;
 import org.nd4j.common.primitives.Pair;
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.dataset.DataSet;
 import org.nd4j.linalg.util.FeatureUtil;
-import org.opencv.core.Mat;
 import org.opencv.core.CvType;
+import org.opencv.core.Mat;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -14,13 +14,13 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.*;
 
-public class MyCifar10Loader {
+public class ServerCifar10Loader {
     private File datasetFile;
     private List<Pair<byte[], Byte>> imagesWithLabel;
     private Map<Byte, Integer> cnt;
     private int maxSamples;
 
-    public MyCifar10Loader(File datasetFile, int maxSamples) throws IOException {
+    public ServerCifar10Loader(File datasetFile, int maxSamples) throws IOException {
         this.datasetFile = datasetFile;
         this.imagesWithLabel = new ArrayList<>();
         this.maxSamples = maxSamples;

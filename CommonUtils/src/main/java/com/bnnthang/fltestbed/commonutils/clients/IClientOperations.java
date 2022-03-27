@@ -21,13 +21,13 @@ public interface IClientOperations {
      * Handle <code>MODELPUSH</code> command.
      * @param socket some socket
      */
-    void handleModelPush(Socket socket);
+    void handleModelPush(Socket socket) throws IOException;
 
     /**
      * Handle <code>DATASETPUSH</code> command.
      * @param socket some socket
      */
-    void handleDatasetPush(Socket socket);
+    void handleDatasetPush(Socket socket) throws IOException;
 
     /**
      * Handle <code>TRAIN</code> command.

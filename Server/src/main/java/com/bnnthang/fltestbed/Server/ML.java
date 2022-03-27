@@ -1,18 +1,13 @@
 package com.bnnthang.fltestbed.Server;
 
-import com.bnnthang.fltestbed.dataset.MyCifar10DataSetIterator;
-import com.bnnthang.fltestbed.dataset.MyCifar10Loader;
 import org.datavec.image.loader.CifarLoader;
 import org.deeplearning4j.datasets.fetchers.DataSetType;
 import org.deeplearning4j.datasets.iterator.impl.Cifar10DataSetIterator;
 import org.deeplearning4j.nn.api.OptimizationAlgorithm;
-import org.deeplearning4j.nn.conf.ConvolutionMode;
 import org.deeplearning4j.nn.conf.MultiLayerConfiguration;
 import org.deeplearning4j.nn.conf.NeuralNetConfiguration;
-import org.deeplearning4j.nn.conf.Updater;
 import org.deeplearning4j.nn.conf.inputs.InputType;
 import org.deeplearning4j.nn.conf.layers.*;
-import org.deeplearning4j.nn.gradient.Gradient;
 import org.deeplearning4j.nn.multilayer.MultiLayerNetwork;
 import org.deeplearning4j.nn.weights.WeightInit;
 import org.deeplearning4j.optimize.api.InvocationType;
@@ -93,8 +88,8 @@ public class ML {
     public static void trainAndEval() throws IOException {
         Cifar10DataSetIterator cifar = new Cifar10DataSetIterator(batchSize, new int[]{height, width}, DataSetType.TRAIN, null, seed);
 //        Cifar10DataSetIterator cifarEval = new Cifar10DataSetIterator(batchSize, new int[]{height, width}, DataSetType.TEST, null, seed);
-        MyCifar10Loader loader = new MyCifar10Loader(new File("C:\\Users\\buinn\\Repos\\FederatedLearningTestbed\\Server\\src\\main\\resources\\cifar-10\\test_batch.bin"), 12345);
-        MyCifar10DataSetIterator cifarEval = new MyCifar10DataSetIterator(loader, 234, 1, 123456);
+        ServerCifar10Loader loader = new ServerCifar10Loader(new File("C:\\Users\\buinn\\Repos\\FederatedLearningTestbed\\Server\\src\\main\\resources\\cifar-10\\test_batch.bin"), 12345);
+        ServerCifar10DataSetIterator cifarEval = new ServerCifar10DataSetIterator(loader, 234, 1, 123456);
 
         //train model and eval model
         MultiLayerNetwork model = getModel();

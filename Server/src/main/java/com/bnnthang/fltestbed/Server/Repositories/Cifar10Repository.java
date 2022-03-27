@@ -1,15 +1,23 @@
 package com.bnnthang.fltestbed.Server.Repositories;
 
+import com.bnnthang.fltestbed.commonutils.servers.IServerLocalRepository;
 import com.sun.tools.javac.Main;
 import org.apache.commons.lang3.tuple.Pair;
+import org.deeplearning4j.nn.multilayer.MultiLayerNetwork;
+import org.deeplearning4j.util.ModelSerializer;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class Cifar10Repository {
+public class Cifar10Repository implements IServerLocalRepository {
+    private static final String MODEL_DIR = "C:\\Users\\buinn\\DoNotTouch\\crap\\photolabeller";
+    private String currentModelName = "newmodel.zip";
+
     private final Map<Byte, List<byte[]>> imagesByLabel;
 
     public Cifar10Repository() throws IOException {
@@ -23,7 +31,6 @@ public class Cifar10Repository {
     }
 
     private void load(InputStream inputStream) throws IOException {
-//        InputStream inputStream = new FileInputStream(path);
         int imageSize = 32 * 32 * 3;
         int labelSize = 1;
         int rowSize = imageSize + labelSize;
@@ -68,7 +75,7 @@ public class Cifar10Repository {
         return res;
     }
 
-    public static int DatasetLength(List<byte[]> dataset) {
+    private static int DatasetLength(List<byte[]> dataset) {
         int length = 0;
         for (int i = 0; i < dataset.size(); ++i) {
             length += dataset.get(i).length;
@@ -76,7 +83,7 @@ public class Cifar10Repository {
         return length;
     }
 
-    public static byte[] flatten(List<byte[]> dataset) {
+    private static byte[] flatten(List<byte[]> dataset) {
         int length = DatasetLength(dataset);
         byte[] res = new byte[length];
         int cnt = 0;
@@ -85,5 +92,36 @@ public class Cifar10Repository {
             cnt += dataset.get(i).length;
         }
         return res;
+    }
+
+    @Override
+    public List<byte[]> partitionAndSerializeDataset(int numPartitions) {
+        List<List<byte[]>> partitions = splitDatasetIID(numPartitions);
+        return partitions.stream().map(Cifar10Repository::flatten).collect(Collectors.toList());
+    }
+
+    @Override
+    public MultiLayerNetwork loadLatestModel() throws IOException {
+        return ModelSerializer.restoreMultiLayerNetwork(MODEL_DIR + "/" + currentModelName);
+    }
+
+    @Override
+    public byte[] loadAndSerializeLatestModel() throws IOException {
+        File f = new File(MODEL_DIR, currentModelName);
+        int modelLength = (int)f.length();
+        FileInputStream fis = new FileInputStream(f);
+        byte[] bytes = new byte[modelLength];
+        int readBytes = fis.read(bytes, 0, modelLength);
+        if (readBytes != modelLength) {
+            throw new IOException(String.format("read %d bytes; expected %d bytes", readBytes, modelLength));
+        }
+        return bytes;
+    }
+
+    @Override
+    public void saveNewModel(MultiLayerNetwork newModel) throws IOException {
+        String newModelName = "model" + (new SimpleDateFormat("dd-MM-yyyy-HH-mm-ss").format(Calendar.getInstance().getTime())) + ".zip";
+        newModel.save(new File(MODEL_DIR, newModelName));
+        currentModelName = newModelName;
     }
 }

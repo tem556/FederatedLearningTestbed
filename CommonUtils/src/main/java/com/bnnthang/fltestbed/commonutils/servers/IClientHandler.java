@@ -2,24 +2,33 @@ package com.bnnthang.fltestbed.commonutils.servers;
 
 import com.bnnthang.fltestbed.commonutils.models.TrainingReport;
 
+import java.io.IOException;
+
 public interface IClientHandler {
+    /**
+     * Accept client to training queue.
+     */
+    void accept() throws IOException;
+
+    /**
+     * Deny client connection.
+     */
+    void reject() throws IOException;
+
     /**
      * Push dataset to client.
      * @param bytes serialized dataset
-     * @throws Exception
      */
-    void pushDataset(byte[] bytes) throws Exception;
+    void pushDataset(byte[] bytes) throws IOException;
 
     /**
      * Push model to client.
      * @param bytes serialized model
-     * @throws Exception if problems happen
      */
-    void pushModel(byte[] bytes) throws Exception;
+    void pushModel(byte[] bytes) throws IOException;
 
     /**
      * Initiate training process at client.
-     * @throws Exception if problems happen
      */
     void startTraining() throws Exception;
 
@@ -27,11 +36,10 @@ public interface IClientHandler {
      * Retrieve training report from client.
      * @return the training report
      */
-    TrainingReport getTrainingReport();
+    TrainingReport getTrainingReport() throws IOException;
 
     /**
      * Close connection.
-     * @throws Exception if problems happen
      */
     void done() throws Exception;
 
@@ -41,16 +49,4 @@ public interface IClientHandler {
      * <code>false</code> otherwise
      */
     Boolean isTraining();
-
-    /**
-     * Accept client to training queue.
-     * @throws Exception if problems happen
-     */
-    void accept() throws Exception;
-
-    /**
-     * Deny client connection.
-     * @throws Exception if problems happen
-     */
-    void reject() throws Exception;
 }

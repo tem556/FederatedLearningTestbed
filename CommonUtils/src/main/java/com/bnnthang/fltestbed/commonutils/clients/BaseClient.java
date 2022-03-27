@@ -10,7 +10,7 @@ import java.rmi.UnexpectedException;
 /**
  * Simple implementation of a Federated Learning client.
  */
-public class BaseClient {
+public class BaseClient extends Thread {
     /**
      * Delay interval (in milliseconds).
      */
@@ -30,7 +30,7 @@ public class BaseClient {
      * Constructor for <code>BaseClient</code>.
      * @param host address to connect
      * @param port port to connect
-     * @param delayInterval delay interval (in milliseconds)
+     * @param _delayInterval delay interval (in milliseconds)
      * @param clientOperations implementation of supported operations
      * @throws IOException if errors happened when initiating the socket
      */
@@ -44,6 +44,15 @@ public class BaseClient {
         delayInterval = _delayInterval;
     }
 
+    @Override
+    public void run() {
+        try {
+            serve();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
     /**
      * Start serving instructions from server.
      * @throws IOException if I/O errors happen
@@ -52,14 +61,13 @@ public class BaseClient {
     public void serve() throws IOException, InterruptedException {
         // close connection if rejected
         if (!acceptedOrRejected()) {
-            operations.handleDone(socket);
             return;
         }
 
         do {
             // skip if there is nothing to read
             if (!SocketUtils.availableToRead(socket)) {
-                Thread.sleep(delayInterval);
+                sleep(delayInterval);
                 continue;
             }
 
@@ -83,6 +91,9 @@ public class BaseClient {
                     String.format("got unexpected command index: %d",
                             commandIndex));
         }
+
+        System.out.println("recv command = " + commandIndex);
+
         switch (ClientCommandEnum.values()[commandIndex]) {
             case ACCEPTED:
             case REJECTED:
@@ -125,7 +136,8 @@ public class BaseClient {
             UnexpectedException {
         switch (SocketUtils.readInteger(socket)) {
             case 0:
-                SocketUtils.sendInteger(socket, operations.hasLocalModel() ? 1 : 0);
+//                SocketUtils.sendInteger(socket, operations.hasLocalModel() ? 1 : 0);
+                SocketUtils.sendInteger(socket, 0);
                 operations.handleAccepted(socket);
                 return true;
             case 1:
