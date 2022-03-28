@@ -2,15 +2,19 @@ package com.bnnthang.fltestbed.commonutils.servers;
 
 import com.bnnthang.fltestbed.commonutils.enums.ClientCommandEnum;
 import com.bnnthang.fltestbed.commonutils.models.TrainingReport;
-import com.bnnthang.fltestbed.commonutils.network.SocketUtils;
+import com.bnnthang.fltestbed.commonutils.utils.SocketUtils;
 import org.nd4j.common.util.SerializationUtils;
 
 import java.io.IOException;
 import java.net.Socket;
+import java.time.Duration;
+import java.time.LocalDateTime;
 
 public class BaseClientHandler implements IClientHandler {
     private final Socket socket;
     private boolean hasLocalModel;
+
+    private Double uplinkTime;
 
     public BaseClientHandler(Socket _socket) {
         socket = _socket;
@@ -54,12 +58,20 @@ public class BaseClientHandler implements IClientHandler {
     @Override
     public void startTraining() throws IOException {
         SocketUtils.sendInteger(socket, ClientCommandEnum.TRAIN.ordinal());
+
+        // reset
+        uplinkTime = -1.0;
     }
 
     @Override
     public TrainingReport getTrainingReport() throws IOException {
         SocketUtils.sendInteger(socket, ClientCommandEnum.REPORT.ordinal());
+
+        LocalDateTime startTime = LocalDateTime.now();
         byte[] bytes = SocketUtils.readBytesWrapper(socket);
+        LocalDateTime endTime = LocalDateTime.now();
+        uplinkTime = (double) Duration.between(startTime, endTime).getSeconds() / bytes.length;
+
         return SerializationUtils.deserialize(bytes);
     }
 
@@ -81,5 +93,10 @@ public class BaseClientHandler implements IClientHandler {
             e.printStackTrace();
         }
         return res;
+    }
+
+    @Override
+    public Double getUplinkTime() {
+        return uplinkTime;
     }
 }

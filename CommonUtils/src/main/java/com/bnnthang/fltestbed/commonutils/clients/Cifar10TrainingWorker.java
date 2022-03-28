@@ -3,6 +3,7 @@ package com.bnnthang.fltestbed.commonutils.clients;
 import com.bnnthang.fltestbed.commonutils.models.TrainingReport;
 import lombok.Getter;
 import org.deeplearning4j.nn.multilayer.MultiLayerNetwork;
+import org.deeplearning4j.optimize.listeners.ScoreIterationListener;
 
 import java.io.IOException;
 import java.time.Duration;
@@ -29,16 +30,16 @@ public class Cifar10TrainingWorker extends Thread {
      */
     private int samples;
 
-    @Getter
     private TrainingReport report;
 
     public Cifar10TrainingWorker(IClientLocalRepository _localRepository,
+                                 TrainingReport _report,
                                  int _batchSize,
                                  int _epochs) {
         localRepository = _localRepository;
+        report = _report;
         batchSize = _batchSize;
         epochs = _epochs;
-        report = null;
     }
 
     @Override
@@ -53,13 +54,14 @@ public class Cifar10TrainingWorker extends Thread {
 
             // run the training and measure the training time
             LocalDateTime startTime = LocalDateTime.now();
+            model.addListeners(new ScoreIterationListener());
             model.fit(cifar, epochs);
             LocalDateTime endTime = LocalDateTime.now();
 
             // update report
-            report = new TrainingReport(model.gradient(),
-                    model.params(),
-                    Duration.between(startTime, endTime).getSeconds());
+            report.setGradient(model.gradient());
+            report.setParams(model.params());
+            report.setTrainingTimeInSecs(Duration.between(startTime, endTime).getSeconds());
 
             // clean memory
             System.gc();

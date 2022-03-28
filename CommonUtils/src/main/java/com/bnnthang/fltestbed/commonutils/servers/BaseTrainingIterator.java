@@ -4,7 +4,9 @@ import com.bnnthang.fltestbed.commonutils.models.TrainingConfiguration;
 import com.bnnthang.fltestbed.commonutils.models.TrainingReport;
 import lombok.AllArgsConstructor;
 import lombok.NonNull;
+import org.nd4j.evaluation.classification.Evaluation;
 
+import java.rmi.UnexpectedException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -38,7 +40,7 @@ public final class BaseTrainingIterator extends Thread {
             operations.pushDatasetToClients(clients);
 
             // repeat the process a certain number of times
-            for (Integer currentRound = 1;
+            for (int currentRound = 1;
                  currentRound <= configuration.getRounds();
                  ++currentRound) {
 
@@ -71,21 +73,19 @@ public final class BaseTrainingIterator extends Thread {
                 } while (true);
 
                 // aggregate results
-//                List<TrainingReport> reports = clients.stream()
-//                        .map(IClientHandler::getTrainingReport)
-//                        .collect(Collectors.toList());
+                // TODO: parallelize this
                 List<TrainingReport> reports = new ArrayList<>();
                 for (IClientHandler client : clients) {
                     TrainingReport report = client.getTrainingReport();
                     if (report == null) {
-                        System.out.println("sos");
+                        throw new UnexpectedException("received null training report");
                     }
                     reports.add(report);
                 }
-                operations.aggregateResults(reports,
-                        configuration.getAggregationStrategy());
+                operations.aggregateResults(reports, configuration.getAggregationStrategy());
 
-                // TODO: add evaluation
+                // evaluate
+                operations.evaluateCurrentModel(reports);
             }
 
             // terminate connections

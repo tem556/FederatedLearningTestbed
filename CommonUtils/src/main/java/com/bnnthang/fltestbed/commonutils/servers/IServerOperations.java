@@ -41,7 +41,7 @@ public interface IServerOperations {
      * Initiate a training round if certain conditions are met.
      * @param serverParameters given server parameters to verify if the conditions for a training round are met
      */
-    void trainOrElse(ServerParameters serverParameters);
+    void trainOrElse(ServerParameters serverParameters) throws IOException;
 
     /**
      * Aggregate results from clients.
@@ -57,4 +57,6 @@ public interface IServerOperations {
      * and <code>false</code> otherwise
      */
     Boolean isTraining();
+
+    void evaluateCurrentModel(List<TrainingReport> trainingReports) throws IOException;
 }

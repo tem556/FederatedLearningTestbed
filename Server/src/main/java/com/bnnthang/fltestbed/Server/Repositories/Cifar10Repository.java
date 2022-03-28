@@ -1,33 +1,40 @@
 package com.bnnthang.fltestbed.Server.Repositories;
 
+import com.bnnthang.fltestbed.Server.App;
+import com.bnnthang.fltestbed.Server.ServerCifar10DataSetIterator;
+import com.bnnthang.fltestbed.Server.ServerCifar10Loader;
+import com.bnnthang.fltestbed.commonutils.clients.MyCifar10Loader;
 import com.bnnthang.fltestbed.commonutils.servers.IServerLocalRepository;
-import com.sun.tools.javac.Main;
 import org.apache.commons.lang3.tuple.Pair;
 import org.deeplearning4j.nn.multilayer.MultiLayerNetwork;
 import org.deeplearning4j.util.ModelSerializer;
+import org.nd4j.evaluation.classification.Evaluation;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
+import java.net.URISyntaxException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
 
 public class Cifar10Repository implements IServerLocalRepository {
-    private static final String MODEL_DIR = "C:\\Users\\buinn\\DoNotTouch\\crap\\photolabeller";
+    private final String modelDirectory;
     private String currentModelName = "newmodel.zip";
+    private String currentResultFileName = null;
 
     private final Map<Byte, List<byte[]>> imagesByLabel;
 
-    public Cifar10Repository() throws IOException {
+    public Cifar10Repository(String modelDir) throws IOException, URISyntaxException {
+        modelDirectory = modelDir;
+
         imagesByLabel = new HashMap<>();
 
-        load(Objects.requireNonNull(Main.class.getClassLoader().getResourceAsStream("cifar-10/data_batch_1.bin")));
-        load(Objects.requireNonNull(Main.class.getClassLoader().getResourceAsStream("cifar-10/data_batch_2.bin")));
-        load(Objects.requireNonNull(Main.class.getClassLoader().getResourceAsStream("cifar-10/data_batch_3.bin")));
-        load(Objects.requireNonNull(Main.class.getClassLoader().getResourceAsStream("cifar-10/data_batch_4.bin")));
-        load(Objects.requireNonNull(Main.class.getClassLoader().getResourceAsStream("cifar-10/data_batch_5.bin")));
+//        System.out.println("length = " + new File(getClass().getResource("cifar-10/test_batch_1.bin").toExternalForm()));
+
+        load(Objects.requireNonNull(App.class.getClassLoader().getResourceAsStream("cifar-10/data_batch_1.bin")));
+        load(Objects.requireNonNull(App.class.getClassLoader().getResourceAsStream("cifar-10/data_batch_2.bin")));
+        load(Objects.requireNonNull(App.class.getClassLoader().getResourceAsStream("cifar-10/data_batch_3.bin")));
+        load(Objects.requireNonNull(App.class.getClassLoader().getResourceAsStream("cifar-10/data_batch_4.bin")));
+        load(Objects.requireNonNull(App.class.getClassLoader().getResourceAsStream("cifar-10/data_batch_5.bin")));
     }
 
     private void load(InputStream inputStream) throws IOException {
@@ -48,7 +55,7 @@ public class Cifar10Repository implements IServerLocalRepository {
         }
     }
 
-    public List<List<byte[]>> splitDatasetIID(int nPartitions) {
+    public List<List<byte[]>> splitDatasetIIDAndShuffle(int nPartitions) {
         List<List<Pair<byte[], Byte>>> partitions = new ArrayList<>();
         for (int i = 0; i < nPartitions; ++i) {
             partitions.add(new ArrayList<>());
@@ -72,6 +79,12 @@ public class Cifar10Repository implements IServerLocalRepository {
                 res.get(i).add(t);
             }
         }
+
+        // shuffle
+        for (int i = 0; i < nPartitions; ++i) {
+            Collections.shuffle(res.get(i));
+        }
+
         return res;
     }
 
@@ -96,18 +109,18 @@ public class Cifar10Repository implements IServerLocalRepository {
 
     @Override
     public List<byte[]> partitionAndSerializeDataset(int numPartitions) {
-        List<List<byte[]>> partitions = splitDatasetIID(numPartitions);
+        List<List<byte[]>> partitions = splitDatasetIIDAndShuffle(numPartitions);
         return partitions.stream().map(Cifar10Repository::flatten).collect(Collectors.toList());
     }
 
     @Override
     public MultiLayerNetwork loadLatestModel() throws IOException {
-        return ModelSerializer.restoreMultiLayerNetwork(MODEL_DIR + "/" + currentModelName);
+        return ModelSerializer.restoreMultiLayerNetwork(modelDirectory + "/" + currentModelName);
     }
 
     @Override
     public byte[] loadAndSerializeLatestModel() throws IOException {
-        File f = new File(MODEL_DIR, currentModelName);
+        File f = new File(modelDirectory, currentModelName);
         int modelLength = (int)f.length();
         FileInputStream fis = new FileInputStream(f);
         byte[] bytes = new byte[modelLength];
@@ -115,13 +128,50 @@ public class Cifar10Repository implements IServerLocalRepository {
         if (readBytes != modelLength) {
             throw new IOException(String.format("read %d bytes; expected %d bytes", readBytes, modelLength));
         }
+        fis.close();
         return bytes;
     }
 
     @Override
     public void saveNewModel(MultiLayerNetwork newModel) throws IOException {
         String newModelName = "model" + (new SimpleDateFormat("dd-MM-yyyy-HH-mm-ss").format(Calendar.getInstance().getTime())) + ".zip";
-        newModel.save(new File(MODEL_DIR, newModelName));
+        newModel.save(new File(modelDirectory, newModelName));
         currentModelName = newModelName;
+    }
+
+    @Override
+    public void createNewResultFile() throws IOException {
+        String newResultFileName = "result-" + (new SimpleDateFormat("dd-MM-yyyy-HH-mm-ss").format(Calendar.getInstance().getTime())) + ".csv";
+        currentResultFileName = newResultFileName;
+        File newResultFile = new File(modelDirectory, newResultFileName);
+        if (newResultFile.createNewFile()) {
+            FileWriter writer = new FileWriter(newResultFile, true);
+            writer.write("accuracy,precision,recall,f1,training time (s),downlink time (s),uplink time (s)\n");
+            writer.close();
+        } else {
+            throw new IOException("cannot create file");
+        }
+    }
+
+    @Override
+    public void appendToCurrentFile(String s) throws IOException {
+        File currentResultFile = new File(modelDirectory, currentResultFileName);
+        FileWriter writer = new FileWriter(currentResultFile, true);
+        writer.write(s);
+        writer.close();
+    }
+
+    @Override
+    public Evaluation evaluateCurrentModel() {
+        try {
+            File testDatasetFile = new File(App.class.getClassLoader().getResource("cifar-10/test_batch.bin").toURI());
+            ServerCifar10Loader loader = new ServerCifar10Loader(testDatasetFile, 123456);
+            ServerCifar10DataSetIterator cifarEval = new ServerCifar10DataSetIterator(loader, 123, 1, 123456);
+            MultiLayerNetwork model = loadLatestModel();
+            return model.evaluate(cifarEval);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 }

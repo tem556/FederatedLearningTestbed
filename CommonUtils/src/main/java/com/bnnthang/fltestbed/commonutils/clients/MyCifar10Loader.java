@@ -8,8 +8,12 @@ import org.nd4j.linalg.util.FeatureUtil;
 import org.opencv.core.Mat;
 import org.opencv.core.CvType;
 
-import java.io.*;
-import java.util.*;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class MyCifar10Loader {
     /**

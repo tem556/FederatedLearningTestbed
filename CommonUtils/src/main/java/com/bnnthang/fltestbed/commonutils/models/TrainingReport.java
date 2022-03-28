@@ -16,18 +16,26 @@ import java.util.List;
 @Data
 public class TrainingReport implements Serializable {
     /**
-     * Weight updates for all layers in neural network.
+     * Weight updates for all layers in neural utils.
      */
-    @NonNull
-//    private List<INDArray> layerParams;
     private Gradient gradient;
 
-    @NonNull
     private INDArray params;
 
     /**
      * Training time (in seconds).
      */
-    @NonNull
     private Long trainingTimeInSecs;
+
+    /**
+     * Total time for clients to download resources from server (seconds per byte)
+     */
+    private Double downlinkTimeInSecs;
+
+    public TrainingReport() {
+        gradient = null;
+        params = null;
+        trainingTimeInSecs = null;
+        downlinkTimeInSecs = null;
+    }
 }

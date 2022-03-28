@@ -5,6 +5,7 @@ import com.bnnthang.fltestbed.commonutils.models.TrainingReport;
 import lombok.Getter;
 import org.deeplearning4j.nn.multilayer.MultiLayerNetwork;
 import org.deeplearning4j.util.ModelSerializer;
+import org.nd4j.evaluation.classification.Evaluation;
 
 import java.io.IOException;
 import java.net.Socket;
@@ -12,11 +13,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class BaseServerOperations implements IServerOperations {
-    private IServerLocalRepository localRepository;
+    private final IServerLocalRepository localRepository;
     private BaseTrainingIterator trainingIterator;
 
     @Getter
-    private List<IClientHandler> acceptedClients;
+    private final List<IClientHandler> acceptedClients;
 
     public BaseServerOperations(IServerLocalRepository _localRepository) {
         localRepository = _localRepository;
@@ -62,9 +63,13 @@ public class BaseServerOperations implements IServerOperations {
     }
 
     @Override
-    public void trainOrElse(ServerParameters serverParameters) {
+    public void trainOrElse(ServerParameters serverParameters) throws IOException {
         if (acceptedClients.size() >= serverParameters.getTrainingConfiguration().getMinClients()) {
             System.out.println("triggered training");
+
+            // create result file
+            localRepository.createNewResultFile();
+
             trainingIterator = new BaseTrainingIterator(this, acceptedClients, serverParameters.getTrainingConfiguration());
             trainingIterator.start();
         } else {
@@ -82,5 +87,33 @@ public class BaseServerOperations implements IServerOperations {
     @Override
     public Boolean isTraining() {
         return trainingIterator != null && trainingIterator.isAlive();
+    }
+
+    @Override
+    public void evaluateCurrentModel(List<TrainingReport> trainingReports) throws IOException {
+        Evaluation evaluation = localRepository.evaluateCurrentModel();
+
+        // calculate avg uplink time
+        double sumUplinkTime = acceptedClients.stream().map(IClientHandler::getUplinkTime).reduce(0.0, Double::sum);
+        double avgUplinkTime = (double) sumUplinkTime / acceptedClients.size();
+
+        // calculate avg training time
+        long sumTrainingTime = trainingReports.stream().map(TrainingReport::getTrainingTimeInSecs).reduce(0L, Long::sum);
+        double avgTrainingTime = (double) sumTrainingTime / acceptedClients.size();
+
+        // calculate avg downlink time
+        double sumDownlinkTime = trainingReports.stream().map(TrainingReport::getDownlinkTimeInSecs).reduce(0.0, Double::sum);
+        double avgDownlinkTime = sumDownlinkTime / acceptedClients.size();
+
+        // accuracy,precision,recall,f1,training time (s),downlink time (s),uplink time (s)
+        String evalString = String.format("%f,%f,%f,%f,%f,%f,%f\n",
+                evaluation.accuracy(),
+                evaluation.precision(),
+                evaluation.recall(),
+                evaluation.f1(),
+                avgTrainingTime,
+                avgDownlinkTime,
+                avgUplinkTime);
+        localRepository.appendToCurrentFile(evalString);
     }
 }

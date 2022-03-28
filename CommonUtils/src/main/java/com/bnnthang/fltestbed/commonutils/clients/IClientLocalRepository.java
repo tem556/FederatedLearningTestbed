@@ -7,11 +7,11 @@ import java.io.InputStream;
 import java.net.Socket;
 
 public interface IClientLocalRepository {
-    void downloadModel(Socket socket) throws IOException;
-    void updateModel(Socket socket);
+    Long downloadModel(Socket socket) throws IOException;
+    Long downloadDataset(Socket socket) throws IOException;
+    Long updateModel(Socket socket);
     Boolean modelExists();
     MultiLayerNetwork loadModel() throws IOException;
-    void downloadDataset(Socket socket) throws IOException;
     Boolean datasetExists();
     Long getDatasetSize() throws IOException;
     InputStream getDatasetInputStream() throws IOException;

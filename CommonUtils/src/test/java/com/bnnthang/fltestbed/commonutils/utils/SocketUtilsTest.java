@@ -1,4 +1,4 @@
-package com.bnnthang.fltestbed.commonutils.network;
+package com.bnnthang.fltestbed.commonutils.utils;
 
 import org.junit.Assert;
 import org.junit.Test;

@@ -2,17 +2,15 @@ package com.bnnthang.fltestbed.Client;
 
 import com.bnnthang.fltestbed.commonutils.clients.*;
 import com.bnnthang.fltestbed.commonutils.models.ClientParameters;
-import com.sun.tools.javac.Main;
+import org.apache.commons.lang3.ArrayUtils;
 import org.opencv.core.Core;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.rmi.UnexpectedException;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Properties;
 
 public class App {
     private static final String DEFAULT_SERVER_HOST = "127.0.0.1";
@@ -20,11 +18,11 @@ public class App {
     private static final String DEFAULT_WORK_DIR = "C:/Users/buinn/DoNotTouch/crap/testbed";
     private static final int DEFAULT_NUM_CLIENTS = 1;
 
-    static {
-        System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
-    }
-
     public static void main(String[] args) throws IOException, InterruptedException {
+        if (args[0].equals("--native")) {
+            System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
+            args = ArrayUtils.remove(args, 0);
+        }
         switch (args[0]) {
             case "--help":
                 help();
@@ -36,7 +34,7 @@ public class App {
                 fl(args);
                 break;
             default:
-                throw new UnexpectedException("unsupported parameter");
+                throw new UnsupportedOperationException("unsupported argument: " + args[0]);
         }
     }
 
@@ -57,7 +55,7 @@ public class App {
         for (int i = 0; i < parameters.getNumClients(); ++i) {
             // make client dir if needed
             String clientDir = parameters.getWorkDirectory() + "/dirclient" + i;
-            Path path = Path.of(clientDir);
+            Path path = Paths.get(clientDir);
             if (Files.notExists(path))
                 Files.createDirectory(path);
 
@@ -67,6 +65,7 @@ public class App {
             IClientOperations clientOperations = new BaseClientOperations(localRepository);
             BaseClient client = new BaseClient(parameters.getServerHost(), parameters.getServerPort(), 5000, clientOperations);
             client.start();
+            System.out.println("running");
             clientPool.add(client);
         }
 
@@ -83,11 +82,20 @@ public class App {
         int numClients = DEFAULT_NUM_CLIENTS;
         for (int i = 1; i < args.length; i += 2) {
             switch (args[i]) {
-                case "--host" -> host = args[i + 1];
-                case "--port" -> port = Integer.parseInt(args[i + 1]);
-                case "--workdir" -> workDir = args[i + 1];
-                case "--nclients" -> numClients = Integer.parseInt(args[i + 1]);
-                default -> throw new UnsupportedOperationException("unsupported parameter: " + args[i]);
+                case "--host":
+                    host = args[i + 1];
+                    break;
+                case "--port":
+                    port = Integer.parseInt(args[i + 1]);
+                    break;
+                case "--workdir":
+                    workDir = args[i + 1];
+                    break;
+                case "--nclients":
+                    numClients = Integer.parseInt(args[i + 1]);
+                    break;
+                default:
+                    throw new UnsupportedOperationException("unsupported parameter: " + args[i]);
             }
         }
         return new ClientParameters(host, port, workDir, numClients);

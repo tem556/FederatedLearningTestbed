@@ -1,8 +1,7 @@
-package com.bnnthang.fltestbed.commonutils.network;
+package com.bnnthang.fltestbed.commonutils.utils;
 
 import org.nd4j.shade.guava.primitives.Ints;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.Socket;
@@ -55,12 +54,13 @@ public final class SocketUtils {
     }
 
     /**
-     * Read from a socket and directly write to another output stream
+     * Read from a socket and directly write to another output stream.
      * @param socket some socket
      * @param outputStream some output stream
-     * @throws IOException if I/O errors occur
+     * @return the number of bytes read
+     * @throws IOException if I/O errors happen
      */
-    public static void readAndSaveBytes(final Socket socket, final OutputStream outputStream) throws IOException {
+    public static Long readAndSaveBytes(final Socket socket, final OutputStream outputStream) throws IOException {
         // read the expected length
         int size = readInteger(socket);
 
@@ -81,6 +81,12 @@ public final class SocketUtils {
             // increase the counter
             current += readBytes;
         }
+
+        if (current > size) {
+            throw new IOException(String.format("read: %d bytes, expected: %d bytes", current, size));
+        }
+
+        return (long) size;
     }
 
     /**

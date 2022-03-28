@@ -10,7 +10,7 @@ public interface IClientOperations {
     /**
      * Handle <code>ACCEPTED</code> command.
      */
-    void handleAccepted(Socket socket);
+    void handleAccepted(Socket socket) throws IOException;
 
     /**
      * Handle <code>REJECTED</code> command.

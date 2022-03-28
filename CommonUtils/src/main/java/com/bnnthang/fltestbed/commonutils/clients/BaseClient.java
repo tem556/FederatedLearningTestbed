@@ -1,7 +1,7 @@
 package com.bnnthang.fltestbed.commonutils.clients;
 
 import com.bnnthang.fltestbed.commonutils.enums.ClientCommandEnum;
-import com.bnnthang.fltestbed.commonutils.network.SocketUtils;
+import com.bnnthang.fltestbed.commonutils.utils.SocketUtils;
 
 import java.io.IOException;
 import java.net.Socket;
@@ -72,7 +72,7 @@ public class BaseClient extends Thread {
             }
 
             coordinate(SocketUtils.readInteger(socket));
-        } while (socket.isConnected());
+        } while (!socket.isClosed() && socket.isConnected());
     }
 
     /**
@@ -136,8 +136,6 @@ public class BaseClient extends Thread {
             UnexpectedException {
         switch (SocketUtils.readInteger(socket)) {
             case 0:
-//                SocketUtils.sendInteger(socket, operations.hasLocalModel() ? 1 : 0);
-                SocketUtils.sendInteger(socket, 0);
                 operations.handleAccepted(socket);
                 return true;
             case 1:

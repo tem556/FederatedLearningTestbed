@@ -1,7 +1,7 @@
 package com.bnnthang.fltestbed.Client;
 
 import com.bnnthang.fltestbed.commonutils.clients.IClientLocalRepository;
-import com.bnnthang.fltestbed.commonutils.network.SocketUtils;
+import com.bnnthang.fltestbed.commonutils.utils.SocketUtils;
 import lombok.NonNull;
 import org.deeplearning4j.nn.multilayer.MultiLayerNetwork;
 import org.deeplearning4j.util.ModelSerializer;
@@ -22,7 +22,7 @@ public class LocalRepositoryImpl implements IClientLocalRepository {
     }
 
     @Override
-    public void downloadModel(Socket socket) throws IOException {
+    public Long downloadModel(Socket socket) throws IOException {
         File modelFile = new File(pathToModel);
 
         // create file if not exists
@@ -30,18 +30,22 @@ public class LocalRepositoryImpl implements IClientLocalRepository {
 
         // download and write to model file
         FileOutputStream modelFileOutputStream = new FileOutputStream(modelFile);
-        SocketUtils.readAndSaveBytes(socket, modelFileOutputStream);
+        Long readBytes = SocketUtils.readAndSaveBytes(socket, modelFileOutputStream);
+        modelFileOutputStream.close();
+
+        return readBytes;
     }
 
     @Override
-    public void updateModel(Socket socket) {
+    public Long updateModel(Socket socket) {
         // TODO: implement this
         throw new UnsupportedOperationException("not yet implemented");
     }
 
     @Override
     public Boolean modelExists() {
-        return (new File(pathToModel)).exists();
+//        return (new File(pathToModel)).exists();
+        return false;
     }
 
     @Override
@@ -50,7 +54,7 @@ public class LocalRepositoryImpl implements IClientLocalRepository {
     }
 
     @Override
-    public void downloadDataset(Socket socket) throws IOException {
+    public Long downloadDataset(Socket socket) throws IOException {
         File datasetFile = new File(pathToDataset);
 
         // create file if not exists
@@ -58,7 +62,10 @@ public class LocalRepositoryImpl implements IClientLocalRepository {
 
         // download and write to model file
         FileOutputStream datasetFileOutputStream = new FileOutputStream(datasetFile);
-        SocketUtils.readAndSaveBytes(socket, datasetFileOutputStream);
+        Long readBytes = SocketUtils.readAndSaveBytes(socket, datasetFileOutputStream);
+        datasetFileOutputStream.close();
+
+        return readBytes;
     }
 
     @Override
@@ -79,4 +86,6 @@ public class LocalRepositoryImpl implements IClientLocalRepository {
     public InputStream getDatasetInputStream() throws IOException {
         return new FileInputStream(pathToDataset);
     }
+
+
 }

@@ -1,11 +1,15 @@
 package com.bnnthang.fltestbed.commonutils.clients;
 
-import com.bnnthang.fltestbed.commonutils.network.SocketUtils;
+import com.bnnthang.fltestbed.commonutils.models.TrainingReport;
+import com.bnnthang.fltestbed.commonutils.utils.SocketUtils;
+import org.nd4j.common.util.SerializationUtils;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
+import java.time.Duration;
+import java.time.LocalDateTime;
 
 public class BaseClientOperations implements IClientOperations {
     private static final int BATCH_SIZE = 45;
@@ -14,13 +18,18 @@ public class BaseClientOperations implements IClientOperations {
     private final IClientLocalRepository localRepository;
     private Cifar10TrainingWorker trainingWorker;
 
+    private TrainingReport trainingReport;
+
     public BaseClientOperations(IClientLocalRepository _localRepository) {
+
         localRepository = _localRepository;
+        trainingReport = new TrainingReport();
     }
 
     @Override
-    public void handleAccepted(Socket socket) {
+    public void handleAccepted(Socket socket) throws IOException {
         // TODO: send model existence information
+        SocketUtils.sendInteger(socket, 0);
     }
 
     @Override
@@ -30,11 +39,10 @@ public class BaseClientOperations implements IClientOperations {
 
     @Override
     public void handleModelPush(Socket socket) throws IOException {
-        if (localRepository.modelExists()) {
-            localRepository.downloadModel(socket);
-        } else {
-            localRepository.updateModel(socket);
-        }
+        LocalDateTime startTime = LocalDateTime.now();
+        Long bytesRead = localRepository.modelExists() ? localRepository.updateModel(socket) : localRepository.downloadModel(socket);
+        LocalDateTime endTime = LocalDateTime.now();
+        trainingReport.setDownlinkTimeInSecs((double) Duration.between(startTime, endTime).getSeconds() / bytesRead);
     }
 
     @Override
@@ -44,7 +52,7 @@ public class BaseClientOperations implements IClientOperations {
 
     @Override
     public void handleTrain() {
-        trainingWorker = new Cifar10TrainingWorker(localRepository, BATCH_SIZE, EPOCHS);
+        trainingWorker = new Cifar10TrainingWorker(localRepository, trainingReport, BATCH_SIZE, EPOCHS);
         trainingWorker.start();
     }
 
@@ -59,7 +67,7 @@ public class BaseClientOperations implements IClientOperations {
         // get and convert report to bytes
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
         ObjectOutputStream out = new ObjectOutputStream(bos);
-        out.writeObject(trainingWorker.getReport());
+        out.writeObject(trainingReport);
         out.flush();
         byte[] bytes = bos.toByteArray();
         bos.close();

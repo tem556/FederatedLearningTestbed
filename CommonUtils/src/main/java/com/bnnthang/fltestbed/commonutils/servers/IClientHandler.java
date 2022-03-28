@@ -49,4 +49,6 @@ public interface IClientHandler {
      * <code>false</code> otherwise
      */
     Boolean isTraining();
+
+    Double getUplinkTime();
 }
