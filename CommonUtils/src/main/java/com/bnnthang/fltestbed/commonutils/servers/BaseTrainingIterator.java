@@ -37,7 +37,7 @@ public final class BaseTrainingIterator extends Thread {
     public void run() {
         try {
             // offload dataset to client
-            operations.pushDatasetToClients(clients);
+            operations.pushDatasetToClients(clients, configuration.getDatasetRatio());
 
             // repeat the process a certain number of times
             for (int currentRound = 1;

@@ -19,6 +19,7 @@ public class App {
     private static final int DEFAULT_ROUNDS = 3;
     private static final String DEFAULT_MODEL_DIR = "C:/Users/buinn/DoNotTouch/crap/photolabeller";
     private static final String DEFAULT_APK_PATH = "C:\\Users\\buinn\\Repos\\FederatedLearningTestbed\\AndroidClient\\app\\build\\intermediates\\apk\\debug\\app-debug.apk";;
+    private static final float DEFAULT_DATASET_RATIO = 1.0F;
 
     public static void main(String[] args) throws Exception {
         // load native library if needed
@@ -55,8 +56,9 @@ public class App {
         int port = DEFAULT_PORT;
         int minClients = DEFAULT_MIN_CLIENTS;
         int rounds = DEFAULT_ROUNDS;
-        String modelDir = DEFAULT_MODEL_DIR;
+        String workDir = DEFAULT_MODEL_DIR;
         String apkPath = DEFAULT_APK_PATH;
+        float ratio = DEFAULT_DATASET_RATIO;
         for (int i = 1; i < args.length; i += 2) {
             switch (args[i]) {
                 case "--port":
@@ -68,8 +70,11 @@ public class App {
                 case "--rounds":
                     rounds = Integer.parseInt(args[i + 1]);
                     break;
-                case "--modeldir":
-                    modelDir = args[i + 1];
+                case "--workdir":
+                    workDir = args[i + 1];
+                    break;
+                case "--datasetratio":
+                    ratio = Float.parseFloat(args[i + 1]);
                     break;
                 case "--apk":
                     apkPath = args[i + 1];
@@ -79,10 +84,9 @@ public class App {
             }
         }
 
-        TrainingConfiguration trainingConfiguration = new TrainingConfiguration(minClients, rounds, 5000, new NewFedAvg());
-        IServerOperations serverOperations = new BaseServerOperations(new Cifar10Repository(modelDir));
+        TrainingConfiguration trainingConfiguration = new TrainingConfiguration(minClients, rounds, 5000, new NewFedAvg(), ratio);
+        IServerOperations serverOperations = new BaseServerOperations(new Cifar10Repository(workDir));
         ServerParameters serverParameters = new ServerParameters(port, trainingConfiguration, serverOperations);
-
         BaseServer server = new BaseServer(serverParameters);
         server.start();
         server.join();

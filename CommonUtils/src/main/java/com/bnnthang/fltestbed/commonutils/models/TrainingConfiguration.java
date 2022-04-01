@@ -32,4 +32,10 @@ public class TrainingConfiguration {
      */
     @NonNull
     private IAggregationStrategy aggregationStrategy;
+
+    /**
+     * Percentage of the dataset to train on.
+     */
+    @NonNull
+    private Float datasetRatio;
 }

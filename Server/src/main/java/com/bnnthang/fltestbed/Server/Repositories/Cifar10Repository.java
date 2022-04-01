@@ -149,8 +149,8 @@ public class Cifar10Repository implements IServerLocalRepository {
     }
 
     @Override
-    public List<byte[]> partitionAndSerializeDataset(int numPartitions) {
-        List<List<byte[]>> partitions = splitDatasetIIDAndShuffle(numPartitions);
+    public List<byte[]> partitionAndSerializeDataset(int numPartitions, float ratio) {
+        List<List<byte[]>> partitions = partialSplitDatasetIIDAndShuffle(numPartitions, ratio);
         return partitions.stream().map(Cifar10Repository::flatten).collect(Collectors.toList());
     }
 

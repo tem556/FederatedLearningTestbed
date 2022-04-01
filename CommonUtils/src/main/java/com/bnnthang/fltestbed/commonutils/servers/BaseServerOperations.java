@@ -39,10 +39,10 @@ public class BaseServerOperations implements IServerOperations {
     }
 
     @Override
-    public void pushDatasetToClients(List<IClientHandler> clients) throws IOException {
+    public void pushDatasetToClients(List<IClientHandler> clients, float ratio) throws IOException {
         // TODO: not to do this in memory
         System.out.println("spliting dataset");
-        List<byte[]> partitions = localRepository.partitionAndSerializeDataset(acceptedClients.size());
+        List<byte[]> partitions = localRepository.partitionAndSerializeDataset(acceptedClients.size(), ratio);
         System.out.println("pushing to clients");
         // TODO: parallelize this
         for (int i = 0; i < clients.size(); ++i) {

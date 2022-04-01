@@ -7,7 +7,7 @@ import java.io.IOException;
 import java.util.List;
 
 public interface IServerLocalRepository {
-    List<byte[]> partitionAndSerializeDataset(int numPartitions);
+    List<byte[]> partitionAndSerializeDataset(int numPartitions, float ratio);
     MultiLayerNetwork loadLatestModel() throws IOException;
     byte[] loadAndSerializeLatestModel() throws IOException;
     byte[] loadAndSerializeLatestModelWeights() throws IOException;

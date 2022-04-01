@@ -54,8 +54,7 @@ public class BaseServer extends Thread {
 
             System.out.println("getting client");
 
-            IServerOperations serverOperations =
-                    serverParameters.getServerOperations();
+            IServerOperations serverOperations = serverParameters.getServerOperations();
 
             if (serverOperations.isTraining()) {
                 System.out.println("reject");

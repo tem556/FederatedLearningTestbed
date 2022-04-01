@@ -29,7 +29,7 @@ public interface IServerOperations {
      * Push dataset to clients.
      * @param clients list of accepted clients
      */
-    void pushDatasetToClients(List<IClientHandler> clients) throws IOException;
+    void pushDatasetToClients(List<IClientHandler> clients, float ratio) throws IOException;
 
     /**
      * Push model to clients.
