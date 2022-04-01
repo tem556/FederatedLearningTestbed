@@ -18,24 +18,21 @@ public class TrainingReport implements Serializable {
     /**
      * Weight updates for all layers in neural utils.
      */
-    private Gradient gradient;
-
     private INDArray params;
 
     /**
-     * Training time (in seconds).
+     * Training time (in milliseconds).
      */
-    private Long trainingTimeInSecs;
+    private Double trainingTime;
 
     /**
-     * Total time for clients to download resources from server (seconds per byte)
+     * Total time for clients to download resources from server (milliseconds per byte)
      */
-    private Double downlinkTimeInSecs;
+    private Double downlinkTime;
 
     public TrainingReport() {
-        gradient = null;
         params = null;
-        trainingTimeInSecs = null;
-        downlinkTimeInSecs = null;
+        trainingTime = null;
+        downlinkTime = null;
     }
 }

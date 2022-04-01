@@ -119,9 +119,7 @@ public class BaseClient extends Thread {
                 operations.handleDone(socket);
                 break;
             default:
-                throw new UnsupportedOperationException(
-                        String.format("received unrecognized command index: %d",
-                                commandIndex));
+                throw new UnsupportedOperationException(String.format("received unrecognized command index: %d", commandIndex));
         }
     }
 
@@ -131,9 +129,7 @@ public class BaseClient extends Thread {
      * @throws IOException if I/O errors happen
      * @throws UnexpectedException if reads unexpected bytes
      */
-    private Boolean acceptedOrRejected() throws
-            IOException,
-            UnexpectedException {
+    private Boolean acceptedOrRejected() throws IOException, UnexpectedException {
         switch (SocketUtils.readInteger(socket)) {
             case 0:
                 operations.handleAccepted(socket);

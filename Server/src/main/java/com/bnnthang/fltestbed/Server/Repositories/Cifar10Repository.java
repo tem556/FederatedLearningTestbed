@@ -5,36 +5,36 @@ import com.bnnthang.fltestbed.Server.ServerCifar10DataSetIterator;
 import com.bnnthang.fltestbed.Server.ServerCifar10Loader;
 import com.bnnthang.fltestbed.commonutils.clients.MyCifar10Loader;
 import com.bnnthang.fltestbed.commonutils.servers.IServerLocalRepository;
+import org.apache.commons.lang3.SerializationUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.deeplearning4j.nn.multilayer.MultiLayerNetwork;
 import org.deeplearning4j.util.ModelSerializer;
 import org.nd4j.evaluation.classification.Evaluation;
+import org.nd4j.linalg.api.ndarray.INDArray;
 
 import java.io.*;
-import java.net.URISyntaxException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
 
 public class Cifar10Repository implements IServerLocalRepository {
-    private final String modelDirectory;
+    private final String workingDirectory;
     private String currentModelName = "newmodel.zip";
     private String currentResultFileName = null;
 
     private final Map<Byte, List<byte[]>> imagesByLabel;
 
-    public Cifar10Repository(String modelDir) throws IOException, URISyntaxException {
-        modelDirectory = modelDir;
+    public Cifar10Repository(String _workingDirectory) throws IOException {
+        workingDirectory = _workingDirectory;
 
         imagesByLabel = new HashMap<>();
 
-//        System.out.println("length = " + new File(getClass().getResource("cifar-10/test_batch_1.bin").toExternalForm()));
-
-        load(Objects.requireNonNull(App.class.getClassLoader().getResourceAsStream("cifar-10/data_batch_1.bin")));
-        load(Objects.requireNonNull(App.class.getClassLoader().getResourceAsStream("cifar-10/data_batch_2.bin")));
-        load(Objects.requireNonNull(App.class.getClassLoader().getResourceAsStream("cifar-10/data_batch_3.bin")));
-        load(Objects.requireNonNull(App.class.getClassLoader().getResourceAsStream("cifar-10/data_batch_4.bin")));
-        load(Objects.requireNonNull(App.class.getClassLoader().getResourceAsStream("cifar-10/data_batch_5.bin")));
+        // load dataset
+        load(new FileInputStream(workingDirectory + "/cifar-10/data_batch_1.bin"));
+        load(new FileInputStream(workingDirectory + "/cifar-10/data_batch_2.bin"));
+        load(new FileInputStream(workingDirectory + "/cifar-10/data_batch_3.bin"));
+        load(new FileInputStream(workingDirectory + "/cifar-10/data_batch_4.bin"));
+        load(new FileInputStream(workingDirectory + "/cifar-10/data_batch_5.bin"));
     }
 
     private void load(InputStream inputStream) throws IOException {
@@ -46,6 +46,8 @@ public class Cifar10Repository implements IServerLocalRepository {
             byte[] imageBytes = new byte[imageSize];
             int bytesRead = inputStream.read(labelBytes) + inputStream.read(imageBytes);
 
+//            System.out.println(bytesRead);
+
             if (bytesRead != rowSize) {
                 throw new IOException("read invalid row");
             }
@@ -55,16 +57,18 @@ public class Cifar10Repository implements IServerLocalRepository {
         }
     }
 
-    public List<List<byte[]>> splitDatasetIIDAndShuffle(int nPartitions) {
+    public List<List<byte[]>> partialSplitDatasetIIDAndShuffle(int nPartitions, float ratio) {
         List<List<Pair<byte[], Byte>>> partitions = new ArrayList<>();
         for (int i = 0; i < nPartitions; ++i) {
             partitions.add(new ArrayList<>());
         }
         int partition = 0;
         for (byte label = 0; label < 10; ++label) {
-            for (byte[] image : imagesByLabel.get(label)) {
-                partitions.get(partition).add(Pair.of(image, label));
-
+            List<byte[]> images = imagesByLabel.get(label);
+            Collections.shuffle(images);
+            int nSamples = Integer.min(Math.round(ratio * images.size()), images.size());
+            for (int i = 0; i < nSamples; ++i) {
+                partitions.get(partition).add(Pair.of(images.get(i), label));
                 ++partition;
                 partition %= nPartitions;
             }
@@ -88,10 +92,47 @@ public class Cifar10Repository implements IServerLocalRepository {
         return res;
     }
 
+    public List<List<byte[]>> splitDatasetIIDAndShuffle(int nPartitions) {
+        return partialSplitDatasetIIDAndShuffle(nPartitions, 1.0F);
+    }
+
+//    public List<List<byte[]>> splitDatasetIIDAndShuffle(int nPartitions) {
+//        List<List<Pair<byte[], Byte>>> partitions = new ArrayList<>();
+//        for (int i = 0; i < nPartitions; ++i) {
+//            partitions.add(new ArrayList<>());
+//        }
+//        int partition = 0;
+//        for (byte label = 0; label < 10; ++label) {
+//            for (byte[] image : imagesByLabel.get(label)) {
+//                partitions.get(partition).add(Pair.of(image, label));
+//
+//                ++partition;
+//                partition %= nPartitions;
+//            }
+//        }
+//        List<List<byte[]>> res = new ArrayList<>();
+//        for (int i = 0; i < nPartitions; ++i) {
+//            res.add(new ArrayList<>());
+//            for (int j = 0; j < partitions.get(i).size(); ++j) {
+//                byte[] t = new byte[partitions.get(i).get(j).getLeft().length + 1];
+//                t[0] = partitions.get(i).get(j).getRight();
+//                System.arraycopy(partitions.get(i).get(j).getLeft(), 0, t, 1, partitions.get(i).get(j).getLeft().length);
+//                res.get(i).add(t);
+//            }
+//        }
+//
+//        // shuffle
+//        for (int i = 0; i < nPartitions; ++i) {
+//            Collections.shuffle(res.get(i));
+//        }
+//
+//        return res;
+//    }
+
     private static int DatasetLength(List<byte[]> dataset) {
         int length = 0;
-        for (int i = 0; i < dataset.size(); ++i) {
-            length += dataset.get(i).length;
+        for (byte[] bytes : dataset) {
+            length += bytes.length;
         }
         return length;
     }
@@ -100,9 +141,9 @@ public class Cifar10Repository implements IServerLocalRepository {
         int length = DatasetLength(dataset);
         byte[] res = new byte[length];
         int cnt = 0;
-        for (int i = 0; i < dataset.size(); ++i) {
-            System.arraycopy(dataset.get(i), 0, res, cnt, dataset.get(i).length);
-            cnt += dataset.get(i).length;
+        for (byte[] bytes : dataset) {
+            System.arraycopy(bytes, 0, res, cnt, bytes.length);
+            cnt += bytes.length;
         }
         return res;
     }
@@ -115,12 +156,13 @@ public class Cifar10Repository implements IServerLocalRepository {
 
     @Override
     public MultiLayerNetwork loadLatestModel() throws IOException {
-        return ModelSerializer.restoreMultiLayerNetwork(modelDirectory + "/" + currentModelName);
+        System.out.println("loading " + workingDirectory + "/" + currentModelName);
+        return ModelSerializer.restoreMultiLayerNetwork(workingDirectory + "/" + currentModelName);
     }
 
     @Override
     public byte[] loadAndSerializeLatestModel() throws IOException {
-        File f = new File(modelDirectory, currentModelName);
+        File f = new File(workingDirectory, currentModelName);
         int modelLength = (int)f.length();
         FileInputStream fis = new FileInputStream(f);
         byte[] bytes = new byte[modelLength];
@@ -133,9 +175,18 @@ public class Cifar10Repository implements IServerLocalRepository {
     }
 
     @Override
+    public byte[] loadAndSerializeLatestModelWeights() throws IOException {
+        MultiLayerNetwork model = loadLatestModel();
+        INDArray params = model.params().dup();
+        model.close();
+        byte[] bytes = SerializationUtils.serialize(params);
+        return bytes;
+    }
+
+    @Override
     public void saveNewModel(MultiLayerNetwork newModel) throws IOException {
         String newModelName = "model" + (new SimpleDateFormat("dd-MM-yyyy-HH-mm-ss").format(Calendar.getInstance().getTime())) + ".zip";
-        newModel.save(new File(modelDirectory, newModelName));
+        newModel.save(new File(workingDirectory, newModelName));
         currentModelName = newModelName;
     }
 
@@ -143,7 +194,7 @@ public class Cifar10Repository implements IServerLocalRepository {
     public void createNewResultFile() throws IOException {
         String newResultFileName = "result-" + (new SimpleDateFormat("dd-MM-yyyy-HH-mm-ss").format(Calendar.getInstance().getTime())) + ".csv";
         currentResultFileName = newResultFileName;
-        File newResultFile = new File(modelDirectory, newResultFileName);
+        File newResultFile = new File(workingDirectory, newResultFileName);
         if (newResultFile.createNewFile()) {
             FileWriter writer = new FileWriter(newResultFile, true);
             writer.write("accuracy,precision,recall,f1,training time (s),downlink time (s),uplink time (s)\n");
@@ -155,7 +206,7 @@ public class Cifar10Repository implements IServerLocalRepository {
 
     @Override
     public void appendToCurrentFile(String s) throws IOException {
-        File currentResultFile = new File(modelDirectory, currentResultFileName);
+        File currentResultFile = new File(workingDirectory, currentResultFileName);
         FileWriter writer = new FileWriter(currentResultFile, true);
         writer.write(s);
         writer.close();
@@ -164,11 +215,13 @@ public class Cifar10Repository implements IServerLocalRepository {
     @Override
     public Evaluation evaluateCurrentModel() {
         try {
-            File testDatasetFile = new File(App.class.getClassLoader().getResource("cifar-10/test_batch.bin").toURI());
+            File testDatasetFile = new File(workingDirectory, "cifar-10/test_batch.bin");
             ServerCifar10Loader loader = new ServerCifar10Loader(testDatasetFile, 123456);
             ServerCifar10DataSetIterator cifarEval = new ServerCifar10DataSetIterator(loader, 123, 1, 123456);
             MultiLayerNetwork model = loadLatestModel();
-            return model.evaluate(cifarEval);
+            Evaluation eval = model.evaluate(cifarEval);
+            model.close();
+            return eval;
         } catch (Exception e) {
             e.printStackTrace();
         }

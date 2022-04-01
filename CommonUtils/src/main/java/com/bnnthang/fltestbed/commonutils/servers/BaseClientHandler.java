@@ -12,13 +12,13 @@ import java.time.LocalDateTime;
 
 public class BaseClientHandler implements IClientHandler {
     private final Socket socket;
-    private boolean hasLocalModel;
+    private boolean localModel;
 
     private Double uplinkTime;
 
     public BaseClientHandler(Socket _socket) {
         socket = _socket;
-        hasLocalModel = false;
+        localModel = false;
     }
 
     @Override
@@ -28,7 +28,7 @@ public class BaseClientHandler implements IClientHandler {
 
         // check if client has local model
         // TODO: read 1 byte only
-        hasLocalModel = SocketUtils.readInteger(socket) == 1;
+        localModel = SocketUtils.readInteger(socket) == 1;
     }
 
     @Override
@@ -45,14 +45,16 @@ public class BaseClientHandler implements IClientHandler {
 
     @Override
     public void pushModel(byte[] bytes) throws IOException {
-        if (hasLocalModel) {
-            // TODO: send weight updates
+        if (localModel) {
+            System.out.println("pushing weights");
         } else {
             System.out.println("pushing");
-            SocketUtils.sendInteger(socket, ClientCommandEnum.MODELPUSH.ordinal());
-            SocketUtils.sendBytesWrapper(socket, bytes);
-            System.out.println("pushed model length = " + bytes.length);
         }
+        localModel = true;
+
+        SocketUtils.sendInteger(socket, ClientCommandEnum.MODELPUSH.ordinal());
+        SocketUtils.sendBytesWrapper(socket, bytes);
+        System.out.println("pushed model length = " + bytes.length);
     }
 
     @Override
@@ -93,6 +95,16 @@ public class BaseClientHandler implements IClientHandler {
             e.printStackTrace();
         }
         return res;
+    }
+
+    @Override
+    public Boolean isAlive() {
+        return null;
+    }
+
+    @Override
+    public Boolean hasLocalModel() {
+        return localModel;
     }
 
     @Override

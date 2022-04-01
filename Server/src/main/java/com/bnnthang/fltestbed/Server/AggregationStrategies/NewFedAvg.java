@@ -16,24 +16,24 @@ import java.util.stream.Collectors;
 public class NewFedAvg implements IAggregationStrategy {
     @Override
     public MultiLayerNetwork aggregate(MultiLayerNetwork model, List<TrainingReport> reports) throws Exception {
-        // update gradients
-        List<Gradient> gradients = reports.stream().map(TrainingReport::getGradient).collect(Collectors.toList());
-        List<Map<String, INDArray>> gradientTables = gradients.stream().map(Gradient::gradientForVariable).collect(Collectors.toList());
-        Set<String> variables = gradientTables.get(0).keySet();
-        Map<String, INDArray> avgGradientTable = new HashMap<>();
-        for (String key : variables) {
-            INDArray sum = gradientTables.get(0).get(key);
-            for (int i = 1; i < gradientTables.size(); ++i) {
-                sum = sum.add(gradientTables.get(i).get(key));
-            }
-            INDArray avg = sum.div(reports.size());
-            avgGradientTable.put(key, avg);
-        }
-        Gradient g = new DefaultGradient();
-        for (String key : avgGradientTable.keySet()) {
-            g.setGradientFor(key, avgGradientTable.get(key));
-        }
-        model.setGradient(g);
+//        // update gradients
+//        List<Gradient> gradients = reports.stream().map(TrainingReport::getGradient).collect(Collectors.toList());
+//        List<Map<String, INDArray>> gradientTables = gradients.stream().map(Gradient::gradientForVariable).collect(Collectors.toList());
+//        Set<String> variables = gradientTables.get(0).keySet();
+//        Map<String, INDArray> avgGradientTable = new HashMap<>();
+//        for (String key : variables) {
+//            INDArray sum = gradientTables.get(0).get(key);
+//            for (int i = 1; i < gradientTables.size(); ++i) {
+//                sum = sum.add(gradientTables.get(i).get(key));
+//            }
+//            INDArray avg = sum.div(reports.size());
+//            avgGradientTable.put(key, avg);
+//        }
+//        Gradient g = new DefaultGradient();
+//        for (String key : avgGradientTable.keySet()) {
+//            g.setGradientFor(key, avgGradientTable.get(key));
+//        }
+//        model.setGradient(g);
 
         // update model params
         INDArray sum = reports.get(0).getParams();

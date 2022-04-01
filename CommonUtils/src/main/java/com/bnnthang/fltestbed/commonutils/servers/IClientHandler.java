@@ -50,5 +50,13 @@ public interface IClientHandler {
      */
     Boolean isTraining();
 
+    /**
+     * Check if client can still be contacted
+     * @return <code>true</code> iff client is alive
+     */
+    Boolean isAlive();
+
+    Boolean hasLocalModel();
+
     Double getUplinkTime();
 }

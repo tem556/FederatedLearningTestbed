@@ -52,19 +52,24 @@ public class BaseServer extends Thread {
         do {
             Socket client = serverSocket.accept();
 
+            System.out.println("getting client");
+
             IServerOperations serverOperations =
                     serverParameters.getServerOperations();
 
             if (serverOperations.isTraining()) {
+                System.out.println("reject");
                 // reject client if server is training
                 serverOperations.rejectClient(client);
             } else {
+                System.out.println("accept");
+
                 // accept client to training queue if server is not training
                 serverOperations.acceptClient(client);
-            }
 
-            // check if should start training
-            serverOperations.trainOrElse(serverParameters);
+                // check if should start training
+                serverOperations.trainOrElse(serverParameters);
+            }
         } while (true);
     }
 }

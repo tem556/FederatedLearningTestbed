@@ -1,35 +1,33 @@
 package com.bnnthang.fltestbed.commonutils.clients;
 
 import com.bnnthang.fltestbed.commonutils.models.TrainingReport;
-import lombok.Getter;
+import com.bnnthang.fltestbed.commonutils.utils.TimeUtils;
 import org.deeplearning4j.nn.multilayer.MultiLayerNetwork;
 import org.deeplearning4j.optimize.listeners.ScoreIterationListener;
+import org.nd4j.linalg.api.ndarray.INDArray;
 
 import java.io.IOException;
-import java.time.Duration;
 import java.time.LocalDateTime;
 
 public class Cifar10TrainingWorker extends Thread {
     /**
-     * An instance of local repository
+     * An instance of local repository.
      */
     private IClientLocalRepository localRepository;
 
     /**
-     * Batch size
+     * Batch size.
      */
     private int batchSize;
 
     /**
-     * Number of epochs to train
+     * Number of epochs to train.
      */
     private int epochs;
 
     /**
-     * Dataset sample size to take
+     * Training report.
      */
-    private int samples;
-
     private TrainingReport report;
 
     public Cifar10TrainingWorker(IClientLocalRepository _localRepository,
@@ -45,8 +43,7 @@ public class Cifar10TrainingWorker extends Thread {
     @Override
     public void run() {
         MyCifar10Loader loader = new MyCifar10Loader(localRepository);
-        MyCifar10DataSetIterator cifar =
-                new MyCifar10DataSetIterator(loader, batchSize, 1);
+        MyCifar10DataSetIterator cifar = new MyCifar10DataSetIterator(loader, batchSize, 1);
 
         try {
             // load model
@@ -59,12 +56,10 @@ public class Cifar10TrainingWorker extends Thread {
             LocalDateTime endTime = LocalDateTime.now();
 
             // update report
-            report.setGradient(model.gradient());
-            report.setParams(model.params());
-            report.setTrainingTimeInSecs(Duration.between(startTime, endTime).getSeconds());
+            report.setParams(model.params().dup());
+            report.setTrainingTime(TimeUtils.millisecondsBetween(startTime, endTime));
 
-            // clean memory
-            System.gc();
+            model.close();
         } catch (IOException e) {
             e.printStackTrace();
         }

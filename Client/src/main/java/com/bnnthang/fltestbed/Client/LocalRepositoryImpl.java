@@ -3,8 +3,11 @@ package com.bnnthang.fltestbed.Client;
 import com.bnnthang.fltestbed.commonutils.clients.IClientLocalRepository;
 import com.bnnthang.fltestbed.commonutils.utils.SocketUtils;
 import lombok.NonNull;
+import org.apache.commons.lang3.SerializationUtils;
 import org.deeplearning4j.nn.multilayer.MultiLayerNetwork;
 import org.deeplearning4j.util.ModelSerializer;
+import org.nd4j.linalg.api.ndarray.INDArray;
+import org.nd4j.linalg.cpu.nativecpu.NDArray;
 
 import java.io.*;
 import java.net.Socket;
@@ -37,15 +40,21 @@ public class LocalRepositoryImpl implements IClientLocalRepository {
     }
 
     @Override
-    public Long updateModel(Socket socket) {
-        // TODO: implement this
-        throw new UnsupportedOperationException("not yet implemented");
+    public Long updateModel(Socket socket) throws IOException {
+        byte[] bytes = SocketUtils.readBytesWrapper(socket);
+        System.out.println("recv weights length = " + bytes.length);
+        INDArray params = SerializationUtils.deserialize(bytes);
+        MultiLayerNetwork model = ModelSerializer.restoreMultiLayerNetwork(pathToModel);
+        model.setParams(params);
+        model.save(new File(pathToModel), true);
+        model.close();
+        return (long) bytes.length;
     }
 
     @Override
     public Boolean modelExists() {
-//        return (new File(pathToModel)).exists();
-        return false;
+        System.out.println("path to model = " + pathToModel);
+        return (new File(pathToModel)).exists();
     }
 
     @Override
@@ -86,6 +95,4 @@ public class LocalRepositoryImpl implements IClientLocalRepository {
     public InputStream getDatasetInputStream() throws IOException {
         return new FileInputStream(pathToDataset);
     }
-
-
 }

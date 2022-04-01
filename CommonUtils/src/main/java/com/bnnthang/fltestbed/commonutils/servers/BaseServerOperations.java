@@ -55,9 +55,10 @@ public class BaseServerOperations implements IServerOperations {
     @Override
     public void pushModelToClients(List<IClientHandler> clients) throws IOException {
         // TODO: not to load model to memory
-        byte[] bytes = localRepository.loadAndSerializeLatestModel();
+        byte[] modelBytes = localRepository.loadAndSerializeLatestModel();
+        byte[] weightBytes = localRepository.loadAndSerializeLatestModelWeights();
         for (IClientHandler client : clients) {
-            client.pushModel(bytes);
+            client.pushModel(client.hasLocalModel() ? weightBytes : modelBytes);
         }
         System.out.println("pushed model to all clients");
     }
@@ -82,6 +83,8 @@ public class BaseServerOperations implements IServerOperations {
         MultiLayerNetwork currentModel = localRepository.loadLatestModel();
         MultiLayerNetwork newModel = aggregationStrategy.aggregate(currentModel, trainingReports);
         localRepository.saveNewModel(newModel);
+        newModel.close();
+        currentModel.close();
     }
 
     @Override
@@ -95,17 +98,17 @@ public class BaseServerOperations implements IServerOperations {
 
         // calculate avg uplink time
         double sumUplinkTime = acceptedClients.stream().map(IClientHandler::getUplinkTime).reduce(0.0, Double::sum);
-        double avgUplinkTime = (double) sumUplinkTime / acceptedClients.size();
+        double avgUplinkTime = sumUplinkTime / acceptedClients.size();
 
         // calculate avg training time
-        long sumTrainingTime = trainingReports.stream().map(TrainingReport::getTrainingTimeInSecs).reduce(0L, Long::sum);
-        double avgTrainingTime = (double) sumTrainingTime / acceptedClients.size();
+        double sumTrainingTime = trainingReports.stream().map(TrainingReport::getTrainingTime).reduce(0.0, Double::sum);
+        double avgTrainingTime = sumTrainingTime / acceptedClients.size();
 
         // calculate avg downlink time
-        double sumDownlinkTime = trainingReports.stream().map(TrainingReport::getDownlinkTimeInSecs).reduce(0.0, Double::sum);
+        double sumDownlinkTime = trainingReports.stream().map(TrainingReport::getDownlinkTime).reduce(0.0, Double::sum);
         double avgDownlinkTime = sumDownlinkTime / acceptedClients.size();
 
-        // accuracy,precision,recall,f1,training time (s),downlink time (s),uplink time (s)
+        // accuracy, precision, recall, f1, training time (ms), downlink time (ms), uplink time (ms)
         String evalString = String.format("%f,%f,%f,%f,%f,%f,%f\n",
                 evaluation.accuracy(),
                 evaluation.precision(),

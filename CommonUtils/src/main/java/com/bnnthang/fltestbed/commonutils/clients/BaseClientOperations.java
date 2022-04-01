@@ -2,13 +2,13 @@ package com.bnnthang.fltestbed.commonutils.clients;
 
 import com.bnnthang.fltestbed.commonutils.models.TrainingReport;
 import com.bnnthang.fltestbed.commonutils.utils.SocketUtils;
-import org.nd4j.common.util.SerializationUtils;
+import com.bnnthang.fltestbed.commonutils.utils.TimeUtils;
+import org.apache.commons.lang3.SerializationUtils;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
-import java.time.Duration;
 import java.time.LocalDateTime;
 
 public class BaseClientOperations implements IClientOperations {
@@ -21,15 +21,14 @@ public class BaseClientOperations implements IClientOperations {
     private TrainingReport trainingReport;
 
     public BaseClientOperations(IClientLocalRepository _localRepository) {
-
         localRepository = _localRepository;
         trainingReport = new TrainingReport();
     }
 
     @Override
     public void handleAccepted(Socket socket) throws IOException {
-        // TODO: send model existence information
-        SocketUtils.sendInteger(socket, 0);
+        // send model existence information
+        SocketUtils.sendInteger(socket, hasLocalModel() ? 1 : 0);
     }
 
     @Override
@@ -40,9 +39,9 @@ public class BaseClientOperations implements IClientOperations {
     @Override
     public void handleModelPush(Socket socket) throws IOException {
         LocalDateTime startTime = LocalDateTime.now();
-        Long bytesRead = localRepository.modelExists() ? localRepository.updateModel(socket) : localRepository.downloadModel(socket);
+        Long bytesRead = hasLocalModel() ? localRepository.updateModel(socket) : localRepository.downloadModel(socket);
         LocalDateTime endTime = LocalDateTime.now();
-        trainingReport.setDownlinkTimeInSecs((double) Duration.between(startTime, endTime).getSeconds() / bytesRead);
+        trainingReport.setDownlinkTime(TimeUtils.millisecondsBetween(startTime, endTime) / bytesRead);
     }
 
     @Override
@@ -63,7 +62,7 @@ public class BaseClientOperations implements IClientOperations {
 
     @Override
     public void handleReport(Socket socket) throws IOException {
-        // TODO: handle report better
+        // TODO: handle report better (how?)
         // get and convert report to bytes
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
         ObjectOutputStream out = new ObjectOutputStream(bos);
@@ -71,6 +70,8 @@ public class BaseClientOperations implements IClientOperations {
         out.flush();
         byte[] bytes = bos.toByteArray();
         bos.close();
+
+        System.out.println("report length = " + bytes.length);
 
         // send report
         SocketUtils.sendBytesWrapper(socket, bytes);

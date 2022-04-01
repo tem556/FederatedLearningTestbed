@@ -10,6 +10,7 @@ public interface IServerLocalRepository {
     List<byte[]> partitionAndSerializeDataset(int numPartitions);
     MultiLayerNetwork loadLatestModel() throws IOException;
     byte[] loadAndSerializeLatestModel() throws IOException;
+    byte[] loadAndSerializeLatestModelWeights() throws IOException;
     void saveNewModel(MultiLayerNetwork model) throws IOException;
     Evaluation evaluateCurrentModel();
     void createNewResultFile() throws IOException;
