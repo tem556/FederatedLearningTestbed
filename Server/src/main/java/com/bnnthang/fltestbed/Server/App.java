@@ -1,6 +1,6 @@
 package com.bnnthang.fltestbed.Server;
 
-import com.bnnthang.fltestbed.Server.AggregationStrategies.NewFedAvg;
+import com.bnnthang.fltestbed.Server.AggregationStrategies.FedAvg;
 import com.bnnthang.fltestbed.Server.Repositories.Cifar10Repository;
 import com.bnnthang.fltestbed.commonutils.models.ServerParameters;
 import com.bnnthang.fltestbed.commonutils.models.TrainingConfiguration;
@@ -8,12 +8,16 @@ import com.bnnthang.fltestbed.commonutils.servers.BaseServer;
 import com.bnnthang.fltestbed.commonutils.servers.BaseServerOperations;
 import com.bnnthang.fltestbed.commonutils.servers.IServerOperations;
 import org.apache.commons.lang3.ArrayUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.opencv.core.Core;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
 
 public class App {
+    private static final Logger _logger = LogManager.getLogger(App.class);
+
     private static final int DEFAULT_PORT = 4602;
     private static final int DEFAULT_MIN_CLIENTS = 1;
     private static final int DEFAULT_ROUNDS = 3;
@@ -22,6 +26,8 @@ public class App {
     private static final float DEFAULT_DATASET_RATIO = 1.0F;
 
     public static void main(String[] args) throws Exception {
+        _logger.debug("hello world");
+
         // load native library if needed
         if (args[0].equals("--native")) {
             System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
@@ -84,7 +90,7 @@ public class App {
             }
         }
 
-        TrainingConfiguration trainingConfiguration = new TrainingConfiguration(minClients, rounds, 5000, new NewFedAvg(), ratio);
+        TrainingConfiguration trainingConfiguration = new TrainingConfiguration(minClients, rounds, 5000, new FedAvg(), ratio);
         IServerOperations serverOperations = new BaseServerOperations(new Cifar10Repository(workDir));
         ServerParameters serverParameters = new ServerParameters(port, trainingConfiguration, serverOperations);
         BaseServer server = new BaseServer(serverParameters);

@@ -2,6 +2,8 @@ package com.bnnthang.fltestbed.commonutils.clients;
 
 import com.bnnthang.fltestbed.commonutils.enums.ClientCommandEnum;
 import com.bnnthang.fltestbed.commonutils.utils.SocketUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.io.IOException;
 import java.net.Socket;
@@ -11,6 +13,8 @@ import java.rmi.UnexpectedException;
  * Simple implementation of a Federated Learning client.
  */
 public class BaseClient extends Thread {
+    private static final Logger _logger = LogManager.getLogger(BaseClient.class);
+
     /**
      * Delay interval (in milliseconds).
      */
@@ -87,19 +91,15 @@ public class BaseClient extends Thread {
             UnsupportedOperationException,
             IOException {
         if (commandIndex < 0 || commandIndex > ClientCommandEnum.values().length) {
-            throw new IllegalArgumentException(
-                    String.format("got unexpected command index: %d",
-                            commandIndex));
+            throw new IllegalArgumentException(String.format("got unexpected command index: %d", commandIndex));
         }
 
-        System.out.println("recv command = " + commandIndex);
+        _logger.debug("recv command = " + commandIndex);
 
         switch (ClientCommandEnum.values()[commandIndex]) {
             case ACCEPTED:
             case REJECTED:
-                throw new UnsupportedOperationException(
-                        String.format("received unexpected command: %s",
-                                ClientCommandEnum.values()[commandIndex].toString()));
+                throw new UnsupportedOperationException(String.format("received unexpected command: %s", ClientCommandEnum.values()[commandIndex].toString()));
             case MODELPUSH:
                 operations.handleModelPush(socket);
                 break;

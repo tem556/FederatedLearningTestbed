@@ -4,15 +4,18 @@ import com.bnnthang.fltestbed.commonutils.clients.IClientLocalRepository;
 import com.bnnthang.fltestbed.commonutils.utils.SocketUtils;
 import lombok.NonNull;
 import org.apache.commons.lang3.SerializationUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.deeplearning4j.nn.multilayer.MultiLayerNetwork;
 import org.deeplearning4j.util.ModelSerializer;
 import org.nd4j.linalg.api.ndarray.INDArray;
-import org.nd4j.linalg.cpu.nativecpu.NDArray;
 
 import java.io.*;
 import java.net.Socket;
 
 public class LocalRepositoryImpl implements IClientLocalRepository {
+    private static final Logger _logger = LogManager.getLogger(LocalRepositoryImpl.class);
+
     @NonNull
     private final String pathToModel;
 
@@ -42,7 +45,9 @@ public class LocalRepositoryImpl implements IClientLocalRepository {
     @Override
     public Long updateModel(Socket socket) throws IOException {
         byte[] bytes = SocketUtils.readBytesWrapper(socket);
-        System.out.println("recv weights length = " + bytes.length);
+
+        _logger.debug("recv weights length = " + bytes.length);
+
         INDArray params = SerializationUtils.deserialize(bytes);
         MultiLayerNetwork model = ModelSerializer.restoreMultiLayerNetwork(pathToModel);
         model.setParams(params);
@@ -53,7 +58,8 @@ public class LocalRepositoryImpl implements IClientLocalRepository {
 
     @Override
     public Boolean modelExists() {
-        System.out.println("path to model = " + pathToModel);
+        _logger.debug("path to model = " + pathToModel);
+
         return (new File(pathToModel)).exists();
     }
 

@@ -2,37 +2,42 @@ package com.bnnthang.fltestbed.commonutils.servers;
 
 import com.bnnthang.fltestbed.commonutils.models.ServerParameters;
 import lombok.Getter;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Simple implementation of a Federated Learning server.
  */
 public class BaseServer extends Thread {
     /**
+     * Logger.
+     */
+    private static final Logger _logger = LogManager.getLogger(BaseServer.class);
+
+    /**
      * Socket opened for connections.
      */
     @Getter
-    private final ServerSocket serverSocket;
+    private final ServerSocket _serverSocket;
 
     /**
      * Encapsulated server parameters.
      */
     @Getter
-    private final ServerParameters serverParameters;
+    private final ServerParameters _serverParameters;
 
     /**
      * Instantiate a <code>BaseServer</code> object.
-     * @param _serverParameters server parameters
+     * @param serverParameters server parameters
      * @throws IOException if I/O errors happen
      */
-    public BaseServer(final ServerParameters _serverParameters) throws IOException {
-        serverParameters = _serverParameters;
-        serverSocket = new ServerSocket(_serverParameters.getPort());
+    public BaseServer(final ServerParameters serverParameters) throws IOException {
+        _serverParameters = serverParameters;
+        _serverSocket = new ServerSocket(serverParameters.getPort());
     }
 
     @Override
@@ -49,26 +54,19 @@ public class BaseServer extends Thread {
      * @throws IOException if I/O errors happen
      */
     private void serve() throws IOException {
+        IServerOperations serverOperations = _serverParameters.getServerOperations();
         do {
-            Socket client = serverSocket.accept();
+            Socket client = _serverSocket.accept();
 
-            System.out.println("getting client");
-
-            IServerOperations serverOperations = serverParameters.getServerOperations();
+            _logger.debug("getting client");
 
             if (serverOperations.isTraining()) {
-                System.out.println("reject");
                 // reject client if server is training
                 serverOperations.rejectClient(client);
             } else {
-                System.out.println("accept");
-
                 // accept client to training queue if server is not training
                 serverOperations.acceptClient(client);
-
-                // check if should start training
-                serverOperations.trainOrElse(serverParameters);
             }
-        } while (true);
+        } while (!serverOperations.trainOrElse(_serverParameters));
     }
 }

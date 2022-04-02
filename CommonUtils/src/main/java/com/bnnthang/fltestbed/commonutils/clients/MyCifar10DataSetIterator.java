@@ -1,28 +1,39 @@
 package com.bnnthang.fltestbed.commonutils.clients;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.deeplearning4j.datasets.datavec.RecordReaderDataSetIterator;
 import org.nd4j.linalg.dataset.DataSet;
 
 import java.io.IOException;
+import java.util.Map;
 
 public class MyCifar10DataSetIterator extends RecordReaderDataSetIterator {
+    private static final Logger _logger = LogManager.getLogger(MyCifar10DataSetIterator.class);
+
     private int counter = 0;
     private int numSamples = 0;
-    public MyCifar10Loader loader;
 
-    public MyCifar10DataSetIterator(MyCifar10Loader _loader,
+    public MyCifar10Loader _loader;
+
+    public MyCifar10DataSetIterator(MyCifar10Loader loader,
                                     int batchSize,
-                                    int labelIndex) {
-        this(_loader, batchSize, labelIndex, 123456789);
+                                    int labelIndex) throws IOException {
+        this(loader, batchSize, labelIndex, 123456789);
     }
 
-    public MyCifar10DataSetIterator(MyCifar10Loader _loader,
+    public MyCifar10DataSetIterator(MyCifar10Loader loader,
                                     int batchSize,
                                     int labelIndex,
-                                    int _numSamples) {
+                                    int _numSamples) throws IOException {
         super(null, batchSize, labelIndex, 10);
-        loader = _loader;
+        _loader = loader;
         numSamples = _numSamples;
+
+        if (_logger.isDebugEnabled()) {
+            Map<Integer, Integer> dist = _loader.getDataDistribution();
+            _logger.debug("data dist: " + dist);
+        }
     }
 
     @Override
@@ -35,7 +46,7 @@ public class MyCifar10DataSetIterator extends RecordReaderDataSetIterator {
     public DataSet next(int num) {
         DataSet res = null;
         try {
-            res = loader.createDataSet(num, counter);
+            res = _loader.createDataSet(num, counter);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -47,7 +58,7 @@ public class MyCifar10DataSetIterator extends RecordReaderDataSetIterator {
     public boolean hasNext() {
         boolean res = false;
         try {
-            res = counter < loader.count();
+            res = counter < _loader.count();
         } catch (IOException e) {
             e.printStackTrace();
         }

@@ -42,10 +42,10 @@ public class Cifar10TrainingWorker extends Thread {
 
     @Override
     public void run() {
-        MyCifar10Loader loader = new MyCifar10Loader(localRepository);
-        MyCifar10DataSetIterator cifar = new MyCifar10DataSetIterator(loader, batchSize, 1);
-
         try {
+            MyCifar10Loader loader = new MyCifar10Loader(localRepository);
+            MyCifar10DataSetIterator cifar = new MyCifar10DataSetIterator(loader, batchSize, 1);
+
             // load model
             MultiLayerNetwork model = localRepository.loadModel();
 

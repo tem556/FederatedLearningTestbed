@@ -4,6 +4,8 @@ import com.bnnthang.fltestbed.commonutils.models.TrainingReport;
 import com.bnnthang.fltestbed.commonutils.utils.SocketUtils;
 import com.bnnthang.fltestbed.commonutils.utils.TimeUtils;
 import org.apache.commons.lang3.SerializationUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -12,6 +14,8 @@ import java.net.Socket;
 import java.time.LocalDateTime;
 
 public class BaseClientOperations implements IClientOperations {
+    private static final Logger _logger = LogManager.getLogger(BaseClientOperations.class);
+
     private static final int BATCH_SIZE = 45;
     private static final int EPOCHS = 2;
 
@@ -71,7 +75,7 @@ public class BaseClientOperations implements IClientOperations {
         byte[] bytes = bos.toByteArray();
         bos.close();
 
-        System.out.println("report length = " + bytes.length);
+        _logger.debug("report length = " + bytes.length);
 
         // send report
         SocketUtils.sendBytesWrapper(socket, bytes);

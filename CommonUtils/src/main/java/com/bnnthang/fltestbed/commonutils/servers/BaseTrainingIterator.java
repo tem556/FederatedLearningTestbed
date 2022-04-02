@@ -4,6 +4,8 @@ import com.bnnthang.fltestbed.commonutils.models.TrainingConfiguration;
 import com.bnnthang.fltestbed.commonutils.models.TrainingReport;
 import lombok.AllArgsConstructor;
 import lombok.NonNull;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.nd4j.evaluation.classification.Evaluation;
 
 import java.rmi.UnexpectedException;
@@ -15,6 +17,11 @@ import java.util.List;
  */
 @AllArgsConstructor
 public final class BaseTrainingIterator extends Thread {
+    /**
+     * Logger.
+     */
+    private static final Logger _logger = LogManager.getLogger(BaseTrainingIterator.class);
+
     /**
      * Supported operations.
      */
@@ -44,7 +51,7 @@ public final class BaseTrainingIterator extends Thread {
                  currentRound <= configuration.getRounds();
                  ++currentRound) {
 
-                System.out.println("current round = " + currentRound);
+                _logger.debug("current round = " + currentRound);
 
                 // offload model to clients
                 // TODO: add logic for sending weights only
@@ -64,7 +71,7 @@ public final class BaseTrainingIterator extends Thread {
                             .map(IClientHandler::isTraining)
                             .reduce(false, Boolean::logicalOr);
 
-                    System.out.println("are clients training? = " + areClientsTraining);
+                    _logger.debug("are clients training? = " + areClientsTraining);
 
                     // break if clients finish
                     if (!areClientsTraining) {

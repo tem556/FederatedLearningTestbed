@@ -3,8 +3,9 @@ package com.bnnthang.fltestbed.commonutils.servers;
 import com.bnnthang.fltestbed.commonutils.models.ServerParameters;
 import com.bnnthang.fltestbed.commonutils.models.TrainingReport;
 import lombok.Getter;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.deeplearning4j.nn.multilayer.MultiLayerNetwork;
-import org.deeplearning4j.util.ModelSerializer;
 import org.nd4j.evaluation.classification.Evaluation;
 
 import java.io.IOException;
@@ -13,7 +14,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class BaseServerOperations implements IServerOperations {
+    /**
+     * Logger.
+     */
+    private static final Logger _logger = LogManager.getLogger(BaseServerOperations.class);
+
     private final IServerLocalRepository localRepository;
+
     private BaseTrainingIterator trainingIterator;
 
     @Getter
@@ -40,16 +47,20 @@ public class BaseServerOperations implements IServerOperations {
 
     @Override
     public void pushDatasetToClients(List<IClientHandler> clients, float ratio) throws IOException {
+        _logger.debug("splitting dataset");
+
         // TODO: not to do this in memory
-        System.out.println("spliting dataset");
         List<byte[]> partitions = localRepository.partitionAndSerializeDataset(acceptedClients.size(), ratio);
-        System.out.println("pushing to clients");
+
+        _logger.debug("pushing to client");
+
         // TODO: parallelize this
         for (int i = 0; i < clients.size(); ++i) {
             // send to client
             clients.get(i).pushDataset(partitions.get(i));
         }
-        System.out.println("pushed all clients");
+
+        _logger.debug("pushed to all clients");
     }
 
     @Override
@@ -60,21 +71,25 @@ public class BaseServerOperations implements IServerOperations {
         for (IClientHandler client : clients) {
             client.pushModel(client.hasLocalModel() ? weightBytes : modelBytes);
         }
-        System.out.println("pushed model to all clients");
+
+        _logger.debug("pushed model to all clients");
     }
 
     @Override
-    public void trainOrElse(ServerParameters serverParameters) throws IOException {
+    public Boolean trainOrElse(ServerParameters serverParameters) throws IOException {
         if (acceptedClients.size() >= serverParameters.getTrainingConfiguration().getMinClients()) {
-            System.out.println("triggered training");
+            _logger.debug("triggered training");
 
             // create result file
             localRepository.createNewResultFile();
 
             trainingIterator = new BaseTrainingIterator(this, acceptedClients, serverParameters.getTrainingConfiguration());
             trainingIterator.start();
+
+            return true;
         } else {
-            System.out.println("not good for training");
+            _logger.debug("not good for training");
+            return false;
         }
     }
 

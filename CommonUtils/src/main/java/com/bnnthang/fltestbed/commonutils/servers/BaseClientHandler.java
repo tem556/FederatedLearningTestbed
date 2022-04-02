@@ -3,6 +3,8 @@ package com.bnnthang.fltestbed.commonutils.servers;
 import com.bnnthang.fltestbed.commonutils.enums.ClientCommandEnum;
 import com.bnnthang.fltestbed.commonutils.models.TrainingReport;
 import com.bnnthang.fltestbed.commonutils.utils.SocketUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.nd4j.common.util.SerializationUtils;
 
 import java.io.IOException;
@@ -11,7 +13,10 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 
 public class BaseClientHandler implements IClientHandler {
+    private static final Logger _logger = LogManager.getLogger(BaseClientHandler.class);
+
     private final Socket socket;
+
     private boolean localModel;
 
     private Double uplinkTime;
@@ -45,16 +50,13 @@ public class BaseClientHandler implements IClientHandler {
 
     @Override
     public void pushModel(byte[] bytes) throws IOException {
-        if (localModel) {
-            System.out.println("pushing weights");
-        } else {
-            System.out.println("pushing");
-        }
-        localModel = true;
+        _logger.debug(localModel ? "pushing weights" : "pushing");
 
+        localModel = true;
         SocketUtils.sendInteger(socket, ClientCommandEnum.MODELPUSH.ordinal());
         SocketUtils.sendBytesWrapper(socket, bytes);
-        System.out.println("pushed model length = " + bytes.length);
+
+        _logger.debug("pushed model length = " + bytes.length);
     }
 
     @Override
