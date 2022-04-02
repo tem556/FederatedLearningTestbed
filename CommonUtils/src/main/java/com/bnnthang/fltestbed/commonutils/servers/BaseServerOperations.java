@@ -111,27 +111,33 @@ public class BaseServerOperations implements IServerOperations {
     public void evaluateCurrentModel(List<TrainingReport> trainingReports) throws IOException {
         Evaluation evaluation = localRepository.evaluateCurrentModel();
 
-        // calculate avg uplink time
-        double sumUplinkTime = acceptedClients.stream().map(IClientHandler::getUplinkTime).reduce(0.0, Double::sum);
-        double avgUplinkTime = sumUplinkTime / acceptedClients.size();
-
         // calculate avg training time
         double sumTrainingTime = trainingReports.stream().map(TrainingReport::getTrainingTime).reduce(0.0, Double::sum);
         double avgTrainingTime = sumTrainingTime / acceptedClients.size();
+
+        // calculate avg uplink time
+        double sumUplinkTime = acceptedClients.stream().map(IClientHandler::getUplinkTime).reduce(0.0, Double::sum);
+        double avgUplinkTime = sumUplinkTime / acceptedClients.size();
 
         // calculate avg downlink time
         double sumDownlinkTime = trainingReports.stream().map(TrainingReport::getDownlinkTime).reduce(0.0, Double::sum);
         double avgDownlinkTime = sumDownlinkTime / acceptedClients.size();
 
-        // accuracy, precision, recall, f1, training time (ms), downlink time (ms), uplink time (ms)
-        String evalString = String.format("%f,%f,%f,%f,%f,%f,%f\n",
+        // calculate avg power consumption
+        double sumPower = trainingReports.stream().map(x -> x.getCommunicationPower().getPowerConsumption()).reduce(0.0, Double::sum);
+        double avgPower = sumPower / acceptedClients.size();
+
+        // TODO: move this to repo logic
+        // accuracy, precision, recall, f1, training time (ms), downlink time (ms), uplink time (ms), power (j)
+        String evalString = String.format("%f,%f,%f,%f,%f,%f,%f,%f\n",
                 evaluation.accuracy(),
                 evaluation.precision(),
                 evaluation.recall(),
                 evaluation.f1(),
                 avgTrainingTime,
                 avgDownlinkTime,
-                avgUplinkTime);
+                avgUplinkTime,
+                avgPower);
         localRepository.appendToCurrentFile(evalString);
     }
 }

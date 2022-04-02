@@ -1,6 +1,7 @@
 package com.bnnthang.fltestbed.Client;
 
 import com.bnnthang.fltestbed.commonutils.clients.IClientLocalRepository;
+import com.bnnthang.fltestbed.commonutils.models.PowerConsumptionFromBytes;
 import com.bnnthang.fltestbed.commonutils.utils.SocketUtils;
 import lombok.NonNull;
 import org.apache.commons.lang3.SerializationUtils;
@@ -54,6 +55,27 @@ public class LocalRepositoryImpl implements IClientLocalRepository {
         model.save(new File(pathToModel), true);
         model.close();
         return (long) bytes.length;
+    }
+
+    @Override
+    public Long downloadModel(Socket socket, PowerConsumptionFromBytes power) throws IOException {
+        Long readBytes = downloadModel(socket);
+        power.increasePowerConsumption(readBytes);
+        return readBytes;
+    }
+
+    @Override
+    public Long downloadDataset(Socket socket, PowerConsumptionFromBytes power) throws IOException {
+        Long readBytes = downloadDataset(socket);
+        power.increasePowerConsumption(readBytes);
+        return readBytes;
+    }
+
+    @Override
+    public Long updateModel(Socket socket, PowerConsumptionFromBytes power) throws IOException {
+        Long readBytes = updateModel(socket);
+        power.increasePowerConsumption(readBytes);
+        return readBytes;
     }
 
     @Override

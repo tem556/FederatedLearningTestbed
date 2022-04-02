@@ -26,13 +26,19 @@ public class TrainingReport implements Serializable {
     private Double trainingTime;
 
     /**
-     * Total time for clients to download resources from server (milliseconds per byte)
+     * Total time for clients to download resources from server (milliseconds per byte).
      */
     private Double downlinkTime;
+
+    /**
+     * Communication power consumption (joules).
+     */
+    private PowerConsumptionFromBytes communicationPower;
 
     public TrainingReport() {
         params = null;
         trainingTime = null;
         downlinkTime = null;
+        communicationPower = new PowerConsumptionFromBytes();
     }
 }
