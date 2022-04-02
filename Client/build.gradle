@@ -1,11 +1,12 @@
 plugins {
     id 'java'
     id 'application'
-//    id 'jar'
 }
 
 group 'com.bnnthang.fltestbed'
 version '1.0-SNAPSHOT'
+sourceCompatibility = 12
+targetCompatibility = 12
 
 repositories {
     mavenCentral()
@@ -26,9 +27,13 @@ dependencies {
 
     implementation 'com.bnnthang.fltestbed:commonutils:1.21-SNAPSHOT'
     implementation 'org.deeplearning4j:deeplearning4j-core:1.0.0-M2'
-    implementation 'org.nd4j:nd4j-native:1.0.0-M2'
     implementation group: 'org.nd4j', name: 'nd4j-native-platform', version: '1.0.0-M2'
     implementation group: 'org.bytedeco', name: 'javacv-platform', version: '1.5.7'
+    implementation 'org.apache.logging.log4j:log4j-api:2.17.2'
+    implementation 'org.apache.logging.log4j:log4j-core:2.17.2'
+
+    implementation 'org.slf4j:slf4j-simple:1.7.36'
+
     compileOnly 'org.projectlombok:lombok:1.18.22'
 }
 
@@ -44,5 +49,6 @@ task uberJar(type: Jar) {
         configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
     }
     with jar
-    exclude("META-INF/**")
+//    exclude("META-INF/**")
+    duplicatesStrategy = 'include'
 }
