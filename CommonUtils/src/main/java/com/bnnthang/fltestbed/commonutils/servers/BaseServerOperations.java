@@ -8,9 +8,13 @@ import org.apache.logging.log4j.Logger;
 import org.deeplearning4j.nn.multilayer.MultiLayerNetwork;
 import org.nd4j.evaluation.classification.Evaluation;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.List;
 
 public class BaseServerOperations implements IServerOperations {
@@ -51,6 +55,12 @@ public class BaseServerOperations implements IServerOperations {
 
         // TODO: not to do this in memory
         List<byte[]> partitions = localRepository.partitionAndSerializeDataset(acceptedClients.size(), ratio);
+
+//        File f = new File("C:\\Users\\buinn\\DoNotTouch\\crap\\photolabeller\\crap\\debug_dataset.txt");
+//        f.createNewFile();
+//        FileOutputStream os = new FileOutputStream(f);
+//        os.write(partitions.get(0));
+//        os.close();
 
         _logger.debug("pushing to client");
 

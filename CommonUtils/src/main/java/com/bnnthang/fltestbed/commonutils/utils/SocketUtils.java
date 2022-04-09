@@ -1,19 +1,24 @@
 package com.bnnthang.fltestbed.commonutils.utils;
 
 import com.bnnthang.fltestbed.commonutils.models.PowerConsumptionFromBytes;
+import org.apache.commons.lang3.ArrayUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.nd4j.shade.guava.primitives.Ints;
 
-import java.io.IOException;
-import java.io.OutputStream;
+import java.io.*;
 import java.net.Socket;
+import java.util.Base64;
 
 public final class SocketUtils {
+    private static final Logger _logger = LogManager.getLogger(SocketUtils.class);
+
     private SocketUtils() { }
 
     /**
      * Maximum buffer size.
      */
-    private static final int BUFFER_SIZE = 2048;
+    private static final int BUFFER_SIZE = 3072;
 
     /**
      * Enhanced wrapper for <code>sendBytes</code>.
@@ -44,8 +49,7 @@ public final class SocketUtils {
         int current = 0;
         while (current < size) {
             // read to buffer
-            int readBytes = socket.getInputStream()
-                    .read(buffer, 0, Integer.min(BUFFER_SIZE, size - current));
+            int readBytes = socket.getInputStream().read(buffer, 0, Integer.min(BUFFER_SIZE, size - current));
 
             // copy to result
             System.arraycopy(buffer, 0, bytes, current, readBytes);
@@ -72,26 +76,21 @@ public final class SocketUtils {
     public static Long readAndSaveBytes(final Socket socket, final OutputStream outputStream) throws IOException {
         // read the expected length
         int size = readInteger(socket);
+        _logger.debug("reading dataset length = " + size);
 
-        // initialize the buffer and counter
-        byte[] buffer = new byte[BUFFER_SIZE];
         int current = 0;
-
-        // read until reach the expected length
         while (current < size) {
-            // read to buffer
-            int readBytes = socket.getInputStream().read(buffer, 0, Integer.min(BUFFER_SIZE, size - current));
+            int toRead = Integer.min(BUFFER_SIZE, size - current);
+            byte[] buf = new byte[toRead];
+            int bytesRead = socket.getInputStream().read(buf);
 
-            // save to file
-            outputStream.write(buffer);
+            _logger.debug(String.format("to read %d read %d", toRead, buf.length));
+
+            outputStream.write(buf);
             outputStream.flush();
 
-            // increase the counter
-            current += readBytes;
-        }
-
-        if (current > size) {
-            throw new IOException(String.format("read: %d bytes, expected: %d bytes", current, size));
+            current += bytesRead;
+            _logger.debug("so far: " + current);
         }
 
         return (long) size;
@@ -110,6 +109,28 @@ public final class SocketUtils {
      * @throws IOException if I/O errors occur
      */
     public static void sendBytes(final Socket socket, final byte[] bytes) throws IOException {
+
+//        File f = new File("C:\\Users\\buinn\\DoNotTouch\\crap\\photolabeller\\crap\\debug_dataset1.txt");
+//        f.createNewFile();
+//        PrintWriter writer = new PrintWriter(f);
+//        for (byte i : bytes) {
+//            writer.println(i);
+//            writer.flush();
+//        }
+//        writer.close();
+
+//        int i = 0;
+//        while (i < bytes.length) {
+//            int nBytesToSend = Integer.min(bytes.length - i, BUFFER_SIZE);
+//            byte[] bytesToSend = ArrayUtils.subarray(bytes, i, i + nBytesToSend);
+//            socket.getOutputStream().write(bytesToSend);
+//            socket.getOutputStream().flush();
+//            i += nBytesToSend;
+//
+//            _logger.debug("sent " + nBytesToSend + " bytes");
+////            _logger.debug(String.format("sending... %d %d %d", bytesToSend[0], bytesToSend[1], bytesToSend[2]));
+//        }
+
         socket.getOutputStream().write(bytes);
         socket.getOutputStream().flush();
     }
@@ -128,8 +149,7 @@ public final class SocketUtils {
      */
     public static byte[] readBytes(final Socket socket, final Integer expectedBytes) throws IOException {
         byte[] buffer = new byte[expectedBytes];
-        Integer actualBytes = socket.getInputStream()
-                .read(buffer, 0, expectedBytes);
+        Integer actualBytes = socket.getInputStream().read(buffer, 0, expectedBytes);
         if (!actualBytes.equals(expectedBytes)) {
             throw new IOException("read less bytes than expected");
         }
@@ -149,6 +169,7 @@ public final class SocketUtils {
      * @throws IOException if I/O errors occur
      */
     public static void sendInteger(final Socket socket, final Integer integer) throws IOException {
+        _logger.debug("sending integer = " + integer);
         sendBytes(socket, Ints.toByteArray(integer));
     }
 

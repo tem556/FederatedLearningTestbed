@@ -77,9 +77,9 @@ public class Cifar10Repository implements IServerLocalRepository {
         for (int i = 0; i < nPartitions; ++i) {
             res.add(new ArrayList<>());
             for (int j = 0; j < partitions.get(i).size(); ++j) {
-                byte[] t = new byte[partitions.get(i).get(j).getLeft().length + 1];
+                byte[] t = new byte[32 * 32 * 3 + 1];
                 t[0] = partitions.get(i).get(j).getRight();
-                System.arraycopy(partitions.get(i).get(j).getLeft(), 0, t, 1, partitions.get(i).get(j).getLeft().length);
+                System.arraycopy(partitions.get(i).get(j).getLeft(), 0, t, 1, 32 * 32 * 3);
                 res.get(i).add(t);
             }
         }
@@ -105,9 +105,13 @@ public class Cifar10Repository implements IServerLocalRepository {
         byte[] res = new byte[length];
         int cnt = 0;
         for (byte[] bytes : dataset) {
+//            _logger.debug(String.format("??? %d %d %d %d", bytes[0], bytes[1], bytes[2], bytes[3]));
             System.arraycopy(bytes, 0, res, cnt, bytes.length);
             cnt += bytes.length;
         }
+//        if (cnt != (32 * 32 * 3 + 1) * dataset.size()) {
+//            _logger.error("wrong dataset!");
+//        }
         return res;
     }
 

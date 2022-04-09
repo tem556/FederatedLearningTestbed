@@ -60,7 +60,9 @@ public class BaseClientOperations implements IClientOperations {
 
     @Override
     public void handleDatasetPush(Socket socket) throws IOException {
+        _logger.debug("start dataset read");
         localRepository.downloadDataset(socket, trainingReport.getCommunicationPower());
+        _logger.debug("end dataset read");
     }
 
     @Override

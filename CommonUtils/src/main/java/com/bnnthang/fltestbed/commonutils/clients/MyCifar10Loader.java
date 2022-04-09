@@ -1,5 +1,7 @@
 package com.bnnthang.fltestbed.commonutils.clients;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.datavec.image.loader.NativeImageLoader;
 import org.nd4j.common.primitives.Pair;
 import org.nd4j.linalg.api.ndarray.INDArray;
@@ -10,10 +12,7 @@ import org.opencv.core.CvType;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class MyCifar10Loader {
     /**
@@ -51,6 +50,10 @@ public class MyCifar10Loader {
      */
     private IClientLocalRepository localRepository;
 
+    /**
+     * Logger.
+     */
+    private static final Logger _logger = LogManager.getLogger(MyCifar10Loader.class);
 
     /**
      * Instantiate <code>MyCifar10Loader</code>
@@ -80,7 +83,10 @@ public class MyCifar10Loader {
         InputStream inputStream = localRepository.getDatasetInputStream();
 
         // read until end of file
+        int cnt = 0;
         while (inputStream.available() >= ROW_SIZE) {
+//            _logger.debug("image id = " + cnt);
+            ++cnt;
             Pair<Byte, byte[]> row = readOneRow(inputStream);
             Integer currentFrequency = frequency.getOrDefault((int) row.getFirst(), 0);
             frequency.put((int) row.getFirst(), currentFrequency + 1);
@@ -144,6 +150,12 @@ public class MyCifar10Loader {
         byte[] labelBytes = new byte[LABEL_SIZE];
         byte[] imageBytes = new byte[IMAGE_SIZE];
         int bytesRead = inputStream.read(labelBytes) + inputStream.read(imageBytes);
+
+//        if (_logger.isDebugEnabled()) {
+//            _logger.debug("label = " + labelBytes[0]);
+//            _logger.debug("img = " + Arrays.asList(imageBytes[0], imageBytes[1], imageBytes[2]));
+//        }
+
         if (bytesRead != ROW_SIZE) {
             throw new IOException(String.format("didn't read enough %d bytes", ROW_SIZE));
         }

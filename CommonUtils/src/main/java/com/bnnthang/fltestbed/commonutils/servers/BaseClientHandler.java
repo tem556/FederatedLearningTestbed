@@ -46,6 +46,9 @@ public class BaseClientHandler implements IClientHandler {
         // TODO: think of an alternative to send dataset
         SocketUtils.sendInteger(socket, ClientCommandEnum.DATASETPUSH.ordinal());
         SocketUtils.sendBytesWrapper(socket, bytes);
+//        SocketUtils.sendBytesBase64Wrapper(socket, bytes);
+
+        _logger.debug("pushed dataset length = " + bytes.length);
     }
 
     @Override

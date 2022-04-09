@@ -70,7 +70,7 @@ public class BaseClient extends Thread {
 
         do {
             // skip if there is nothing to read
-            if (!SocketUtils.availableToRead(socket)) {
+            if (socket.getInputStream().available() < 4) {
                 sleep(delayInterval);
                 continue;
             }
