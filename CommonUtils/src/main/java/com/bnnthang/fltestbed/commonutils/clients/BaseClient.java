@@ -94,7 +94,7 @@ public class BaseClient extends Thread {
             throw new IllegalArgumentException(String.format("got unexpected command index: %d", commandIndex));
         }
 
-        _logger.debug("recv command = " + commandIndex);
+//        _logger.debug("recv command = " + commandIndex);
 
         switch (ClientCommandEnum.values()[commandIndex]) {
             case ACCEPTED:

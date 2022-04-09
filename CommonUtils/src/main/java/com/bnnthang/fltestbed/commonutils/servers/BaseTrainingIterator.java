@@ -71,7 +71,7 @@ public final class BaseTrainingIterator extends Thread {
                             .map(IClientHandler::isTraining)
                             .reduce(false, Boolean::logicalOr);
 
-                    _logger.debug("are clients training? = " + areClientsTraining);
+//                    _logger.debug("are clients training? = " + areClientsTraining);
 
                     // break if clients finish
                     if (!areClientsTraining) {

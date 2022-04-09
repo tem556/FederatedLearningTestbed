@@ -1,14 +1,12 @@
 package com.bnnthang.fltestbed.commonutils.utils;
 
 import com.bnnthang.fltestbed.commonutils.models.PowerConsumptionFromBytes;
-import org.apache.commons.lang3.ArrayUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.nd4j.shade.guava.primitives.Ints;
 
 import java.io.*;
 import java.net.Socket;
-import java.util.Base64;
 
 public final class SocketUtils {
     private static final Logger _logger = LogManager.getLogger(SocketUtils.class);
@@ -18,7 +16,7 @@ public final class SocketUtils {
     /**
      * Maximum buffer size.
      */
-    private static final int BUFFER_SIZE = 3072;
+    private static final int BUFFER_SIZE = 8192;
 
     /**
      * Enhanced wrapper for <code>sendBytes</code>.
@@ -84,13 +82,13 @@ public final class SocketUtils {
             byte[] buf = new byte[toRead];
             int bytesRead = socket.getInputStream().read(buf);
 
-            _logger.debug(String.format("to read %d read %d", toRead, buf.length));
+//            _logger.debug(String.format("to read %d read %d", toRead, bytesRead));
 
-            outputStream.write(buf);
+            outputStream.write(buf, 0, bytesRead);
             outputStream.flush();
 
             current += bytesRead;
-            _logger.debug("so far: " + current);
+//            _logger.debug("so far: " + current);
         }
 
         return (long) size;
@@ -109,28 +107,6 @@ public final class SocketUtils {
      * @throws IOException if I/O errors occur
      */
     public static void sendBytes(final Socket socket, final byte[] bytes) throws IOException {
-
-//        File f = new File("C:\\Users\\buinn\\DoNotTouch\\crap\\photolabeller\\crap\\debug_dataset1.txt");
-//        f.createNewFile();
-//        PrintWriter writer = new PrintWriter(f);
-//        for (byte i : bytes) {
-//            writer.println(i);
-//            writer.flush();
-//        }
-//        writer.close();
-
-//        int i = 0;
-//        while (i < bytes.length) {
-//            int nBytesToSend = Integer.min(bytes.length - i, BUFFER_SIZE);
-//            byte[] bytesToSend = ArrayUtils.subarray(bytes, i, i + nBytesToSend);
-//            socket.getOutputStream().write(bytesToSend);
-//            socket.getOutputStream().flush();
-//            i += nBytesToSend;
-//
-//            _logger.debug("sent " + nBytesToSend + " bytes");
-////            _logger.debug(String.format("sending... %d %d %d", bytesToSend[0], bytesToSend[1], bytesToSend[2]));
-//        }
-
         socket.getOutputStream().write(bytes);
         socket.getOutputStream().flush();
     }
@@ -169,7 +145,7 @@ public final class SocketUtils {
      * @throws IOException if I/O errors occur
      */
     public static void sendInteger(final Socket socket, final Integer integer) throws IOException {
-        _logger.debug("sending integer = " + integer);
+//        _logger.debug("sending integer = " + integer);
         sendBytes(socket, Ints.toByteArray(integer));
     }
 

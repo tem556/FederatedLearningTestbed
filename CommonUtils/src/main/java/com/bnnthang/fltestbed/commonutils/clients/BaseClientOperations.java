@@ -87,7 +87,7 @@ public class BaseClientOperations implements IClientOperations {
         byte[] bytes = bos.toByteArray();
         bos.close();
 
-        _logger.debug("report length = " + bytes.length);
+//        _logger.debug("report length = " + bytes.length);
 
         // send report
         SocketUtils.sendBytesWrapper(socket, bytes, trainingReport.getCommunicationPower());

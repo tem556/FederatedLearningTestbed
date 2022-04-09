@@ -33,6 +33,6 @@ cd build
 cmake -DBUILD_SHARED_LIBS=OFF -D BUILD_PERF_TESTS=OFF -D BUILD_opencv_python=OFF -D CMAKE_INSTALL_PREFIX=../../thang_opencv -D PYTHON_DEFAULT_EXECUTABLE=$(which python3) ..
 make
 
-printf "done... check %s" $(pwd)
+printf "done... check %s\n" $(pwd)
 
 cd ~
