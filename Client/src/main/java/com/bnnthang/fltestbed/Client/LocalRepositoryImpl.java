@@ -99,7 +99,6 @@ public class LocalRepositoryImpl implements IClientLocalRepository {
 
         // download and write to model file
         FileOutputStream datasetFileOutputStream = new FileOutputStream(datasetFile);
-//        Long readBytes = SocketUtils.readAndSaveBytesBase64(socket, datasetFileOutputStream);
         Long readBytes = SocketUtils.readAndSaveBytes(socket, datasetFileOutputStream);
         datasetFileOutputStream.close();
 
