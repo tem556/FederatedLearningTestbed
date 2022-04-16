@@ -59,7 +59,7 @@ public class Cifar10TrainingWorker extends Thread {
             report.setParams(model.params().dup());
             report.setTrainingTime(TimeUtils.millisecondsBetween(startTime, endTime));
 
-            model.close();
+//            model.close();
         } catch (IOException e) {
             e.printStackTrace();
         }

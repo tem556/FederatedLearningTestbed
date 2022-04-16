@@ -53,7 +53,7 @@ public class LocalRepositoryImpl implements IClientLocalRepository {
         MultiLayerNetwork model = ModelSerializer.restoreMultiLayerNetwork(pathToModel);
         model.setParams(params);
         model.save(new File(pathToModel), true);
-        model.close();
+//        model.close();
         return (long) bytes.length;
     }
 
