@@ -1,5 +1,6 @@
 package com.bnnthang.fltestbed.commonutils.clients;
 
+import com.bnnthang.fltestbed.commonutils.models.ICifar10Loader;
 import com.bnnthang.fltestbed.commonutils.models.TrainingReport;
 import com.bnnthang.fltestbed.commonutils.utils.SocketUtils;
 import com.bnnthang.fltestbed.commonutils.utils.TimeUtils;
@@ -16,24 +17,36 @@ public class BaseClientOperations implements IClientOperations {
     private static final Logger _logger = LogManager.getLogger(BaseClientOperations.class);
 
     private static final double AVG_POWER_PER_BYTE = 15.0;
-    private static final int BATCH_SIZE = 45;
+
+    private static final double AVG_POWER_PER_MFLOP = 0.009;
+
+    private static final int BATCH_SIZE = 33;
+
     private static final int EPOCHS = 2;
 
+    private double mflops = 0.0;
+
     private final IClientLocalRepository localRepository;
+
     private Cifar10TrainingWorker trainingWorker;
 
     private TrainingReport trainingReport;
 
-    public BaseClientOperations(IClientLocalRepository _localRepository) {
-        localRepository = _localRepository;
-        trainingReport = new TrainingReport();
-        trainingReport.getCommunicationPower().setAvgPowerPerBytes(AVG_POWER_PER_BYTE);
-    }
+    private ICifar10Loader _cifar10Loader;
 
-    public BaseClientOperations(IClientLocalRepository _localRepository, Double avgPowerPerByte) {
+    private Boolean _needToCloseModel;
+
+    public BaseClientOperations(IClientLocalRepository _localRepository,
+                                Double avgPowerPerByte,
+                                Double _mflops,
+                                ICifar10Loader cifar10Loader,
+                                Boolean needToCloseModel) {
         localRepository = _localRepository;
         trainingReport = new TrainingReport();
         trainingReport.getCommunicationPower().setAvgPowerPerBytes(avgPowerPerByte);
+        mflops = _mflops;
+        _cifar10Loader = cifar10Loader;
+        _needToCloseModel = needToCloseModel;
     }
 
     @Override
@@ -67,7 +80,14 @@ public class BaseClientOperations implements IClientOperations {
 
     @Override
     public void handleTrain() {
-        trainingWorker = new Cifar10TrainingWorker(localRepository, trainingReport, BATCH_SIZE, EPOCHS);
+        trainingWorker = new Cifar10TrainingWorker(
+                localRepository,
+                trainingReport,
+                BATCH_SIZE,
+                EPOCHS,
+                () -> _cifar10Loader,
+                _needToCloseModel);
+        trainingReport.setComputingPower(mflops * EPOCHS * AVG_POWER_PER_MFLOP);
         trainingWorker.start();
     }
 

@@ -1,4 +1,4 @@
-package com.bnnthang.fltestbed.commonutils.clients;
+package com.bnnthang.fltestbed.commonutils.models;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -8,24 +8,25 @@ import org.nd4j.linalg.dataset.DataSet;
 import java.io.IOException;
 import java.util.Map;
 
-public class MyCifar10DataSetIterator extends RecordReaderDataSetIterator {
-    private static final Logger _logger = LogManager.getLogger(MyCifar10DataSetIterator.class);
+public class BaseCifar10DataSetIterator extends RecordReaderDataSetIterator {
+    private static final Logger _logger = LogManager.getLogger(BaseCifar10DataSetIterator.class);
 
     private int counter = 0;
+
     private int numSamples = 0;
 
-    public MyCifar10Loader _loader;
+    public ICifar10Loader _loader;
 
-    public MyCifar10DataSetIterator(MyCifar10Loader loader,
-                                    int batchSize,
-                                    int labelIndex) throws IOException {
+    public BaseCifar10DataSetIterator(ICifar10Loader loader,
+                                      int batchSize,
+                                      int labelIndex) throws IOException {
         this(loader, batchSize, labelIndex, 123456789);
     }
 
-    public MyCifar10DataSetIterator(MyCifar10Loader loader,
-                                    int batchSize,
-                                    int labelIndex,
-                                    int _numSamples) throws IOException {
+    public BaseCifar10DataSetIterator(ICifar10Loader loader,
+                                      int batchSize,
+                                      int labelIndex,
+                                      int _numSamples) throws IOException {
         super(null, batchSize, labelIndex, 10);
         _loader = loader;
         numSamples = _numSamples;

@@ -3,6 +3,7 @@ package com.bnnthang.fltestbed.commonutils.clients;
 import com.bnnthang.fltestbed.commonutils.models.PowerConsumptionFromBytes;
 import org.deeplearning4j.nn.multilayer.MultiLayerNetwork;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.Socket;
@@ -19,4 +20,5 @@ public interface IClientLocalRepository {
     Boolean datasetExists();
     Long getDatasetSize() throws IOException;
     InputStream getDatasetInputStream() throws IOException;
+    File getModelFile() throws IOException;
 }

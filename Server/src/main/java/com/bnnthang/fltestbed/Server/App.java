@@ -55,7 +55,8 @@ public class App {
     }
 
     private static void ml() throws IOException {
-        ML.trainAndEval();
+//        ML.trainAndEval();
+        ML.trainAndEvalDefault();
     }
 
     private static void fl(String[] args) throws IOException, InterruptedException, URISyntaxException {

@@ -165,7 +165,7 @@ public class Cifar10Repository implements IServerLocalRepository {
         File newResultFile = new File(workingDirectory, newResultFileName);
         if (newResultFile.createNewFile()) {
             FileWriter writer = new FileWriter(newResultFile, true);
-            writer.write("accuracy,precision,recall,f1,training time (s),downlink time (s),uplink time (s),power (j)\n");
+            writer.write("accuracy,precision,recall,f1,training time (ms),downlink time (ms),uplink time (ms),communicating power (j), computing power (j)\n");
             writer.close();
         } else {
             throw new IOException("cannot create file");

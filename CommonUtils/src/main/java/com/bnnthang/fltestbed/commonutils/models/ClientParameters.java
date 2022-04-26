@@ -16,4 +16,7 @@ public class ClientParameters {
 
     @NonNull
     private Integer numClients;
+
+    @NonNull
+    private Double mflopsPerRound;
 }

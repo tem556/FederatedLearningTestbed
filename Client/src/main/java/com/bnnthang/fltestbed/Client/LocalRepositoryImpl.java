@@ -53,7 +53,8 @@ public class LocalRepositoryImpl implements IClientLocalRepository {
         MultiLayerNetwork model = ModelSerializer.restoreMultiLayerNetwork(pathToModel);
         model.setParams(params);
         model.save(new File(pathToModel), true);
-//        model.close();
+        model.close();
+
         return (long) bytes.length;
     }
 
@@ -122,5 +123,10 @@ public class LocalRepositoryImpl implements IClientLocalRepository {
     @Override
     public InputStream getDatasetInputStream() throws IOException {
         return new FileInputStream(pathToDataset);
+    }
+
+    @Override
+    public File getModelFile() throws IOException {
+        return new File(pathToModel);
     }
 }

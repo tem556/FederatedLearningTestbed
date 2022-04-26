@@ -20,6 +20,8 @@ public class TrainingReport implements Serializable {
      */
     private INDArray params;
 
+//    private INDArray stateViewArray;
+
     /**
      * Training time (in milliseconds).
      */
@@ -31,14 +33,20 @@ public class TrainingReport implements Serializable {
     private Double downlinkTime;
 
     /**
-     * Communication power consumption (joules).
+     * Communicating power consumption (joules).
      */
     private PowerConsumptionFromBytes communicationPower;
+
+    /**
+     * Computing power consumption (joules)
+     */
+    private Double computingPower;
 
     public TrainingReport() {
         params = null;
         trainingTime = null;
         downlinkTime = null;
         communicationPower = new PowerConsumptionFromBytes();
+        computingPower = null;
     }
 }

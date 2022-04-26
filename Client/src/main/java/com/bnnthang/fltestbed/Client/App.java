@@ -1,7 +1,9 @@
 package com.bnnthang.fltestbed.Client;
 
 import com.bnnthang.fltestbed.commonutils.clients.*;
+import com.bnnthang.fltestbed.commonutils.models.BaseCifar10Loader;
 import com.bnnthang.fltestbed.commonutils.models.ClientParameters;
+import com.bnnthang.fltestbed.commonutils.models.ICifar10Loader;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -18,9 +20,16 @@ public class App {
     private static final Logger _logger = LogManager.getLogger(App.class);
 
     private static final String DEFAULT_SERVER_HOST = "127.0.0.1";
+
     private static final int DEFAULT_SERVER_PORT = 4602;
+
     private static final String DEFAULT_WORK_DIR = "C:/Users/buinn/DoNotTouch/crap/testbed";
+
     private static final int DEFAULT_NUM_CLIENTS = 1;
+
+    private static final double DEFAULT_MFLOPS = 218673.155;
+
+    private static final double AVG_POWER_PER_BYTE = 15.0;
 
     public static void main(String[] args) throws IOException, InterruptedException {
         if (args[0].equals("--native")) {
@@ -51,7 +60,7 @@ public class App {
         ML.trainAndEval();
     }
 
-    private static void fl(String args[]) throws IOException, InterruptedException {
+    private static void fl(String[] args) throws IOException, InterruptedException {
         ClientParameters parameters = parseParameters(args);
 
         List<BaseClient> clientPool = new ArrayList<>();
@@ -66,7 +75,13 @@ public class App {
             String pathToModel = clientDir + "/model.zip";
             String pathToDataset = clientDir + "/dataset";
             IClientLocalRepository localRepository = new LocalRepositoryImpl(pathToModel, pathToDataset);
-            IClientOperations clientOperations = new BaseClientOperations(localRepository);
+            ICifar10Loader loader = new BaseCifar10Loader(localRepository);
+            IClientOperations clientOperations = new BaseClientOperations(
+                    localRepository,
+                    AVG_POWER_PER_BYTE,
+                    parameters.getMflopsPerRound(),
+                    loader,
+                    true);
             BaseClient client = new BaseClient(parameters.getServerHost(), parameters.getServerPort(), 5000, clientOperations);
             client.start();
 
@@ -86,6 +101,7 @@ public class App {
         int port = DEFAULT_SERVER_PORT;
         String workDir = DEFAULT_WORK_DIR;
         int numClients = DEFAULT_NUM_CLIENTS;
+        double mflops = DEFAULT_MFLOPS;
         for (int i = 1; i < args.length; i += 2) {
             switch (args[i]) {
                 case "--host":
@@ -100,10 +116,13 @@ public class App {
                 case "--nclients":
                     numClients = Integer.parseInt(args[i + 1]);
                     break;
+                case "--mflops":
+                    mflops = Double.parseDouble(args[i + 1]);
+                    break;
                 default:
                     throw new UnsupportedOperationException("unsupported parameter: " + args[i]);
             }
         }
-        return new ClientParameters(host, port, workDir, numClients);
+        return new ClientParameters(host, port, workDir, numClients, mflops);
     }
 }

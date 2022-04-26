@@ -8,13 +8,9 @@ import org.apache.logging.log4j.Logger;
 import org.deeplearning4j.nn.multilayer.MultiLayerNetwork;
 import org.nd4j.evaluation.classification.Evaluation;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.Socket;
 import java.util.ArrayList;
-import java.util.Base64;
 import java.util.List;
 
 public class BaseServerOperations implements IServerOperations {
@@ -133,13 +129,17 @@ public class BaseServerOperations implements IServerOperations {
         double sumDownlinkTime = trainingReports.stream().map(TrainingReport::getDownlinkTime).reduce(0.0, Double::sum);
         double avgDownlinkTime = sumDownlinkTime / acceptedClients.size();
 
-        // calculate avg power consumption
-        double sumPower = trainingReports.stream().map(x -> x.getCommunicationPower().getPowerConsumption()).reduce(0.0, Double::sum);
-        double avgPower = sumPower / acceptedClients.size();
+        // calculate avg comm power
+        double sumCommPower = trainingReports.stream().map(x -> x.getCommunicationPower().getPowerConsumption()).reduce(0.0, Double::sum);
+        double avgCommPower = sumCommPower / acceptedClients.size();
+
+        // calculate avg comp power
+        double sumCompPower = trainingReports.stream().map(TrainingReport::getComputingPower).reduce(0.0, Double::sum);
+        double avgCompPower = sumCompPower / acceptedClients.size();
 
         // TODO: move this to repo logic
-        // accuracy, precision, recall, f1, training time (ms), downlink time (ms), uplink time (ms), power (j)
-        String evalString = String.format("%f,%f,%f,%f,%f,%f,%f,%f\n",
+        // accuracy, precision, recall, f1, training time (ms), downlink time (ms), uplink time (ms), comm power (j). comp power (j)
+        String evalString = String.format("%f,%f,%f,%f,%f,%f,%f,%f,%f\n",
                 evaluation.accuracy(),
                 evaluation.precision(),
                 evaluation.recall(),
@@ -147,7 +147,8 @@ public class BaseServerOperations implements IServerOperations {
                 avgTrainingTime,
                 avgDownlinkTime,
                 avgUplinkTime,
-                avgPower);
+                avgCommPower,
+                avgCompPower);
         localRepository.appendToCurrentFile(evalString);
     }
 }
