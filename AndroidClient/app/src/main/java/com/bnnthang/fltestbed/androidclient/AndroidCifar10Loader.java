@@ -11,12 +11,15 @@ import com.bnnthang.fltestbed.commonutils.models.ICifar10Loader;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+//import org.bytedeco.opencv.opencv_core.Mat;
 import org.datavec.image.loader.AndroidNativeImageLoader;
-import org.datavec.image.loader.Java2DNativeImageLoader;
+import org.datavec.image.loader.NativeImageLoader;
 import org.nd4j.common.primitives.Pair;
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.dataset.DataSet;
 import org.nd4j.linalg.util.FeatureUtil;
+import org.opencv.core.CvType;
+import org.opencv.core.Mat;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -64,7 +67,7 @@ public class AndroidCifar10Loader implements ICifar10Loader {
     /**
      * Logger.
      */
-    protected static final Logger _logger = LogManager.getLogger(BaseCifar10Loader.class);
+//    protected static final Logger _logger = LogManager.getLogger(BaseCifar10Loader.class);
 
     /**
      * Instantiate <code>MyCifar10Loader</code>
@@ -142,7 +145,6 @@ public class AndroidCifar10Loader implements ICifar10Loader {
      * @return a corresponding <code>INDArray</code> instance
      * @throws IOException if I/O errors happen
      */
-    @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
     public INDArray bytesToImage(byte[] imageBytes) throws IOException {
         int[] rgbaImage = new int[IMAGE_HEIGHT * IMAGE_WIDTH];
@@ -155,17 +157,20 @@ public class AndroidCifar10Loader implements ICifar10Loader {
             }
         }
 
-//        BufferedImage bufferedImage = new BufferedImage(IMAGE_WIDTH, IMAGE_HEIGHT, BufferedImage.TYPE_INT_RGB);
-        Bitmap bmp = Bitmap.createBitmap(IMAGE_WIDTH, IMAGE_HEIGHT, Bitmap.Config.ARGB_8888);
-        for (int y = 0; y < IMAGE_HEIGHT; ++y) {
-            for (int x = 0; x < IMAGE_WIDTH; ++x) {
-                bmp.setPixel(x, y, rgbaImage[y * IMAGE_WIDTH + x]);
+        Bitmap bmp = Bitmap.createBitmap(rgbaImage, IMAGE_WIDTH, IMAGE_HEIGHT, Bitmap.Config.ARGB_8888);
+        AndroidNativeImageLoader imageLoader = new AndroidNativeImageLoader(IMAGE_HEIGHT, IMAGE_WIDTH, IMAGE_CHANNELS);
+        INDArray arr = imageLoader.asMatrix(bmp);
+
+        for (int y = 0; y < 32; ++y) {
+            for (int x = 0; x < 32; ++x) {
+                double b = arr.getDouble(0, 0, y, x);
+                double r = arr.getDouble(0, 2, y, x);
+                arr.putScalar(0, 0, y, x, r);
+                arr.putScalar(0, 2, y, x, b);
             }
         }
 
-        AndroidNativeImageLoader imageLoader = new AndroidNativeImageLoader(IMAGE_HEIGHT, IMAGE_WIDTH, IMAGE_CHANNELS);
-
-        return imageLoader.asMatrix(bmp);
+        return arr;
     }
 
     /**

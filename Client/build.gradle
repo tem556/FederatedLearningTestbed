@@ -29,6 +29,7 @@ dependencies {
     implementation 'org.deeplearning4j:deeplearning4j-core:1.0.0-M2'
     implementation group: 'org.nd4j', name: 'nd4j-native-platform', version: '1.0.0-M2'
     implementation group: 'org.bytedeco', name: 'javacv-platform', version: '1.5.7'
+    implementation 'org.bytedeco:opencv:4.5.5-1.5.7'
     implementation 'org.apache.logging.log4j:log4j-api:2.17.2'
     implementation 'org.apache.logging.log4j:log4j-core:2.17.2'
 

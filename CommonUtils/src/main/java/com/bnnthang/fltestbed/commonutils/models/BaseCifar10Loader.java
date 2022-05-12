@@ -12,10 +12,7 @@ import org.nd4j.linalg.util.FeatureUtil;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class BaseCifar10Loader implements ICifar10Loader {
     /**
@@ -134,23 +131,23 @@ public class BaseCifar10Loader implements ICifar10Loader {
         int[] rgbImage = new int[IMAGE_HEIGHT * IMAGE_WIDTH];
         for (int y = 0; y < IMAGE_HEIGHT; ++y) {
             for (int x = 0; x < IMAGE_WIDTH; ++x) {
-                int r = imageBytes[y * IMAGE_WIDTH + x];
-                int g = imageBytes[IMAGE_HEIGHT * IMAGE_WIDTH + y * IMAGE_WIDTH + x];
-                int b = imageBytes[2 * IMAGE_HEIGHT * IMAGE_WIDTH + y * IMAGE_WIDTH + x];
-                rgbImage[y * IMAGE_WIDTH + x] = (r << 16) + (g << 8) + b;
+                int r = 0xFF & imageBytes[y * IMAGE_WIDTH + x];
+                int g = 0xFF & imageBytes[IMAGE_HEIGHT * IMAGE_WIDTH + y * IMAGE_WIDTH + x];
+                int b = 0xFF & imageBytes[2 * IMAGE_HEIGHT * IMAGE_WIDTH + y * IMAGE_WIDTH + x];
+                rgbImage[y * IMAGE_WIDTH + x] = (0xFF << 24) + (r << 16) + (g << 8) + b;
             }
         }
 
         BufferedImage bufferedImage = new BufferedImage(IMAGE_WIDTH, IMAGE_HEIGHT, BufferedImage.TYPE_INT_RGB);
         for (int y = 0; y < IMAGE_HEIGHT; ++y) {
             for (int x = 0; x < IMAGE_WIDTH; ++x) {
-                bufferedImage.setRGB(x, y, rgbImage[y * 32 + x]);
+                bufferedImage.setRGB(x, y, rgbImage[y * IMAGE_WIDTH + x]);
             }
         }
 
         Java2DNativeImageLoader imageLoader = new Java2DNativeImageLoader(IMAGE_HEIGHT, IMAGE_WIDTH, IMAGE_CHANNELS);
 
-        return imageLoader.asMatrix(bufferedImage);
+        return imageLoader.asMatrix(bufferedImage, true);
     }
 
     /**

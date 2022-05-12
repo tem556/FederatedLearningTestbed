@@ -16,12 +16,10 @@ import org.deeplearning4j.nn.weights.WeightInit;
 import org.deeplearning4j.optimize.api.InvocationType;
 import org.deeplearning4j.optimize.listeners.EvaluativeListener;
 import org.deeplearning4j.optimize.listeners.ScoreIterationListener;
-import org.nd4j.enums.Mode;
 import org.nd4j.linalg.activations.Activation;
 import org.nd4j.linalg.learning.config.AdaDelta;
 import org.nd4j.linalg.lossfunctions.LossFunctions;
 
-import java.io.File;
 import java.io.IOException;
 
 public class ML {
@@ -86,13 +84,13 @@ public class ML {
 //        MyCifar10Loader loader = new MyCifar10Loader(new File("C:\\Users\\buinn\\DoNotTouch\\crap\\testbed\\dirclient0\\dataset"), 123456);
 //        MyCifar10DataSetIterator dataSetIterator = new MyCifar10DataSetIterator(loader, batchSize, 1, 123456);
 //
-////        Cifar10DataSetIterator cifarEval = new Cifar10DataSetIterator(batchSize, new int[]{height, width}, DataSetType.TEST, null, seed);
+        Cifar10DataSetIterator cifar = new Cifar10DataSetIterator(batchSize, new int[]{height, width}, DataSetType.TRAIN, null, seed);
+        Cifar10DataSetIterator cifarEval = new Cifar10DataSetIterator(batchSize, new int[]{height, width}, DataSetType.TEST, null, seed);
 //        MyCifar10Loader loader1 = new MyCifar10Loader(new File("C:\\Users\\buinn\\cifar\\cifar-10-batches-bin\\test_batch.bin"), 123456);
 //        MyCifar10DataSetIterator cifarEval = new MyCifar10DataSetIterator(loader1, batchSize, 1, 123456);
 //
-//        MultiLayerNetwork model = getModel();
-//        model.setListeners(new ScoreIterationListener(50),
-//                new EvaluativeListener(cifarEval, 1, InvocationType.EPOCH_END));
-//        model.fit(dataSetIterator, epochs);
+        MultiLayerNetwork model = getModel();
+        model.setListeners(new ScoreIterationListener(50), new EvaluativeListener(cifarEval, 1, InvocationType.EPOCH_END));
+        model.fit(cifar, epochs);
     }
 }

@@ -6,12 +6,14 @@ import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.dataset.DataSet;
 import org.nd4j.linalg.util.FeatureUtil;
 
+import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.*;
+import java.util.List;
 
 public class ServerCifar10Loader {
     private File datasetFile;
@@ -121,10 +123,10 @@ public class ServerCifar10Loader {
         int[] rgbImage = new int[1024];
         for (int y = 0; y < 32; ++y) {
             for (int x = 0; x < 32; ++x) {
-                int r = imageBytes[y * 32 + x];
-                int g = imageBytes[1024 + y * 32 + x];
-                int b = imageBytes[2048 + y * 32 + x];
-                rgbImage[y * 32 + x] = (r << 16) + (g << 8) + b;
+                int r = 0xFF & imageBytes[y * 32 + x];
+                int g = 0xFF & imageBytes[1024 + y * 32 + x];
+                int b = 0xFF & imageBytes[2048 + y * 32 + x];
+                rgbImage[y * 32 + x] = new Color(r, g, b).getRGB();
             }
         }
 
@@ -136,7 +138,7 @@ public class ServerCifar10Loader {
         }
 
         Java2DNativeImageLoader imageLoader = new Java2DNativeImageLoader(32, 32, 3);
-        INDArray image = imageLoader.asMatrix(bufferedImage);
+        INDArray image = imageLoader.asMatrix(bufferedImage, true);
 
         return image;
     }
