@@ -1,0 +1,48 @@
+plugins {
+    id "java"
+    id "java-library"
+    id "io.freefair.lombok" version "6.4.3"
+    id "maven-publish"
+}
+
+java {
+    toolchain {
+        languageVersion.set(JavaLanguageVersion.of(8))
+    }
+}
+
+group 'com.bnnthang.fltestbed'
+version '1.0-SNAPSHOT'
+
+repositories {
+    mavenLocal()
+    mavenCentral()
+}
+
+publishing {
+    repositories {
+        maven {
+            name = "GithubPackage"
+            url = "https://maven.pkg.github.com/bnnthang/FederatedLearningTestbed"
+            credentials {
+                username = System.getenv("GITHUB_USERNAME")
+                password = System.getenv("GITHUB_TOKEN")
+            }
+        }
+    }
+}
+
+dependencies {
+    implementation 'org.deeplearning4j:deeplearning4j-core:1.0.0-M2'
+    implementation 'org.nd4j:nd4j-native-platform:1.0.0-M2'
+
+    implementation 'org.slf4j:slf4j-api:2.0.0-alpha7'
+    testImplementation 'org.slf4j:slf4j-simple:2.0.0-alpha7'
+
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.2'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.2'
+}
+
+test {
+    useJUnitPlatform()
+}
