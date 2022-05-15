@@ -32,7 +32,7 @@ public interface IClientOperations {
     /**
      * Handle <code>TRAIN</code> command.
      */
-    void handleTrain();
+    void handleTrain() throws IOException;
 
     /**
      * Handle <code>ISTRAINING</code> command.

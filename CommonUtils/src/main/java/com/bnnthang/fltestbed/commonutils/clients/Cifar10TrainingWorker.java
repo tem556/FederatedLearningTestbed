@@ -1,9 +1,11 @@
 package com.bnnthang.fltestbed.commonutils.clients;
 
 import com.bnnthang.fltestbed.commonutils.models.BaseCifar10DataSetIterator;
+import com.bnnthang.fltestbed.commonutils.models.BaseCifar10Loader;
 import com.bnnthang.fltestbed.commonutils.models.ICifar10Loader;
 import com.bnnthang.fltestbed.commonutils.models.TrainingReport;
 import com.bnnthang.fltestbed.commonutils.utils.TimeUtils;
+import org.deeplearning4j.nn.api.Model;
 import org.deeplearning4j.nn.multilayer.MultiLayerNetwork;
 import org.deeplearning4j.optimize.listeners.ScoreIterationListener;
 import org.deeplearning4j.util.ModelSerializer;
@@ -14,7 +16,7 @@ import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.function.Supplier;
 
-public class Cifar10TrainingWorker<Loader extends ICifar10Loader> extends Thread {
+public class Cifar10TrainingWorker extends Thread {
     /**
      * An instance of local repository.
      */
@@ -35,33 +37,24 @@ public class Cifar10TrainingWorker<Loader extends ICifar10Loader> extends Thread
      */
     private TrainingReport report;
 
-    private final Supplier<? extends Loader> _loaderConstructor;
-
-    private Boolean _needToCloseModel;
-
     public Cifar10TrainingWorker(IClientLocalRepository _localRepository,
                                  TrainingReport _report,
                                  int _batchSize,
-                                 int _epochs,
-                                 Supplier<? extends Loader> loaderConstructor,
-                                 Boolean needToCloseModel) {
+                                 int _epochs) {
         localRepository = _localRepository;
         report = _report;
         batchSize = _batchSize;
         epochs = _epochs;
-        _loaderConstructor = loaderConstructor;
-        _needToCloseModel = needToCloseModel;
     }
 
     @Override
     public void run() {
         try {
-            ICifar10Loader loader = _loaderConstructor.get();
+            ICifar10Loader loader = new BaseCifar10Loader(localRepository);
             BaseCifar10DataSetIterator cifar = new BaseCifar10DataSetIterator(loader, batchSize, 1);
 
             // load model
-            File modelFile = localRepository.getModelFile();
-            MultiLayerNetwork model = ModelSerializer.restoreMultiLayerNetwork(modelFile);
+            MultiLayerNetwork model = localRepository.loadModel();
 
             // run the training and measure the training time
             LocalDateTime startTime = LocalDateTime.now();

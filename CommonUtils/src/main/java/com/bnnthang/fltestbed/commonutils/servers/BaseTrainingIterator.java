@@ -93,6 +93,11 @@ public final class BaseTrainingIterator extends Thread {
 
                 // evaluate
                 operations.evaluateCurrentModel(reports);
+
+                // deallocate arrays
+                for (TrainingReport report : reports) {
+                    report.getParams().close();
+                }
             }
 
             // terminate connections

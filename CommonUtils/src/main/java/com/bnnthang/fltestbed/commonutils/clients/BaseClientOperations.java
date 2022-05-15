@@ -4,10 +4,15 @@ import com.bnnthang.fltestbed.commonutils.models.ICifar10Loader;
 import com.bnnthang.fltestbed.commonutils.models.TrainingReport;
 import com.bnnthang.fltestbed.commonutils.utils.SocketUtils;
 import com.bnnthang.fltestbed.commonutils.utils.TimeUtils;
+import org.apache.commons.lang3.SerializationUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.deeplearning4j.nn.multilayer.MultiLayerNetwork;
+import org.deeplearning4j.util.ModelSerializer;
+import org.nd4j.linalg.api.ndarray.INDArray;
 
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
@@ -32,21 +37,13 @@ public class BaseClientOperations implements IClientOperations {
 
     private TrainingReport trainingReport;
 
-    private ICifar10Loader _cifar10Loader;
-
-    private Boolean _needToCloseModel;
-
     public BaseClientOperations(IClientLocalRepository _localRepository,
                                 Double avgPowerPerByte,
-                                Double _mflops,
-                                ICifar10Loader cifar10Loader,
-                                Boolean needToCloseModel) {
+                                Double _mflops) throws IOException {
         localRepository = _localRepository;
         trainingReport = new TrainingReport();
         trainingReport.getCommunicationPower().setAvgPowerPerBytes(avgPowerPerByte);
         mflops = _mflops;
-        _cifar10Loader = cifar10Loader;
-        _needToCloseModel = needToCloseModel;
     }
 
     @Override
@@ -66,6 +63,7 @@ public class BaseClientOperations implements IClientOperations {
         Long bytesRead = hasLocalModel() ?
                 localRepository.updateModel(socket, trainingReport.getCommunicationPower()) :
                 localRepository.downloadModel(socket, trainingReport.getCommunicationPower());
+
         LocalDateTime endTime = LocalDateTime.now();
 
         trainingReport.setDownlinkTime(TimeUtils.millisecondsBetween(startTime, endTime) / bytesRead);
@@ -79,14 +77,12 @@ public class BaseClientOperations implements IClientOperations {
     }
 
     @Override
-    public void handleTrain() {
+    public void handleTrain() throws IOException {
         trainingWorker = new Cifar10TrainingWorker(
                 localRepository,
                 trainingReport,
                 BATCH_SIZE,
-                EPOCHS,
-                () -> _cifar10Loader,
-                _needToCloseModel);
+                EPOCHS);
         trainingReport.setComputingPower(mflops * EPOCHS * AVG_POWER_PER_MFLOP);
         trainingWorker.start();
     }
@@ -107,10 +103,11 @@ public class BaseClientOperations implements IClientOperations {
         byte[] bytes = bos.toByteArray();
         bos.close();
 
-//        _logger.debug("report length = " + bytes.length);
-
         // send report
         SocketUtils.sendBytesWrapper(socket, bytes, trainingReport.getCommunicationPower());
+
+        trainingReport.getParams().close();
+        trainingReport.setParams(null);
     }
 
     @Override

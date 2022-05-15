@@ -17,6 +17,9 @@ public class FedAvg implements IAggregationStrategy {
         INDArray avg = sum.div(reports.size());
         model.setParams(avg);
 
+        avg.close();
+        sum.close();
+
         return model;
     }
 }

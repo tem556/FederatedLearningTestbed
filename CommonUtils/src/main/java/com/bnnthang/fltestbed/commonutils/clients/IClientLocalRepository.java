@@ -21,4 +21,5 @@ public interface IClientLocalRepository {
     Long getDatasetSize() throws IOException;
     InputStream getDatasetInputStream() throws IOException;
     File getModelFile() throws IOException;
+    String getModelPath();
 }
