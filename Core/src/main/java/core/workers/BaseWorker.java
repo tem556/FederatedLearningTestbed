@@ -10,6 +10,8 @@ import org.deeplearning4j.util.ModelSerializer;
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.dataset.api.iterator.DataSetIterator;
 import org.nd4j.linalg.factory.Nd4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 
@@ -17,6 +19,7 @@ public abstract class BaseWorker extends Thread {
     TrainingParameter  _trainingParameter;
     ClientRepository _clientRepository;
     ClientGateway _clientGateway;
+    Logger _logger;
 
     public BaseWorker(TrainingParameter trainingParameter,
                       ClientRepository clientRepository,
@@ -24,6 +27,7 @@ public abstract class BaseWorker extends Thread {
         _trainingParameter = trainingParameter;
         _clientRepository = clientRepository;
         _clientGateway = clientGateway;
+        _logger = LoggerFactory.getLogger(BaseWorker.class);
     }
 
     @Override
@@ -40,7 +44,7 @@ public abstract class BaseWorker extends Thread {
 
             model.close();
         } catch (IOException exception) {
-
+            _logger.error(exception.getMessage());
         }
     }
 
