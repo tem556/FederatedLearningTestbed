@@ -75,10 +75,12 @@ public class App {
             String pathToModel = clientDir + "/model.zip";
             String pathToDataset = clientDir + "/dataset";
             IClientLocalRepository localRepository = new LocalRepositoryImpl(pathToModel, pathToDataset);
+            ICifar10Loader loader = new BaseCifar10Loader(localRepository);
             IClientOperations clientOperations = new BaseClientOperations(
                     localRepository,
                     AVG_POWER_PER_BYTE,
-                    parameters.getMflopsPerRound());
+                    parameters.getMflopsPerRound(),
+                    loader);
             BaseClient client = new BaseClient(parameters.getServerHost(), parameters.getServerPort(), 5000, clientOperations);
             client.start();
 

@@ -37,24 +37,28 @@ public class Cifar10TrainingWorker extends Thread {
      */
     private TrainingReport report;
 
+    private final Supplier<? extends ICifar10Loader> _loaderConstructor;
+
     public Cifar10TrainingWorker(IClientLocalRepository _localRepository,
                                  TrainingReport _report,
                                  int _batchSize,
-                                 int _epochs) {
+                                 int _epochs,
+                                 Supplier<? extends ICifar10Loader> loaderConstructor) {
         localRepository = _localRepository;
         report = _report;
         batchSize = _batchSize;
         epochs = _epochs;
+        _loaderConstructor = loaderConstructor;
     }
 
     @Override
     public void run() {
         try {
-            ICifar10Loader loader = new BaseCifar10Loader(localRepository);
+            ICifar10Loader loader = _loaderConstructor.get();
             BaseCifar10DataSetIterator cifar = new BaseCifar10DataSetIterator(loader, batchSize, 1);
 
             // load model
-            MultiLayerNetwork model = localRepository.loadModel();
+            MultiLayerNetwork model = ModelSerializer.restoreMultiLayerNetwork(localRepository.getModelPath());
 
             // run the training and measure the training time
             LocalDateTime startTime = LocalDateTime.now();

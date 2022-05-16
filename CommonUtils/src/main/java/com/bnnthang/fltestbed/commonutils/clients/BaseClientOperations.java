@@ -1,5 +1,6 @@
 package com.bnnthang.fltestbed.commonutils.clients;
 
+import com.bnnthang.fltestbed.commonutils.models.BaseCifar10Loader;
 import com.bnnthang.fltestbed.commonutils.models.ICifar10Loader;
 import com.bnnthang.fltestbed.commonutils.models.TrainingReport;
 import com.bnnthang.fltestbed.commonutils.utils.SocketUtils;
@@ -25,7 +26,7 @@ public class BaseClientOperations implements IClientOperations {
 
     private static final double AVG_POWER_PER_MFLOP = 0.009;
 
-    private static final int BATCH_SIZE = 33;
+    private static final int BATCH_SIZE = 12;
 
     private static final int EPOCHS = 2;
 
@@ -37,13 +38,17 @@ public class BaseClientOperations implements IClientOperations {
 
     private TrainingReport trainingReport;
 
+    private ICifar10Loader _cifar10Loader;
+
     public BaseClientOperations(IClientLocalRepository _localRepository,
                                 Double avgPowerPerByte,
-                                Double _mflops) throws IOException {
+                                Double _mflops,
+                                ICifar10Loader cifar10Loader) throws IOException {
         localRepository = _localRepository;
         trainingReport = new TrainingReport();
         trainingReport.getCommunicationPower().setAvgPowerPerBytes(avgPowerPerByte);
         mflops = _mflops;
+        _cifar10Loader = cifar10Loader;
     }
 
     @Override
@@ -82,7 +87,8 @@ public class BaseClientOperations implements IClientOperations {
                 localRepository,
                 trainingReport,
                 BATCH_SIZE,
-                EPOCHS);
+                EPOCHS,
+                () -> _cifar10Loader);
         trainingReport.setComputingPower(mflops * EPOCHS * AVG_POWER_PER_MFLOP);
         trainingWorker.start();
     }
@@ -102,6 +108,7 @@ public class BaseClientOperations implements IClientOperations {
         out.flush();
         byte[] bytes = bos.toByteArray();
         bos.close();
+        out.close();
 
         // send report
         SocketUtils.sendBytesWrapper(socket, bytes, trainingReport.getCommunicationPower());

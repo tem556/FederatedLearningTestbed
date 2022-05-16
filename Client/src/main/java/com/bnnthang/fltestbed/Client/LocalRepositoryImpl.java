@@ -55,6 +55,7 @@ public class LocalRepositoryImpl implements IClientLocalRepository {
         model.save(new File(pathToModel), true);
         params.close();
         model.close();
+        params.close();
 
         return (long) bytes.length;
     }

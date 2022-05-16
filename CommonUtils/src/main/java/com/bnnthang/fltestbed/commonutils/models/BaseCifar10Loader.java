@@ -91,6 +91,8 @@ public class BaseCifar10Loader implements ICifar10Loader {
             frequency.put((int) row.getFirst(), currentFrequency + 1);
         }
 
+        inputStream.close();
+
         return frequency;
     }
 
@@ -117,6 +119,8 @@ public class BaseCifar10Loader implements ICifar10Loader {
             INDArray label = FeatureUtil.toOutcomeVector(row.getFirst(), 10);
             atomicDataSets.add(new DataSet(image, label));
         }
+
+        inputStream.close();
 
         return DataSet.merge(atomicDataSets);
     }
