@@ -127,4 +127,9 @@ public class AndroidLocalRepository implements IClientLocalRepository {
     public File getModelFile() throws IOException {
         return new File(localFileDir, MODEL_FILENAME);
     }
+
+    @Override
+    public String getModelPath() {
+        return MODEL_FILENAME;
+    }
 }

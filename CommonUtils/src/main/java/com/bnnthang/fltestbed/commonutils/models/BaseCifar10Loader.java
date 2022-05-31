@@ -55,6 +55,8 @@ public class BaseCifar10Loader implements ICifar10Loader {
      */
     protected static final Logger _logger = LogManager.getLogger(BaseCifar10Loader.class);
 
+    private long rowCount = -1;
+
     /**
      * Instantiate <code>MyCifar10Loader</code>
      * @param _localRepository an instance of <code>ILocalRepository</code>
@@ -68,7 +70,10 @@ public class BaseCifar10Loader implements ICifar10Loader {
      * @return the number of elements in the dataset
      */
     public long count() throws IOException {
-        return localRepository.getDatasetSize() / ROW_SIZE;
+        if (rowCount < 0) {
+            rowCount = localRepository.getDatasetSize() / ROW_SIZE;
+        }
+        return rowCount;
     }
 
     /**

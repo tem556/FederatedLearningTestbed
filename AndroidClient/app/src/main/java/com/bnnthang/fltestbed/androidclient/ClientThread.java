@@ -23,7 +23,7 @@ import java.io.File;
 import java.io.IOException;
 
 public class ClientThread extends Thread {
-    private static final String HOST = "172.30.16.1";
+    private static final String HOST = "192.168.1.7";
 
     private static final Integer PORT = 4602;
 
@@ -44,7 +44,7 @@ public class ClientThread extends Thread {
         try {
             IClientLocalRepository localRepository = new AndroidLocalRepository(localDir);
             AndroidCifar10Loader loader = new AndroidCifar10Loader(localRepository);
-            IClientOperations clientOperations = new BaseClientOperations(localRepository, AVG_POWER_PER_BYTE, MFLOPS_PER_ROUND, loader, true);
+            IClientOperations clientOperations = new BaseClientOperations(localRepository, AVG_POWER_PER_BYTE, MFLOPS_PER_ROUND, loader);
             BaseClient client = new BaseClient(HOST, PORT, DELAY_INTERVAL, clientOperations);
             client.run();
         } catch (IOException e) {

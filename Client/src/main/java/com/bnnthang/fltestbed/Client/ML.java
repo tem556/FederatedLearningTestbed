@@ -1,11 +1,17 @@
 package com.bnnthang.fltestbed.Client;
 
+import com.bnnthang.fltestbed.commonutils.models.BaseCifar10DataSetIterator;
+import com.bnnthang.fltestbed.commonutils.models.BaseCifar10Loader;
+import com.bnnthang.fltestbed.commonutils.models.MemoryListener;
+import com.bnnthang.fltestbed.commonutils.models.NewCifar10DSIterator;
+import org.bytedeco.javacpp.Pointer;
 import org.datavec.image.loader.CifarLoader;
 import org.deeplearning4j.datasets.fetchers.DataSetType;
 import org.deeplearning4j.datasets.iterator.impl.Cifar10DataSetIterator;
 import org.deeplearning4j.nn.api.OptimizationAlgorithm;
 import org.deeplearning4j.nn.conf.MultiLayerConfiguration;
 import org.deeplearning4j.nn.conf.NeuralNetConfiguration;
+import org.deeplearning4j.nn.conf.WorkspaceMode;
 import org.deeplearning4j.nn.conf.inputs.InputType;
 import org.deeplearning4j.nn.conf.layers.BatchNormalization;
 import org.deeplearning4j.nn.conf.layers.ConvolutionLayer;
@@ -17,6 +23,11 @@ import org.deeplearning4j.optimize.api.InvocationType;
 import org.deeplearning4j.optimize.listeners.EvaluativeListener;
 import org.deeplearning4j.optimize.listeners.ScoreIterationListener;
 import org.nd4j.linalg.activations.Activation;
+import org.nd4j.linalg.api.memory.MemoryWorkspace;
+import org.nd4j.linalg.api.memory.conf.WorkspaceConfiguration;
+import org.nd4j.linalg.api.memory.enums.*;
+import org.nd4j.linalg.api.ndarray.INDArray;
+import org.nd4j.linalg.factory.Nd4j;
 import org.nd4j.linalg.learning.config.AdaDelta;
 import org.nd4j.linalg.lossfunctions.LossFunctions;
 
@@ -29,7 +40,7 @@ public class ML {
     private static int numLabels = CifarLoader.NUM_LABELS;
     private static int batchSize = 1234;
     private static long seed = 5432L;
-    private static int epochs = 123;
+    private static int epochs = 50;
 
     public static MultiLayerNetwork getModel()  {
 //        log.info("Building simple convolutional network...");
@@ -81,16 +92,26 @@ public class ML {
     }
 
     public static void trainAndEval() throws IOException {
-//        MyCifar10Loader loader = new MyCifar10Loader(new File("C:\\Users\\buinn\\DoNotTouch\\crap\\testbed\\dirclient0\\dataset"), 123456);
-//        MyCifar10DataSetIterator dataSetIterator = new MyCifar10DataSetIterator(loader, batchSize, 1, 123456);
-//
-        Cifar10DataSetIterator cifar = new Cifar10DataSetIterator(batchSize, new int[]{height, width}, DataSetType.TRAIN, null, seed);
-        Cifar10DataSetIterator cifarEval = new Cifar10DataSetIterator(batchSize, new int[]{height, width}, DataSetType.TEST, null, seed);
-//        MyCifar10Loader loader1 = new MyCifar10Loader(new File("C:\\Users\\buinn\\cifar\\cifar-10-batches-bin\\test_batch.bin"), 123456);
-//        MyCifar10DataSetIterator cifarEval = new MyCifar10DataSetIterator(loader1, batchSize, 1, 123456);
-//
-        MultiLayerNetwork model = getModel();
-        model.setListeners(new ScoreIterationListener(50), new EvaluativeListener(cifarEval, 1, InvocationType.EPOCH_END));
-        model.fit(cifar, epochs);
+        String path = "C:\\Users\\buinn\\DoNotTouch\\crap\\testbed\\dirclient0";
+        LocalRepositoryImpl repo = new LocalRepositoryImpl(path + "/model.zip", path + "/dataset");
+        BaseCifar10Loader loader = new BaseCifar10Loader(repo);
+//        BaseCifar10DataSetIterator mycifar = new BaseCifar10DataSetIterator(loader, 33, 1);
+        NewCifar10DSIterator newCifar = new NewCifar10DSIterator(loader, 23);
+
+        WorkspaceConfiguration wc = WorkspaceConfiguration.builder()
+                .policyAllocation(AllocationPolicy.STRICT)
+                .policyLearning(LearningPolicy.FIRST_LOOP)
+                .policyMirroring(MirroringPolicy.FULL)
+                .policySpill(SpillPolicy.REALLOCATE)
+                .policyReset(ResetPolicy.BLOCK_LEFT)
+                .maxSize(2000000000)
+                .build();
+
+        try (MemoryWorkspace ws = Nd4j.getWorkspaceManager().getAndActivateWorkspace(wc, "clgt")) {
+            MultiLayerNetwork model = getModel();
+            model.setListeners(new ScoreIterationListener(50), new MemoryListener());
+            model.fit(newCifar, epochs);
+            model.close();
+        }
     }
 }

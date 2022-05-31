@@ -1,14 +1,13 @@
 package com.bnnthang.fltestbed.commonutils.clients;
 
-import com.bnnthang.fltestbed.commonutils.models.BaseCifar10Loader;
-import com.bnnthang.fltestbed.commonutils.models.ICifar10Loader;
-import com.bnnthang.fltestbed.commonutils.models.TrainingReport;
+import com.bnnthang.fltestbed.commonutils.models.*;
 import com.bnnthang.fltestbed.commonutils.utils.SocketUtils;
 import com.bnnthang.fltestbed.commonutils.utils.TimeUtils;
 import org.apache.commons.lang3.SerializationUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.deeplearning4j.nn.multilayer.MultiLayerNetwork;
+import org.deeplearning4j.optimize.listeners.ScoreIterationListener;
 import org.deeplearning4j.util.ModelSerializer;
 import org.nd4j.linalg.api.ndarray.INDArray;
 
@@ -38,17 +37,17 @@ public class BaseClientOperations implements IClientOperations {
 
     private TrainingReport trainingReport;
 
-    private ICifar10Loader _cifar10Loader;
+    private ICifar10Loader _loader;
+
+    private BaseCifar10DataSetIterator _cifar;
 
     public BaseClientOperations(IClientLocalRepository _localRepository,
                                 Double avgPowerPerByte,
-                                Double _mflops,
-                                ICifar10Loader cifar10Loader) throws IOException {
+                                Double _mflops) throws IOException {
         localRepository = _localRepository;
         trainingReport = new TrainingReport();
         trainingReport.getCommunicationPower().setAvgPowerPerBytes(avgPowerPerByte);
         mflops = _mflops;
-        _cifar10Loader = cifar10Loader;
     }
 
     @Override
@@ -65,9 +64,14 @@ public class BaseClientOperations implements IClientOperations {
     @Override
     public void handleModelPush(Socket socket) throws IOException {
         LocalDateTime startTime = LocalDateTime.now();
-        Long bytesRead = hasLocalModel() ?
-                localRepository.updateModel(socket, trainingReport.getCommunicationPower()) :
-                localRepository.downloadModel(socket, trainingReport.getCommunicationPower());
+
+        long bytesRead;
+
+        if (hasLocalModel()) {
+            bytesRead = localRepository.updateModel(socket, trainingReport.getCommunicationPower());
+        } else {
+            bytesRead = localRepository.downloadModel(socket, trainingReport.getCommunicationPower());
+        }
 
         LocalDateTime endTime = LocalDateTime.now();
 
@@ -79,6 +83,9 @@ public class BaseClientOperations implements IClientOperations {
         _logger.debug("start dataset read");
         localRepository.downloadDataset(socket, trainingReport.getCommunicationPower());
         _logger.debug("end dataset read");
+
+        _loader = new BaseCifar10Loader(localRepository);
+        _cifar = new BaseCifar10DataSetIterator(_loader, 32, 1);
     }
 
     @Override
@@ -87,8 +94,7 @@ public class BaseClientOperations implements IClientOperations {
                 localRepository,
                 trainingReport,
                 BATCH_SIZE,
-                EPOCHS,
-                () -> _cifar10Loader);
+                EPOCHS);
         trainingReport.setComputingPower(mflops * EPOCHS * AVG_POWER_PER_MFLOP);
         trainingWorker.start();
     }
@@ -107,14 +113,15 @@ public class BaseClientOperations implements IClientOperations {
         out.writeObject(trainingReport);
         out.flush();
         byte[] bytes = bos.toByteArray();
-        bos.close();
-        out.close();
 
         // send report
         SocketUtils.sendBytesWrapper(socket, bytes, trainingReport.getCommunicationPower());
 
         trainingReport.getParams().close();
         trainingReport.setParams(null);
+
+        bos.close();
+        out.close();
     }
 
     @Override

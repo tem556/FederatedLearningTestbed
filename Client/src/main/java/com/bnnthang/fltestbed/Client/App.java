@@ -1,6 +1,7 @@
 package com.bnnthang.fltestbed.Client;
 
 import com.bnnthang.fltestbed.commonutils.clients.*;
+import com.bnnthang.fltestbed.commonutils.models.BaseCifar10DataSetIterator;
 import com.bnnthang.fltestbed.commonutils.models.BaseCifar10Loader;
 import com.bnnthang.fltestbed.commonutils.models.ClientParameters;
 import com.bnnthang.fltestbed.commonutils.models.ICifar10Loader;
@@ -75,12 +76,10 @@ public class App {
             String pathToModel = clientDir + "/model.zip";
             String pathToDataset = clientDir + "/dataset";
             IClientLocalRepository localRepository = new LocalRepositoryImpl(pathToModel, pathToDataset);
-            ICifar10Loader loader = new BaseCifar10Loader(localRepository);
             IClientOperations clientOperations = new BaseClientOperations(
                     localRepository,
                     AVG_POWER_PER_BYTE,
-                    parameters.getMflopsPerRound(),
-                    loader);
+                    parameters.getMflopsPerRound());
             BaseClient client = new BaseClient(parameters.getServerHost(), parameters.getServerPort(), 5000, clientOperations);
             client.start();
 
