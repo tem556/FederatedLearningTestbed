@@ -17,7 +17,6 @@ import java.net.URISyntaxException;
 
 public class App {
     private static final Logger _logger = LogManager.getLogger(App.class);
-
     private static final int DEFAULT_PORT = 4602;
     private static final int DEFAULT_MIN_CLIENTS = 1;
     private static final int DEFAULT_ROUNDS = 3;

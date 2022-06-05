@@ -37,10 +37,6 @@ public class BaseClientOperations implements IClientOperations {
 
     private TrainingReport trainingReport;
 
-    private ICifar10Loader _loader;
-
-    private BaseCifar10DataSetIterator _cifar;
-
     public BaseClientOperations(IClientLocalRepository _localRepository,
                                 Double avgPowerPerByte,
                                 Double _mflops) throws IOException {
@@ -83,9 +79,6 @@ public class BaseClientOperations implements IClientOperations {
         _logger.debug("start dataset read");
         localRepository.downloadDataset(socket, trainingReport.getCommunicationPower());
         _logger.debug("end dataset read");
-
-        _loader = new BaseCifar10Loader(localRepository);
-        _cifar = new BaseCifar10DataSetIterator(_loader, 32, 1);
     }
 
     @Override
@@ -118,7 +111,6 @@ public class BaseClientOperations implements IClientOperations {
         SocketUtils.sendBytesWrapper(socket, bytes, trainingReport.getCommunicationPower());
 
         trainingReport.getParams().close();
-        trainingReport.setParams(null);
 
         bos.close();
         out.close();
