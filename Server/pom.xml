@@ -22,7 +22,7 @@
       <url>https://repo1.maven.org/maven2</url>
     </repository>
     <repository>
-      <id>githubpackages</id>
+      <id>GithubPackages</id>
       <url>https://maven.pkg.github.com/bnnthang/FederatedLearningTestbed</url>
       <snapshots>
         <enabled>true</enabled>
