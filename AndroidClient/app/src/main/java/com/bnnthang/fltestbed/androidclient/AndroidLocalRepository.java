@@ -18,7 +18,6 @@ import java.io.InputStream;
 import java.net.Socket;
 
 public class AndroidLocalRepository implements IClientLocalRepository {
-//    private static final Logger _logger = LoggerFactory.getLogger(AndroidLocalRepository.class);
 
     private File localFileDir = null;
 
