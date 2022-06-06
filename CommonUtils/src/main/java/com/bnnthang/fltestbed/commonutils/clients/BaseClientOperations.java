@@ -33,7 +33,7 @@ public class BaseClientOperations implements IClientOperations {
 
     private final IClientLocalRepository localRepository;
 
-    private Cifar10TrainingWorker trainingWorker;
+    private Thread trainingWorker;
 
     private TrainingReport trainingReport;
 
