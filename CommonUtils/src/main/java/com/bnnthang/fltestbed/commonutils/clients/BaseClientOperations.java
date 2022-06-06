@@ -21,21 +21,21 @@ import java.time.LocalDateTime;
 public class BaseClientOperations implements IClientOperations {
     private static final Logger _logger = LogManager.getLogger(BaseClientOperations.class);
 
-    private static final double AVG_POWER_PER_BYTE = 15.0;
+    protected static final double AVG_POWER_PER_BYTE = 15.0;
 
-    private static final double AVG_POWER_PER_MFLOP = 0.009;
+    protected static final double AVG_POWER_PER_MFLOP = 0.009;
 
-    private static final int BATCH_SIZE = 12;
+    protected static final int BATCH_SIZE = 12;
 
-    private static final int EPOCHS = 2;
+    protected static final int EPOCHS = 2;
 
-    private double mflops = 0.0;
+    protected double mflops = 0.0;
 
-    private final IClientLocalRepository localRepository;
+    protected final IClientLocalRepository localRepository;
 
-    private Thread trainingWorker;
+    protected Thread trainingWorker;
 
-    private TrainingReport trainingReport;
+    protected TrainingReport trainingReport;
 
     public BaseClientOperations(IClientLocalRepository _localRepository,
                                 Double avgPowerPerByte,

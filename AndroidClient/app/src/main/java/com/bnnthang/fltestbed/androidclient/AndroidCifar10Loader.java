@@ -1,25 +1,15 @@
 package com.bnnthang.fltestbed.androidclient;
 
 import android.graphics.Bitmap;
-import android.os.Build;
-
-import androidx.annotation.RequiresApi;
 
 import com.bnnthang.fltestbed.commonutils.clients.IClientLocalRepository;
-import com.bnnthang.fltestbed.commonutils.models.BaseCifar10Loader;
 import com.bnnthang.fltestbed.commonutils.models.ICifar10Loader;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-//import org.bytedeco.opencv.opencv_core.Mat;
 import org.datavec.image.loader.AndroidNativeImageLoader;
-import org.datavec.image.loader.NativeImageLoader;
 import org.nd4j.common.primitives.Pair;
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.dataset.DataSet;
 import org.nd4j.linalg.util.FeatureUtil;
-import org.opencv.core.CvType;
-import org.opencv.core.Mat;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -118,7 +108,6 @@ public class AndroidCifar10Loader implements ICifar10Loader {
      * to <code>fromIndex + batchSize - 1</code> inclusive
      * @throws IOException if I/O errors occur
      */
-    @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
     public DataSet createDataSet(int batchSize, int fromIndex) throws IOException {
         if (!localRepository.datasetExists())

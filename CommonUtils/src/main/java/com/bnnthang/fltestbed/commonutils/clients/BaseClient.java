@@ -18,17 +18,17 @@ public class BaseClient extends Thread {
     /**
      * Delay interval (in milliseconds).
      */
-    private Integer delayInterval;
+    protected Integer delayInterval;
 
     /**
      * Socket connection to server.
      */
-    private Socket socket;
+    protected Socket socket;
 
     /**
      * Supported client operations.
      */
-    private IClientOperations operations;
+    protected IClientOperations operations;
 
     /**
      * Constructor for <code>BaseClient</code>.

@@ -23,9 +23,9 @@ import java.io.File;
 import java.io.IOException;
 
 public class ClientThread extends Thread {
-    private static final String HOST = "192.168.1.7";
+    private String HOST = null;
 
-    private static final Integer PORT = 4602;
+    private Integer PORT = null;
 
     private static final Integer DELAY_INTERVAL = 5000;
 
@@ -35,16 +35,17 @@ public class ClientThread extends Thread {
 
     private File localDir = null;
 
-    public ClientThread(File _localDir) {
+    public ClientThread(File _localDir, String host, int port) {
         localDir = _localDir;
+        HOST = host;
+        PORT = port;
     }
 
     @Override
     public void run() {
         try {
             IClientLocalRepository localRepository = new AndroidLocalRepository(localDir);
-            AndroidCifar10Loader loader = new AndroidCifar10Loader(localRepository);
-            IClientOperations clientOperations = new BaseClientOperations(localRepository, AVG_POWER_PER_BYTE, MFLOPS_PER_ROUND, loader);
+            IClientOperations clientOperations = new AndroidClientOperations(localRepository, AVG_POWER_PER_BYTE, MFLOPS_PER_ROUND);
             BaseClient client = new BaseClient(HOST, PORT, DELAY_INTERVAL, clientOperations);
             client.run();
         } catch (IOException e) {
@@ -109,5 +110,4 @@ public class ClientThread extends Thread {
         model.init();
         return model;
     }
-
 }
