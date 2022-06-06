@@ -13,4 +13,4 @@ ARG datasetratio=1.0
 ARG minClients=1
 WORKDIR /app
 COPY --from=build /app/target/Server-1.0-SNAPSHOT.jar .
-ENTRYPOINT java -jar Server-1.0-SNAPSHOT.jar --fl --datasetratio $datasetratio --minClients $minClients --workdir $workdir --rounds $rounds
+ENTRYPOINT java -jar Server-1.0-STABLE.jar --fl --datasetratio $datasetratio --minClients $minClients --workdir $workdir --rounds $rounds

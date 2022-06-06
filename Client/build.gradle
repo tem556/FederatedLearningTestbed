@@ -4,9 +4,12 @@ plugins {
 }
 
 group 'com.bnnthang.fltestbed'
-version '1.0-SNAPSHOT'
-sourceCompatibility = 8
-targetCompatibility = 8
+version '1.0-STABLE'
+
+compileJava {
+    sourceCompatibility = 1.8
+    targetCompatibility = 1.8
+}
 
 repositories {
     mavenCentral()
@@ -25,7 +28,7 @@ dependencies {
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.2'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.2'
 
-    implementation 'com.bnnthang.fltestbed:commonutils:1.24-SNAPSHOT'
+    implementation 'com.bnnthang.fltestbed:commonutils:1.25-STABLE'
     implementation 'org.deeplearning4j:deeplearning4j-core:1.0.0-M2'
     implementation group: 'org.nd4j', name: 'nd4j-native-platform', version: '1.0.0-M2'
     implementation group: 'org.bytedeco', name: 'javacv-platform', version: '1.5.7'
@@ -54,6 +57,7 @@ task uberJar(type: Jar) {
         configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
     }
     with jar
-//    exclude("META-INF/**")
+    exclude('META-INF/*.RSA', 'META-INF/*.SF', 'META-INF/*.DSA')
     duplicatesStrategy = 'include'
+    zip64 = true
 }
