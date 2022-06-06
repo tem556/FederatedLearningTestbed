@@ -37,6 +37,10 @@ android {
 
     }
 
+    lintOptions {
+        abortOnError false
+    }
+
     compileOptions {
         coreLibraryDesugaringEnabled true
         sourceCompatibility JavaVersion.VERSION_1_8
