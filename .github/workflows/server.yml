@@ -5,14 +5,25 @@ name: Server CI with Maven
 
 on:
   push:
-    branches: [ "master" ]
+    branches:
+      - master
+    paths:
+      - "Server/**"
+      - ".github/workflows/server.yml"
   pull_request:
-    branches: [ "master" ]
+    branches:
+      - master
+    paths:
+      - "CommonUtils/**"
+      - ".github/workflows/server.yml"
 
 jobs:
   build:
 
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
 
     steps:
     - uses: actions/checkout@v3
@@ -23,4 +34,8 @@ jobs:
         distribution: 'corretto'
         cache: maven
     - name: Build Server with Maven
-      run: mvn -B test --file pom.xml
+      run: |-
+        cd Server
+        mvn -B test --file pom.xml -s $GITHUB_WORKSPACE/settings.xml
+      env:
+        GITHUB_TOKEN: ${{ github.token }}
