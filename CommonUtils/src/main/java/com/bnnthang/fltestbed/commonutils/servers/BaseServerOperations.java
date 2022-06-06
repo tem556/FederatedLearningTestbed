@@ -19,12 +19,12 @@ public class BaseServerOperations implements IServerOperations {
      */
     private static final Logger _logger = LogManager.getLogger(BaseServerOperations.class);
 
-    private final IServerLocalRepository localRepository;
+    protected final IServerLocalRepository localRepository;
 
-    private BaseTrainingIterator trainingIterator;
+    protected BaseTrainingIterator trainingIterator;
 
     @Getter
-    private final List<IClientHandler> acceptedClients;
+    protected final List<IClientHandler> acceptedClients;
 
     public BaseServerOperations(IServerLocalRepository _localRepository) {
         localRepository = _localRepository;
