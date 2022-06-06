@@ -34,7 +34,7 @@
     <dependency>
       <groupId>com.bnnthang.fltestbed</groupId>
       <artifactId>commonutils</artifactId>
-      <version>1.25-STABLE</version>
+      <version>1.25.2-STABLE</version>
     </dependency>
     <dependency>
       <groupId>junit</groupId>
