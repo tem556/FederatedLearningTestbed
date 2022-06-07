@@ -4,12 +4,6 @@
 name: CommonUtils CI
 
 on:
-  push:
-    branches:
-      - master
-    paths:
-      - "CommonUtils/**"
-      - ".github/workflows/commonutils.yml"
   pull_request:
     branches:
       - master

@@ -1,12 +1,6 @@
 name: AndroidClient CI
     
 on:
-  push:
-    branches:
-      - master
-    paths:
-      - "AndroidClient/**"
-      - ".github/workflows/androidclient.yml"
   pull_request:
     branches:
       - master
