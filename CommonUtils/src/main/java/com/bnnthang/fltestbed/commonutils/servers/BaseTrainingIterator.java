@@ -4,9 +4,8 @@ import com.bnnthang.fltestbed.commonutils.models.TrainingConfiguration;
 import com.bnnthang.fltestbed.commonutils.models.TrainingReport;
 import lombok.AllArgsConstructor;
 import lombok.NonNull;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.nd4j.evaluation.classification.Evaluation;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.rmi.UnexpectedException;
 import java.util.ArrayList;
@@ -20,7 +19,7 @@ public final class BaseTrainingIterator extends Thread {
     /**
      * Logger.
      */
-    private static final Logger _logger = LogManager.getLogger(BaseTrainingIterator.class);
+    private static final Logger _logger = LoggerFactory.getLogger(BaseTrainingIterator.class);
 
     /**
      * Supported operations.

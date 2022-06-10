@@ -2,8 +2,8 @@ package com.bnnthang.fltestbed.commonutils.servers;
 
 import com.bnnthang.fltestbed.commonutils.models.ServerParameters;
 import lombok.Getter;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.net.ServerSocket;
@@ -16,7 +16,7 @@ public class BaseServer extends Thread {
     /**
      * Logger.
      */
-    private static final Logger _logger = LogManager.getLogger(BaseServer.class);
+    private static final Logger _logger = LoggerFactory.getLogger(BaseServer.class);
 
     /**
      * Socket opened for connections.

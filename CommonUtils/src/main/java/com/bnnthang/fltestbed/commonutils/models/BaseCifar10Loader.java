@@ -1,13 +1,14 @@
 package com.bnnthang.fltestbed.commonutils.models;
 
 import com.bnnthang.fltestbed.commonutils.clients.IClientLocalRepository;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import com.bnnthang.fltestbed.commonutils.utils.SocketUtils;
 import org.datavec.image.loader.Java2DNativeImageLoader;
 import org.nd4j.common.primitives.Pair;
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.dataset.DataSet;
 import org.nd4j.linalg.util.FeatureUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.awt.image.BufferedImage;
 import java.io.IOException;
@@ -53,7 +54,7 @@ public class BaseCifar10Loader implements ICifar10Loader {
     /**
      * Logger.
      */
-    protected static final Logger _logger = LogManager.getLogger(BaseCifar10Loader.class);
+    private static final Logger _logger = LoggerFactory.getLogger(BaseCifar10Loader.class);
 
     private long rowCount = -1;
 

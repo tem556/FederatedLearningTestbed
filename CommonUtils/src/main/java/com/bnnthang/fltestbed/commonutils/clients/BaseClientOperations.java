@@ -3,23 +3,17 @@ package com.bnnthang.fltestbed.commonutils.clients;
 import com.bnnthang.fltestbed.commonutils.models.*;
 import com.bnnthang.fltestbed.commonutils.utils.SocketUtils;
 import com.bnnthang.fltestbed.commonutils.utils.TimeUtils;
-import org.apache.commons.lang3.SerializationUtils;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.deeplearning4j.nn.multilayer.MultiLayerNetwork;
-import org.deeplearning4j.optimize.listeners.ScoreIterationListener;
-import org.deeplearning4j.util.ModelSerializer;
-import org.nd4j.linalg.api.ndarray.INDArray;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.ByteArrayOutputStream;
-import java.io.File;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
 import java.time.LocalDateTime;
 
 public class BaseClientOperations implements IClientOperations {
-    private static final Logger _logger = LogManager.getLogger(BaseClientOperations.class);
+    private static final Logger _logger = LoggerFactory.getLogger(BaseClientOperations.class);
 
     protected static final double AVG_POWER_PER_BYTE = 15.0;
 

@@ -27,12 +27,6 @@ public class App {
     public static void main(String[] args) throws Exception {
         _logger.debug("hello world");
 
-        // load native library if needed
-        if (args[0].equals("--native")) {
-            System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
-            args = ArrayUtils.remove(args, 0);
-        }
-
         switch (args[0]) {
             case "--help":
                 help();

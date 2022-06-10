@@ -33,10 +33,6 @@ public class App {
     private static final double AVG_POWER_PER_BYTE = 15.0;
 
     public static void main(String[] args) throws IOException, InterruptedException {
-        if (args[0].equals("--native")) {
-            System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
-            args = ArrayUtils.remove(args, 0);
-        }
         switch (args[0]) {
             case "--help":
                 help();

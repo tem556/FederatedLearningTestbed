@@ -2,8 +2,8 @@ package com.bnnthang.fltestbed.commonutils.clients;
 
 import com.bnnthang.fltestbed.commonutils.enums.ClientCommandEnum;
 import com.bnnthang.fltestbed.commonutils.utils.SocketUtils;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.net.Socket;
@@ -13,7 +13,7 @@ import java.rmi.UnexpectedException;
  * Simple implementation of a Federated Learning client.
  */
 public class BaseClient extends Thread {
-    private static final Logger _logger = LogManager.getLogger(BaseClient.class);
+    private static final Logger _logger = LoggerFactory.getLogger(BaseClient.class);
 
     /**
      * Delay interval (in milliseconds).

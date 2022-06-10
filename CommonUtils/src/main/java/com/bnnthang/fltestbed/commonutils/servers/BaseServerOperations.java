@@ -3,10 +3,10 @@ package com.bnnthang.fltestbed.commonutils.servers;
 import com.bnnthang.fltestbed.commonutils.models.ServerParameters;
 import com.bnnthang.fltestbed.commonutils.models.TrainingReport;
 import lombok.Getter;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.deeplearning4j.nn.multilayer.MultiLayerNetwork;
 import org.nd4j.evaluation.classification.Evaluation;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.net.Socket;
@@ -17,7 +17,7 @@ public class BaseServerOperations implements IServerOperations {
     /**
      * Logger.
      */
-    private static final Logger _logger = LogManager.getLogger(BaseServerOperations.class);
+    private static final Logger _logger = LoggerFactory.getLogger(BaseServerOperations.class);
 
     protected final IServerLocalRepository localRepository;
 

@@ -1,15 +1,15 @@
 package com.bnnthang.fltestbed.commonutils.utils;
 
 import com.bnnthang.fltestbed.commonutils.models.PowerConsumptionFromBytes;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.nd4j.shade.guava.primitives.Ints;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.*;
 import java.net.Socket;
 
 public final class SocketUtils {
-    private static final Logger _logger = LogManager.getLogger(SocketUtils.class);
+    private static final Logger _logger = LoggerFactory.getLogger(SocketUtils.class);
 
     private SocketUtils() { }
 
