@@ -1,13 +1,17 @@
 package com.bnnthang.fltestbed.commonutils.servers;
 
+import com.bnnthang.fltestbed.commonutils.models.ModelUpdate;
 import com.bnnthang.fltestbed.commonutils.models.ServerParameters;
 import com.bnnthang.fltestbed.commonutils.models.TrainingReport;
+import com.opencsv.CSVWriter;
 import lombok.Getter;
 import org.deeplearning4j.nn.multilayer.MultiLayerNetwork;
 import org.nd4j.evaluation.classification.Evaluation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.net.Socket;
 import java.util.ArrayList;
@@ -26,22 +30,34 @@ public class BaseServerOperations implements IServerOperations {
     @Getter
     protected final List<IClientHandler> acceptedClients;
 
-    public BaseServerOperations(IServerLocalRepository _localRepository) {
+    protected CSVWriter _logWriter;
+
+    public BaseServerOperations(IServerLocalRepository _localRepository) throws IOException {
         localRepository = _localRepository;
         trainingIterator = null;
         acceptedClients = new ArrayList<>();
+
+        File evalLogFile = new File(localRepository.getLogFolder(), "eval-log.csv");
+        if (!evalLogFile.exists()) {
+            if (evalLogFile.createNewFile()) {
+                _logWriter = new CSVWriter(new FileWriter(evalLogFile));
+                _logWriter.writeNext(new String[] {"accuracy", "precision", "f1", "recall"});
+            } else {
+                throw new IOException("cannot open evaluation log");
+            }
+        }
     }
 
     @Override
     public void acceptClient(Socket socket) throws IOException {
-        IClientHandler clientHandler = new BaseClientHandler(socket);
+        IClientHandler clientHandler = new BaseClientHandler(acceptedClients.size(), socket, localRepository.getLogFolder());
         clientHandler.accept();
         acceptedClients.add(clientHandler);
     }
 
     @Override
     public void rejectClient(Socket socket) throws IOException {
-        IClientHandler clientHandler = new BaseClientHandler(socket);
+        IClientHandler clientHandler = new BaseClientHandler(acceptedClients.size(), socket, localRepository.getLogFolder());
         clientHandler.reject();
     }
 
@@ -100,9 +116,9 @@ public class BaseServerOperations implements IServerOperations {
     }
 
     @Override
-    public void aggregateResults(List<TrainingReport> trainingReports, IAggregationStrategy aggregationStrategy) throws Exception {
+    public void aggregateResults(List<ModelUpdate> modelUpdates, IAggregationStrategy aggregationStrategy) throws Exception {
         MultiLayerNetwork currentModel = localRepository.loadLatestModel();
-        MultiLayerNetwork newModel = aggregationStrategy.aggregate(currentModel, trainingReports);
+        MultiLayerNetwork newModel = aggregationStrategy.aggregate(currentModel, modelUpdates);
         localRepository.saveNewModel(newModel);
         newModel.close();
         currentModel.close();
@@ -116,39 +132,19 @@ public class BaseServerOperations implements IServerOperations {
     @Override
     public void evaluateCurrentModel(List<TrainingReport> trainingReports) throws IOException {
         Evaluation evaluation = localRepository.evaluateCurrentModel();
+        _logWriter.writeNext(new String[] {
+                String.valueOf(evaluation.accuracy()),
+                String.valueOf(evaluation.precision()),
+                String.valueOf(evaluation.recall()),
+                String.valueOf(evaluation.f1()),
+        });
+    }
 
-        // calculate avg training time
-        double sumTrainingTime = trainingReports.stream().map(TrainingReport::getTrainingTime).reduce(0.0, Double::sum);
-        double avgTrainingTime = sumTrainingTime / acceptedClients.size();
-
-        // calculate avg uplink time
-        double sumUplinkTime = acceptedClients.stream().map(IClientHandler::getUplinkTime).reduce(0.0, Double::sum);
-        double avgUplinkTime = sumUplinkTime / acceptedClients.size();
-
-        // calculate avg downlink time
-        double sumDownlinkTime = trainingReports.stream().map(TrainingReport::getDownlinkTime).reduce(0.0, Double::sum);
-        double avgDownlinkTime = sumDownlinkTime / acceptedClients.size();
-
-        // calculate avg comm power
-        double sumCommPower = trainingReports.stream().map(x -> x.getCommunicationPower().getPowerConsumption()).reduce(0.0, Double::sum);
-        double avgCommPower = sumCommPower / acceptedClients.size();
-
-        // calculate avg comp power
-        double sumCompPower = trainingReports.stream().map(TrainingReport::getComputingPower).reduce(0.0, Double::sum);
-        double avgCompPower = sumCompPower / acceptedClients.size();
-
-        // TODO: move this to repo logic
-        // accuracy, precision, recall, f1, training time (ms), downlink time (ms), uplink time (ms), comm power (j). comp power (j)
-        String evalString = String.format("%f,%f,%f,%f,%f,%f,%f,%f,%f\n",
-                evaluation.accuracy(),
-                evaluation.precision(),
-                evaluation.recall(),
-                evaluation.f1(),
-                avgTrainingTime,
-                avgDownlinkTime,
-                avgUplinkTime,
-                avgCommPower,
-                avgCompPower);
-        localRepository.appendToCurrentFile(evalString);
+    @Override
+    public void done() throws Exception {
+        _logWriter.close();
+        for (IClientHandler clientHandler : acceptedClients) {
+            clientHandler.done();
+        }
     }
 }

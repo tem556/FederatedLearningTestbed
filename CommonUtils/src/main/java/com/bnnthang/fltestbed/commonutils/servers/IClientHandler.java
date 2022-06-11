@@ -57,6 +57,4 @@ public interface IClientHandler {
     Boolean isAlive();
 
     Boolean hasLocalModel();
-
-    Double getUplinkTime();
 }

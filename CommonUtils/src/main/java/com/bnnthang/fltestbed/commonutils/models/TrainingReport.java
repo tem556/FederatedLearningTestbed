@@ -16,37 +16,14 @@ import java.util.List;
 @Data
 public class TrainingReport implements Serializable {
     /**
-     * Weight updates for all layers in neural utils.
+     * Weight updates for all layers in neural network.
      */
-    private INDArray params;
+    private ModelUpdate modelUpdate;
 
-//    private INDArray stateViewArray;
-
-    /**
-     * Training time (in milliseconds).
-     */
-    private Double trainingTime;
-
-    /**
-     * Total time for clients to download resources from server (milliseconds per byte).
-     */
-    private Double downlinkTime;
-
-    /**
-     * Communicating power consumption (joules).
-     */
-    private PowerConsumptionFromBytes communicationPower;
-
-    /**
-     * Computing power consumption (joules)
-     */
-    private Double computingPower;
+    private WantedMetrics metrics;
 
     public TrainingReport() {
-        params = null;
-        trainingTime = null;
-        downlinkTime = null;
-        communicationPower = new PowerConsumptionFromBytes();
-        computingPower = null;
+        modelUpdate = new ModelUpdate();
+        metrics = new WantedMetrics();
     }
 }

@@ -10,6 +10,7 @@ import org.slf4j.LoggerFactory;
 import java.rmi.UnexpectedException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Simple implementation for a training iteration.
@@ -50,15 +51,17 @@ public final class BaseTrainingIterator extends Thread {
                  currentRound <= configuration.getRounds();
                  ++currentRound) {
 
-                _logger.debug("current round = " + currentRound);
+                _logger.info("current round = " + currentRound);
 
                 // offload model to clients
                 // TODO: add logic for sending weights only
                 operations.pushModelToClients(clients);
+                _logger.info("pushed updated model to all clients");
 
                 for (IClientHandler client : clients) {
                     client.startTraining();
                 }
+                _logger.info("asked all clients to train");
 
                 // wait for trainings to finish
                 do {
@@ -70,8 +73,6 @@ public final class BaseTrainingIterator extends Thread {
                             .map(IClientHandler::isTraining)
                             .reduce(false, Boolean::logicalOr);
 
-//                    _logger.debug("are clients training? = " + areClientsTraining);
-
                     // break if clients finish
                     if (!areClientsTraining) {
                         break;
@@ -81,6 +82,7 @@ public final class BaseTrainingIterator extends Thread {
                 // aggregate results
                 // TODO: parallelize this
                 List<TrainingReport> reports = new ArrayList<>();
+                _logger.info("getting training reports...");
                 for (IClientHandler client : clients) {
                     TrainingReport report = client.getTrainingReport();
                     if (report == null) {
@@ -88,21 +90,22 @@ public final class BaseTrainingIterator extends Thread {
                     }
                     reports.add(report);
                 }
-                operations.aggregateResults(reports, configuration.getAggregationStrategy());
+                _logger.info("got all training reports");
+
+                operations.aggregateResults(reports.stream().map(TrainingReport::getModelUpdate).collect(Collectors.toList()), configuration.getAggregationStrategy());
+                _logger.info("aggregated updates");
 
                 // evaluate
                 operations.evaluateCurrentModel(reports);
+                _logger.info("evaluated new model");
 
                 // deallocate arrays
                 for (TrainingReport report : reports) {
-                    report.getParams().close();
+                    report.getModelUpdate().getWeight().close();
                 }
             }
 
-            // terminate connections
-            for (IClientHandler client : clients) {
-                client.done();
-            }
+            operations.done();
         } catch (Exception e) {
             e.printStackTrace();
         }

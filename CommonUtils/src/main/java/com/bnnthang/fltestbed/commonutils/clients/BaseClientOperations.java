@@ -36,14 +36,13 @@ public class BaseClientOperations implements IClientOperations {
                                 Double _mflops) throws IOException {
         localRepository = _localRepository;
         trainingReport = new TrainingReport();
-        trainingReport.getCommunicationPower().setAvgPowerPerBytes(avgPowerPerByte);
         mflops = _mflops;
     }
 
     @Override
     public void handleAccepted(Socket socket) throws IOException {
         // send model existence information
-        SocketUtils.sendInteger(socket, hasLocalModel() ? 1 : 0, trainingReport.getCommunicationPower());
+        SocketUtils.sendInteger(socket, 0);
     }
 
     @Override
@@ -58,20 +57,28 @@ public class BaseClientOperations implements IClientOperations {
         long bytesRead;
 
         if (hasLocalModel()) {
-            bytesRead = localRepository.updateModel(socket, trainingReport.getCommunicationPower());
+            bytesRead = localRepository.updateModel(socket);
         } else {
-            bytesRead = localRepository.downloadModel(socket, trainingReport.getCommunicationPower());
+            bytesRead = localRepository.downloadModel(socket);
         }
 
         LocalDateTime endTime = LocalDateTime.now();
 
-        trainingReport.setDownlinkTime(TimeUtils.millisecondsBetween(startTime, endTime) / bytesRead);
+        trainingReport.getMetrics().setUplinkBytes(trainingReport.getMetrics().getUplinkBytes() + bytesRead);
+        trainingReport.getMetrics().setDownlinkTime(trainingReport.getMetrics().getDownlinkTime() + TimeUtils.millisecondsBetween(startTime, endTime));
     }
 
     @Override
     public void handleDatasetPush(Socket socket) throws IOException {
         _logger.debug("start dataset read");
-        localRepository.downloadDataset(socket, trainingReport.getCommunicationPower());
+
+        LocalDateTime startTime = LocalDateTime.now();
+        Long bytesRead = localRepository.downloadDataset(socket);
+        LocalDateTime endTime = LocalDateTime.now();
+
+        trainingReport.getMetrics().setUplinkBytes(trainingReport.getMetrics().getUplinkBytes() + bytesRead);
+        trainingReport.getMetrics().setDownlinkTime(trainingReport.getMetrics().getDownlinkTime() + TimeUtils.millisecondsBetween(startTime, endTime));
+
         _logger.debug("end dataset read");
     }
 
@@ -82,13 +89,12 @@ public class BaseClientOperations implements IClientOperations {
                 trainingReport,
                 BATCH_SIZE,
                 EPOCHS);
-        trainingReport.setComputingPower(mflops * EPOCHS * AVG_POWER_PER_MFLOP);
         trainingWorker.start();
     }
 
     @Override
     public void handleIsTraining(Socket socket) throws IOException {
-        SocketUtils.sendInteger(socket, trainingWorker != null && trainingWorker.isAlive() ? 1 : 0, trainingReport.getCommunicationPower());
+        SocketUtils.sendInteger(socket, trainingWorker != null && trainingWorker.isAlive() ? 1 : 0);
     }
 
     @Override
@@ -102,9 +108,9 @@ public class BaseClientOperations implements IClientOperations {
         byte[] bytes = bos.toByteArray();
 
         // send report
-        SocketUtils.sendBytesWrapper(socket, bytes, trainingReport.getCommunicationPower());
+        SocketUtils.sendBytesWrapper(socket, bytes);
 
-        trainingReport.getParams().close();
+        trainingReport.getModelUpdate().getWeight().close();
 
         bos.close();
         out.close();

@@ -1,5 +1,6 @@
 package com.bnnthang.fltestbed.commonutils.servers;
 
+import com.bnnthang.fltestbed.commonutils.models.ModelUpdate;
 import com.bnnthang.fltestbed.commonutils.models.ServerParameters;
 import com.bnnthang.fltestbed.commonutils.models.TrainingReport;
 
@@ -45,10 +46,10 @@ public interface IServerOperations {
 
     /**
      * Aggregate results from clients.
-     * @param trainingReports list of training reports
+     * @param modelUpdates list of model updates
      * @param aggregationStrategy an aggregation strategy
      */
-    void aggregateResults(List<TrainingReport> trainingReports,
+    void aggregateResults(List<ModelUpdate> modelUpdates,
                           IAggregationStrategy aggregationStrategy) throws Exception;
 
     /**
@@ -59,4 +60,6 @@ public interface IServerOperations {
     Boolean isTraining();
 
     void evaluateCurrentModel(List<TrainingReport> trainingReports) throws IOException;
+
+    void done() throws Exception;
 }
