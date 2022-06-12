@@ -13,6 +13,9 @@ import org.nd4j.evaluation.classification.Evaluation;
 import org.nd4j.linalg.api.ndarray.INDArray;
 
 import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -160,24 +163,20 @@ public class Cifar10Repository implements IServerLocalRepository {
 
     @Override
     public void createNewResultFile() throws IOException {
-        String newResultFileName = "result-" + (new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss").format(Calendar.getInstance().getTime())) + ".csv";
-        currentResultFileName = newResultFileName;
-        File newResultFile = new File(workingDirectory, newResultFileName);
-        if (newResultFile.createNewFile()) {
-            FileWriter writer = new FileWriter(newResultFile, true);
-            writer.write("accuracy,precision,recall,f1,training time (ms),downlink time (ms),uplink time (ms),communicating power (j), computing power (j)\n");
-            writer.close();
-        } else {
-            throw new IOException("cannot create file");
-        }
+//        String newResultFileName = "result-" + (new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss").format(Calendar.getInstance().getTime())) + ".csv";
+//        currentResultFileName = newResultFileName;
+//        File newResultFile = new File(workingDirectory, newResultFileName);
+//        newResultFile.createNewFile();
+//        FileWriter writer = new FileWriter(newResultFile, true);
+//        writer.write("accuracy,precision,recall,f1,training time (ms),downlink time (ms),uplink time (ms),communicating power (j), computing power (j)\n");
+//        writer.close();
     }
 
     @Override
-    public void appendToCurrentFile(String s) throws IOException {
-        File currentResultFile = new File(workingDirectory, currentResultFileName);
-        FileWriter writer = new FileWriter(currentResultFile, true);
-        writer.write(s);
-        writer.close();
+    public File getLogFolder() throws IOException {
+        File logFolder = new File(workingDirectory, "logs");
+        logFolder.mkdir();
+        return logFolder;
     }
 
     @Override

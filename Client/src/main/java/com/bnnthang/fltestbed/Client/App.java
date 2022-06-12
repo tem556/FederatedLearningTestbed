@@ -1,14 +1,9 @@
 package com.bnnthang.fltestbed.Client;
 
 import com.bnnthang.fltestbed.commonutils.clients.*;
-import com.bnnthang.fltestbed.commonutils.models.BaseCifar10DataSetIterator;
-import com.bnnthang.fltestbed.commonutils.models.BaseCifar10Loader;
 import com.bnnthang.fltestbed.commonutils.models.ClientParameters;
-import com.bnnthang.fltestbed.commonutils.models.ICifar10Loader;
-import org.apache.commons.lang3.ArrayUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.opencv.core.Core;
 
 import java.io.*;
 import java.nio.file.Files;

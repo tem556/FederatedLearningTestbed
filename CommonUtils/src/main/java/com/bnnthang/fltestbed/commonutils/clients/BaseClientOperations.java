@@ -42,7 +42,7 @@ public class BaseClientOperations implements IClientOperations {
     @Override
     public void handleAccepted(Socket socket) throws IOException {
         // send model existence information
-        SocketUtils.sendInteger(socket, 0);
+        SocketUtils.sendInteger(socket, hasLocalModel() ? 1 : 0);
     }
 
     @Override
@@ -64,7 +64,7 @@ public class BaseClientOperations implements IClientOperations {
 
         LocalDateTime endTime = LocalDateTime.now();
 
-        trainingReport.getMetrics().setUplinkBytes(trainingReport.getMetrics().getUplinkBytes() + bytesRead);
+        trainingReport.getMetrics().setDownlinkBytes(trainingReport.getMetrics().getDownlinkBytes() + bytesRead);
         trainingReport.getMetrics().setDownlinkTime(trainingReport.getMetrics().getDownlinkTime() + TimeUtils.millisecondsBetween(startTime, endTime));
     }
 
@@ -76,7 +76,7 @@ public class BaseClientOperations implements IClientOperations {
         Long bytesRead = localRepository.downloadDataset(socket);
         LocalDateTime endTime = LocalDateTime.now();
 
-        trainingReport.getMetrics().setUplinkBytes(trainingReport.getMetrics().getUplinkBytes() + bytesRead);
+        trainingReport.getMetrics().setDownlinkBytes(trainingReport.getMetrics().getDownlinkBytes() + bytesRead);
         trainingReport.getMetrics().setDownlinkTime(trainingReport.getMetrics().getDownlinkTime() + TimeUtils.millisecondsBetween(startTime, endTime));
 
         _logger.debug("end dataset read");

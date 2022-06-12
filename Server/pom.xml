@@ -6,7 +6,7 @@
 
   <groupId>com.bnnthang.fltestbed</groupId>
   <artifactId>Server</artifactId>
-  <version>1.0-STABLE</version>
+  <version>1.1-SNAPSHOT</version>
   <packaging>jar</packaging>
 
   <name>Federated Learning Server</name>
@@ -34,7 +34,7 @@
     <dependency>
       <groupId>com.bnnthang.fltestbed</groupId>
       <artifactId>commonutils</artifactId>
-      <version>1.25.2-STABLE</version>
+      <version>1.26-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>junit</groupId>
@@ -53,9 +53,9 @@
       <version>1.0.0-M2</version>
     </dependency>
     <dependency>
-      <groupId>org.slf4j</groupId>
-      <artifactId>slf4j-simple</artifactId>
-      <version>1.7.21</version>
+      <groupId>org.apache.logging.log4j</groupId>
+      <artifactId>log4j-slf4j-impl</artifactId>
+      <version>2.17.2</version>
     </dependency>
   </dependencies>
 

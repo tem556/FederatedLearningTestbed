@@ -7,16 +7,14 @@ import com.bnnthang.fltestbed.commonutils.models.TrainingConfiguration;
 import com.bnnthang.fltestbed.commonutils.servers.BaseServer;
 import com.bnnthang.fltestbed.commonutils.servers.BaseServerOperations;
 import com.bnnthang.fltestbed.commonutils.servers.IServerOperations;
-import org.apache.commons.lang3.ArrayUtils;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.opencv.core.Core;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
 
 public class App {
-    private static final Logger _logger = LogManager.getLogger(App.class);
+    private static final Logger _logger = LoggerFactory.getLogger(App.class);
     private static final int DEFAULT_PORT = 4602;
     private static final int DEFAULT_MIN_CLIENTS = 1;
     private static final int DEFAULT_ROUNDS = 3;

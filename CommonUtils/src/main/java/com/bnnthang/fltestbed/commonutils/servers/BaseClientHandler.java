@@ -33,22 +33,15 @@ public class BaseClientHandler implements IClientHandler {
         localModel = false;
 
         File logFile = new File(logFolder, "client" + _id + "-log.csv");
-        if (!logFile.exists()) {
-            if (logFile.createNewFile()) {
-                _logWriter = new CSVWriter(new FileWriter(logFile));
-                _logWriter.writeNext(new String[] {
-                        "training time (ms)",
-                        "uplink bytes (bytes)",
-                        "uplink time (ms)",
-                        "downlink bytes (bytes)",
-                        "downlink time (ms)"
-                });
-            } else {
-                throw new IOException("cannot create client log file");
-            }
-        } else {
-            _logWriter = new CSVWriter(new FileWriter(logFile));
-        }
+        logFile.createNewFile();
+        _logWriter = new CSVWriter(new FileWriter(logFile));
+        _logWriter.writeNext(new String[] {
+                "training time (ms)",
+                "uplink bytes (bytes)",
+                "uplink time (ms)",
+                "downlink bytes (bytes)",
+                "downlink time (ms)"
+        });
     }
 
     @Override

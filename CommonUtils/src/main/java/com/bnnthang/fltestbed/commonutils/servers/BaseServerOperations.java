@@ -38,14 +38,9 @@ public class BaseServerOperations implements IServerOperations {
         acceptedClients = new ArrayList<>();
 
         File evalLogFile = new File(localRepository.getLogFolder(), "eval-log.csv");
-        if (!evalLogFile.exists()) {
-            if (evalLogFile.createNewFile()) {
-                _logWriter = new CSVWriter(new FileWriter(evalLogFile));
-                _logWriter.writeNext(new String[] {"accuracy", "precision", "f1", "recall"});
-            } else {
-                throw new IOException("cannot open evaluation log");
-            }
-        }
+        evalLogFile.createNewFile();
+        _logWriter = new CSVWriter(new FileWriter(evalLogFile));
+        _logWriter.writeNext(new String[] {"accuracy", "precision", "f1", "recall"});
     }
 
     @Override
