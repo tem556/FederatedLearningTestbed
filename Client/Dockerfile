@@ -1,8 +1,8 @@
 FROM gradle:7.4.2-jdk8 AS build
 COPY  . /home/gradle/src
 WORKDIR /home/gradle/src
-ENV GITHUB_USERNAME="tem556"
-ENV GITHUB_TOKEN="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"
+ENV GITHUB_USERNAME=[GITHUB_USERNAME]
+ENV GITHUB_TOKEN=[GITHUB_TOKEN]
 RUN gradle build
 RUN gradle uberJar
 
