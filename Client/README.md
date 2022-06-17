@@ -4,10 +4,10 @@ An implementation of a Federated Learning Client
 
 ## Build Docker image
 
-Remember to change [GITHUB_USERNAME] and [GITHUB_TOKEN] to your own in Dockerfile for authentication
+Make sure to set the environment variables GITHUB_USERNAME and GITHUB_TOKEN for authentication
 
 ```
-docker build -t [name] .
+docker build --build-arg GITHUB_USERNAME=$GITHUB_USERNAME --build-arg GITHUB_TOKEN=$GITHUB_TOKEN -t [name] .
 ```
 
 ## Run Docker image as container
