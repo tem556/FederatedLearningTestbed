@@ -17,9 +17,9 @@ public class WantedMetrics implements Serializable {
     private long uplinkBytes = 0;
 
     /**
-     * Total time for clients to upload resources to server (milliseconds per byte).
+     * Total time for clients to upload resources to server (milliseconds).
      */
-    private double uplinkTime = 0.0;
+    private long uplinkTime = 0;
 
     /**
      * Total resources that clients downloaded from server (bytes).
@@ -27,9 +27,9 @@ public class WantedMetrics implements Serializable {
     private long downlinkBytes = 0;
 
     /**
-     * Total time for clients to download resources from server (milliseconds per byte).
+     * Total time for clients to download resources from server (milliseconds).
      */
-    private double downlinkTime = 0.0;
+    private long downlinkTime = 0;
 
     public String[] toCsvLine() {
         return new String[] {

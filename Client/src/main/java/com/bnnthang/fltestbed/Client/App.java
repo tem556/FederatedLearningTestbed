@@ -67,10 +67,7 @@ public class App {
             String pathToModel = clientDir + "/model.zip";
             String pathToDataset = clientDir + "/dataset";
             IClientLocalRepository localRepository = new LocalRepositoryImpl(pathToModel, pathToDataset);
-            IClientOperations clientOperations = new BaseClientOperations(
-                    localRepository,
-                    AVG_POWER_PER_BYTE,
-                    parameters.getMflopsPerRound());
+            IClientOperations clientOperations = new BaseClientOperations(localRepository);
             BaseClient client = new BaseClient(parameters.getServerHost(), parameters.getServerPort(), 5000, clientOperations);
             client.start();
 

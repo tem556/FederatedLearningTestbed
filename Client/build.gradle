@@ -28,7 +28,7 @@ dependencies {
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.2'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.2'
 
-    implementation 'com.bnnthang.fltestbed:commonutils:1.26-SNAPSHOT'
+    implementation 'com.bnnthang.fltestbed:commonutils:1.27-SNAPSHOT'
     implementation 'org.deeplearning4j:deeplearning4j-core:1.0.0-M2'
     implementation group: 'org.nd4j', name: 'nd4j-native-platform', version: '1.0.0-M2'
     implementation group: 'org.bytedeco', name: 'javacv-platform', version: '1.5.7'

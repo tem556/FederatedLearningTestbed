@@ -2,6 +2,7 @@ package com.bnnthang.fltestbed.commonutils.clients;
 
 import com.bnnthang.fltestbed.commonutils.models.PowerConsumptionFromBytes;
 import org.deeplearning4j.nn.multilayer.MultiLayerNetwork;
+import org.nd4j.common.primitives.Pair;
 
 import java.io.File;
 import java.io.IOException;
@@ -9,12 +10,9 @@ import java.io.InputStream;
 import java.net.Socket;
 
 public interface IClientLocalRepository {
-    Long downloadModel(Socket socket) throws IOException;
+    Pair<Long, Long> downloadModel(Socket socket) throws IOException;
     Long downloadDataset(Socket socket) throws IOException;
-    Long updateModel(Socket socket) throws IOException;
-    Long downloadModel(Socket socket, PowerConsumptionFromBytes power) throws IOException;
-    Long downloadDataset(Socket socket, PowerConsumptionFromBytes power) throws IOException;
-    Long updateModel(Socket socket, PowerConsumptionFromBytes power) throws IOException;
+    Pair<Long, Long> updateModel(Socket socket) throws IOException;
     Boolean modelExists();
     MultiLayerNetwork loadModel() throws IOException;
     Boolean datasetExists();

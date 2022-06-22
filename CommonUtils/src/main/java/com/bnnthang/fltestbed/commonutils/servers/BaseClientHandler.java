@@ -27,6 +27,8 @@ public class BaseClientHandler implements IClientHandler {
 
     protected ICSVWriter _logWriter;
 
+    protected long configurationStartTime;
+
     public BaseClientHandler(int id, Socket socket, File logFolder) throws IOException {
         _id = id;
         _socket = socket;
@@ -42,6 +44,8 @@ public class BaseClientHandler implements IClientHandler {
                 "downlink bytes (bytes)",
                 "downlink time (ms)"
         });
+
+        configurationStartTime = -1L;
     }
 
     @Override
@@ -73,6 +77,8 @@ public class BaseClientHandler implements IClientHandler {
         _logger.debug(localModel ? "pushing weights" : "pushing");
 
         localModel = true;
+
+        configurationStartTime = System.currentTimeMillis();
         SocketUtils.sendInteger(_socket, ClientCommandEnum.MODELPUSH.ordinal());
         SocketUtils.sendBytesWrapper(_socket, bytes);
 
@@ -88,15 +94,17 @@ public class BaseClientHandler implements IClientHandler {
     public TrainingReport getTrainingReport() throws IOException {
         SocketUtils.sendInteger(_socket, ClientCommandEnum.REPORT.ordinal());
 
-        LocalDateTime startTime = LocalDateTime.now();
         byte[] bytes = SocketUtils.readBytesWrapper(_socket);
-        LocalDateTime endTime = LocalDateTime.now();
+        long reportingEndTime = System.currentTimeMillis();
 
         TrainingReport report = SerializationUtils.deserialize(bytes);
 
         report.getMetrics().setUplinkBytes((long) bytes.length);
-        report.getMetrics().setUplinkTime(TimeUtils.millisecondsBetween(startTime, endTime));
+        report.getMetrics().setUplinkTime(reportingEndTime - report.getMetrics().getUplinkTime());
+        report.getMetrics().setDownlinkTime(report.getMetrics().getDownlinkTime() - configurationStartTime);
+
         _logWriter.writeNext(report.getMetrics().toCsvLine());
+        _logWriter.flush();
 
         return report;
     }
