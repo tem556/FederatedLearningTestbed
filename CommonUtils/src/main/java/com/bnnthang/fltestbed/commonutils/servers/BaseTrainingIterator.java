@@ -2,15 +2,21 @@ package com.bnnthang.fltestbed.commonutils.servers;
 
 import com.bnnthang.fltestbed.commonutils.models.TrainingConfiguration;
 import com.bnnthang.fltestbed.commonutils.models.TrainingReport;
+import com.bnnthang.fltestbed.commonutils.utils.TimeUtils;
+import com.opencsv.CSVWriter;
+import com.opencsv.ICSVWriter;
 import lombok.AllArgsConstructor;
 import lombok.NonNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.File;
+import java.io.FileWriter;
 import java.rmi.UnexpectedException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.time.LocalDateTime;
 
 /**
  * Simple implementation for a training iteration.
@@ -40,16 +46,32 @@ public final class BaseTrainingIterator extends Thread {
     @NonNull
     private TrainingConfiguration configuration;
 
+    /**
+     * Log Folder.
+     */
+    @NonNull
+    private File logFolder;
+
     @Override
     public void run() {
         try {
             // offload dataset to client
             operations.pushDatasetToClients(clients, configuration.getDatasetRatio());
 
+	    _logger.info("Creating Aggregated Log file");
+
+            // make log file for aggregated time
+            File AgLogFile = new File(logFolder, "aggregated-log.csv");
+            AgLogFile.createNewFile();
+            CSVWriter _logWriter = new CSVWriter(new FileWriter(AgLogFile));
+            _logWriter.writeNext(new String[] {"Round no.", "Aggregated time(ms)"});
+
             // repeat the process a certain number of times
             for (int currentRound = 1;
                  currentRound <= configuration.getRounds();
                  ++currentRound) {
+
+                LocalDateTime startTime = LocalDateTime.now();
 
                 _logger.info("current round = " + currentRound);
 
@@ -99,11 +121,18 @@ public final class BaseTrainingIterator extends Thread {
                 operations.evaluateCurrentModel(reports);
                 _logger.info("evaluated new model");
 
+                LocalDateTime endTime = LocalDateTime.now();
+                Double roundTime = TimeUtils.millisecondsBetween(startTime, endTime);
+
+                _logWriter.writeNext(new String[] {String.valueOf(currentRound), String.valueOf(roundTime)});
+
                 // deallocate arrays
                 for (TrainingReport report : reports) {
                     report.getModelUpdate().getWeight().close();
                 }
             }
+
+            _logWriter.close();
 
             operations.done();
         } catch (Exception e) {

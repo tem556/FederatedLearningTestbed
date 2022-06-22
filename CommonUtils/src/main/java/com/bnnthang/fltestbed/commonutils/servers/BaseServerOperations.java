@@ -100,7 +100,8 @@ public class BaseServerOperations implements IServerOperations {
             // create result file
             localRepository.createNewResultFile();
 
-            trainingIterator = new BaseTrainingIterator(this, acceptedClients, serverParameters.getTrainingConfiguration());
+            trainingIterator = new BaseTrainingIterator(this, acceptedClients,
+                    serverParameters.getTrainingConfiguration(), localRepository.getLogFolder());
             trainingIterator.start();
 
             return true;
