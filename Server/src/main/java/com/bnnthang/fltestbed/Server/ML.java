@@ -3,6 +3,7 @@ package com.bnnthang.fltestbed.Server;
 import org.datavec.image.loader.CifarLoader;
 import org.deeplearning4j.datasets.fetchers.DataSetType;
 import org.deeplearning4j.datasets.iterator.impl.Cifar10DataSetIterator;
+
 import org.deeplearning4j.nn.api.OptimizationAlgorithm;
 import org.deeplearning4j.nn.conf.MultiLayerConfiguration;
 import org.deeplearning4j.nn.conf.NeuralNetConfiguration;
@@ -83,22 +84,20 @@ public class ML {
         return model;
     }
 
-    public static void trainAndEval() throws IOException {
-//        Cifar10DataSetIterator cifar = new Cifar10DataSetIterator(batchSize, new int[]{height, width}, DataSetType.TRAIN, null, seed);
-//        Cifar10DataSetIterator cifarEval = new Cifar10DataSetIterator(batchSize, new int[]{height, width}, DataSetType.TEST, null, seed);
+    public static void trainAndEval(Integer rounds, Float datasetratio, String workdir) throws IOException {
         ServerCifar10Loader loaderTrain = new ServerCifar10Loader(new File[] {
-                new File("C:\\Users\\buinn\\DoNotTouch\\crap\\photolabeller\\cifar-10\\data_batch_1.bin"),
-                new File("C:\\Users\\buinn\\DoNotTouch\\crap\\photolabeller\\cifar-10\\data_batch_2.bin"),
-                new File("C:\\Users\\buinn\\DoNotTouch\\crap\\photolabeller\\cifar-10\\data_batch_3.bin"),
-                new File("C:\\Users\\buinn\\DoNotTouch\\crap\\photolabeller\\cifar-10\\data_batch_4.bin"),
-                new File("C:\\Users\\buinn\\DoNotTouch\\crap\\photolabeller\\cifar-10\\data_batch_5.bin"),
+                new File(workdir + "/cifar-10/data_batch_1.bin"),
+                new File(workdir + "/cifar-10/data_batch_2.bin"),
+                new File(workdir + "/cifar-10/data_batch_3.bin"),
+                new File(workdir + "/cifar-10/data_batch_4.bin"),
+                new File(workdir + "/cifar-10/data_batch_5.bin"),
         });
-        loaderTrain.getPartialDataset(0.5);
+        loaderTrain.getPartialDataset(datasetratio);
         loaderTrain.printDistribution();
 
         ServerCifar10DataSetIterator cifar = new ServerCifar10DataSetIterator(loaderTrain, batchSize, 1, 123456);
 
-        ServerCifar10Loader loader = new ServerCifar10Loader(new File("C:\\Users\\buinn\\DoNotTouch\\crap\\photolabeller\\cifar-10\\test_batch.bin"), 12345);
+        ServerCifar10Loader loader = new ServerCifar10Loader(new File(workdir + "/cifar-10/test_batch.bin"), 12345);
         loader.printDistribution();
         ServerCifar10DataSetIterator cifarEval = new ServerCifar10DataSetIterator(loader, batchSize, 1, 123456);
 
@@ -108,7 +107,7 @@ public class ML {
         model.setListeners(new ScoreIterationListener(50),
                 new EvaluativeListener(cifarEval, 1, InvocationType.EPOCH_END));
 
-        model.fit(cifar, 60);
+        model.fit(cifar, rounds);
     }
 
     public static void trainAndEvalDefault() throws IOException {
