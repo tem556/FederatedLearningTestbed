@@ -30,7 +30,7 @@ public class App {
                 help();
                 break;
             case "--ml":
-                ml();
+                ml(args);
                 break;
             case "--fl":
                 fl(args);
@@ -45,9 +45,26 @@ public class App {
         System.out.println("help");
     }
 
-    private static void ml() throws IOException {
-//        ML.trainAndEval();
-        ML.trainAndEvalDefault();
+    private static void ml(String[] args) throws IOException {
+        int rounds = DEFAULT_ROUNDS;
+        String workDir = DEFAULT_MODEL_DIR;
+        float ratio = DEFAULT_DATASET_RATIO;
+
+        for (int i = 1; i < args.length; i += 2) {
+            switch (args[i]) {
+                case "--rounds":
+                    rounds = Integer.parseInt(args[i + 1]);
+                    break;
+                case "--workdir":
+                    workDir = args[i + 1];
+                    break;
+                case "--datasetratio":
+                    ratio = Float.parseFloat(args[i + 1]);
+                    break;
+            }
+        }
+        ML.trainAndEval(rounds, ratio, workDir);
+//        ML.trainAndEvalDefault();
     }
 
     private static void fl(String[] args) throws IOException, InterruptedException, URISyntaxException {
