@@ -112,4 +112,9 @@ public class BaseClientOperations implements IClientOperations {
     public Boolean hasLocalModel() {
         return localRepository.modelExists();
     }
+
+    @Override
+    public void terminate() {
+        trainingWorker.interrupt();
+    }
 }

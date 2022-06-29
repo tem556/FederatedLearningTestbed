@@ -56,4 +56,6 @@ public interface IClientOperations {
      * @return <code>true</code> iff client has local model
      */
     Boolean hasLocalModel();
+
+    void terminate();
 }

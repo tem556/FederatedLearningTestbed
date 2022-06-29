@@ -2,6 +2,7 @@ package com.bnnthang.fltestbed.commonutils.clients;
 
 import com.bnnthang.fltestbed.commonutils.enums.ClientCommandEnum;
 import com.bnnthang.fltestbed.commonutils.utils.SocketUtils;
+import org.nd4j.shade.guava.primitives.Ints;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -68,15 +69,21 @@ public class BaseClient extends Thread {
             return;
         }
 
-        do {
-            // skip if there is nothing to read
-            if (socket.getInputStream().available() < 4) {
-                sleep(delayInterval);
-                continue;
-            }
+        while (true) {
+            byte[] bytes = new byte[4];
+            int bytesRead = socket.getInputStream().read(bytes);
 
-            coordinate(SocketUtils.readInteger(socket));
-        } while (!socket.isClosed() && socket.isConnected());
+            if (bytesRead < 0) {
+                operations.terminate();
+                _logger.error("unexpectedly finished");
+                break;
+            } else if (bytesRead == 0) {
+                sleep(delayInterval);
+            } else {
+                Integer cmd = Ints.fromByteArray(bytes);
+                coordinate(cmd);
+            }
+        }
     }
 
     /**
@@ -93,8 +100,6 @@ public class BaseClient extends Thread {
         if (commandIndex < 0 || commandIndex > ClientCommandEnum.values().length) {
             throw new IllegalArgumentException(String.format("got unexpected command index: %d", commandIndex));
         }
-
-//        _logger.debug("recv command = " + commandIndex);
 
         switch (ClientCommandEnum.values()[commandIndex]) {
             case ACCEPTED:

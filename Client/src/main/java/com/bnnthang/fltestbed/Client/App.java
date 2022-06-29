@@ -23,10 +23,6 @@ public class App {
 
     private static final int DEFAULT_NUM_CLIENTS = 1;
 
-    private static final double DEFAULT_MFLOPS = 218673.155;
-
-    private static final double AVG_POWER_PER_BYTE = 15.0;
-
     public static void main(String[] args) throws IOException, InterruptedException {
         switch (args[0]) {
             case "--help":
@@ -87,7 +83,6 @@ public class App {
         int port = DEFAULT_SERVER_PORT;
         String workDir = DEFAULT_WORK_DIR;
         int numClients = DEFAULT_NUM_CLIENTS;
-        double mflops = DEFAULT_MFLOPS;
         for (int i = 1; i < args.length; i += 2) {
             switch (args[i]) {
                 case "--host":
@@ -102,13 +97,10 @@ public class App {
                 case "--nclients":
                     numClients = Integer.parseInt(args[i + 1]);
                     break;
-                case "--mflops":
-                    mflops = Double.parseDouble(args[i + 1]);
-                    break;
                 default:
                     throw new UnsupportedOperationException("unsupported parameter: " + args[i]);
             }
         }
-        return new ClientParameters(host, port, workDir, numClients, mflops);
+        return new ClientParameters(host, port, workDir, numClients);
     }
 }
