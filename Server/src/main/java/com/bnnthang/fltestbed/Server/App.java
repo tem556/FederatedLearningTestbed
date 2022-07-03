@@ -21,6 +21,7 @@ public class App {
     private static final String DEFAULT_MODEL_DIR = "C:/Users/buinn/DoNotTouch/crap/photolabeller";
     private static final String DEFAULT_APK_PATH = "C:\\Users\\buinn\\Repos\\FederatedLearningTestbed\\AndroidClient\\app\\build\\intermediates\\apk\\debug\\app-debug.apk";;
     private static final float DEFAULT_DATASET_RATIO = 1.0F;
+    private static final boolean DEFAULT_USE_CONFIG = false;
 
     public static void main(String[] args) throws Exception {
         _logger.debug("hello world");
@@ -74,6 +75,7 @@ public class App {
         String workDir = DEFAULT_MODEL_DIR;
         String apkPath = DEFAULT_APK_PATH;
         float ratio = DEFAULT_DATASET_RATIO;
+        boolean useConfig = DEFAULT_USE_CONFIG;
         for (int i = 1; i < args.length; i += 2) {
             switch (args[i]) {
                 case "--port":
@@ -94,13 +96,16 @@ public class App {
                 case "--apk":
                     apkPath = args[i + 1];
                     break;
+                case "--config":
+                    useConfig = Boolean.parseBoolean(args[i + 1]);
+                    break;
                 default:
                     throw new UnsupportedOperationException("unsupported argument: " + args[i]);
             }
         }
 
         TrainingConfiguration trainingConfiguration = new TrainingConfiguration(minClients, rounds, 5000, new FedAvg(), ratio);
-        IServerOperations serverOperations = new BaseServerOperations(new Cifar10Repository(workDir));
+        IServerOperations serverOperations = new BaseServerOperations(new Cifar10Repository(workDir, useConfig));
         ServerParameters serverParameters = new ServerParameters(port, trainingConfiguration, serverOperations);
         BaseServer server = new BaseServer(serverParameters);
         server.start();

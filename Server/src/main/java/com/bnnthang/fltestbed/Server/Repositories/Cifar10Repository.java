@@ -13,24 +13,28 @@ import org.nd4j.evaluation.classification.Evaluation;
 import org.nd4j.linalg.api.ndarray.INDArray;
 
 import java.io.*;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.lang.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import org.json.simple.*;
+import org.json.simple.parser.*;
 
 public class Cifar10Repository implements IServerLocalRepository {
     private static final Logger _logger = LogManager.getLogger(Cifar10Repository.class);
 
     private final String workingDirectory;
+    private final boolean useConfig;
     private String currentModelName = "newmodel.zip";
     private String currentResultFileName = null;
 
     private final Map<Byte, List<byte[]>> imagesByLabel;
 
-    public Cifar10Repository(String _workingDirectory) throws IOException {
+    public Cifar10Repository(String _workingDirectory, boolean _useConfig) throws IOException {
         workingDirectory = _workingDirectory;
+        useConfig = _useConfig;
 
         imagesByLabel = new HashMap<>();
 
@@ -60,7 +64,7 @@ public class Cifar10Repository implements IServerLocalRepository {
         }
     }
 
-    public List<List<byte[]>> partialSplitDatasetIIDAndShuffle(int nPartitions, float ratio) {
+    public List<List<byte[]>> partialSplitDatasetIIDAndShuffleEvenly(int nPartitions, float ratio) {
         List<List<Pair<byte[], Byte>>> partitions = new ArrayList<>();
         for (int i = 0; i < nPartitions; ++i) {
             partitions.add(new ArrayList<>());
@@ -94,6 +98,97 @@ public class Cifar10Repository implements IServerLocalRepository {
 
         return res;
     }
+    // Checks that the ratios for each label in JSONArray distribution sum up to 1
+    public boolean isValidLabelDistribution(ArrayList<ArrayList<Double>> distribution){
+        for (int i = 0; i < 9; i++){
+            int finalI = i;
+            Double one = 1.0;
+            // Make the Stream that contains the ratios for the ith label
+            Stream ithRatios = distribution.stream().map(a -> a.get(finalI));
+            if (!one.equals(ithRatios.mapToDouble(a -> (double) a).sum())){
+                return false;
+            }
+        }
+        return true;
+    }
+
+    public boolean isValidJSON(ArrayList<Double> distributionRatiosC, ArrayList<ArrayList<Double>> distributionRatiosL,
+                               int nPartitions, boolean even){
+        Double one = 1.0;
+        // Only checks array that is being used
+        if (even){
+            if (distributionRatiosC.size() != nPartitions) return false;
+            else return (one.equals(distributionRatiosC.stream().mapToDouble(a -> (Double)a).sum()));
+        }
+        else{
+            if (distributionRatiosL.size() != nPartitions) return false;
+            else return isValidLabelDistribution(distributionRatiosL);
+        }
+    }
+
+    public List<List<byte[]>> partialSplitDatasetIIDAndShuffle(int nPartitions, float ratio) {
+        JSONParser parser = new JSONParser();
+        List<List<byte[]>> res = new ArrayList<>();
+        try {
+            ArrayList<Double> distributionRatiosByClient;
+            ArrayList<ArrayList<Double>> distributionRatiosByLabels;
+            boolean evenLabelDistribution;
+            JSONObject jsonObject = (JSONObject)parser.parse(new FileReader(workingDirectory + "/config.json"));
+            evenLabelDistribution = (boolean)jsonObject.get("evenLabelDistributionByClient");
+            distributionRatiosByClient = (ArrayList<Double>)jsonObject.get("distributionRatiosByClient");
+            distributionRatiosByLabels = (ArrayList<ArrayList<Double>>)jsonObject.get("distributionRatiosByLabels");
+
+            if (!isValidJSON(distributionRatiosByClient, distributionRatiosByLabels, nPartitions, evenLabelDistribution)){
+                throw new IOException("Invalid JSON configuration");
+            }
+            _logger.debug("JSON file passed preconditions");
+            
+            List<List<Pair<byte[], Byte>>> partitions = new ArrayList<>();
+            for (int i = 0; i < nPartitions; ++i) {
+                partitions.add(new ArrayList<>());
+            }
+
+            int usedImages;
+            int nSamples;
+            float subRatio;
+            for (byte label = 0; label < 10; ++label) {
+                usedImages = 0;
+                List<byte[]> images = imagesByLabel.get(label);
+                Collections.shuffle(images);
+                // Goes through each partition and gives it the number of images it needs
+                for (int partition = 0; partition < nPartitions; partition++) {
+                    if (evenLabelDistribution) {
+                        subRatio = distributionRatiosByClient.get(partition).floatValue();
+                    }
+                    else subRatio = (distributionRatiosByLabels.get(partition)).get(label).floatValue();
+                    nSamples = Integer.min(Math.round(subRatio * ratio * images.size()), images.size());
+                    for (int i = usedImages; i < usedImages + nSamples; ++i) {
+                        assert i < images.size() : "Problem in accessing images";
+                        partitions.get(partition).add(Pair.of(images.get(i), label));
+                    }
+                    usedImages += nSamples;
+                }
+            }
+
+            for (int i = 0; i < nPartitions; ++i) {
+                res.add(new ArrayList<>());
+                for (int j = 0; j < partitions.get(i).size(); ++j) {
+                    byte[] t = new byte[32 * 32 * 3 + 1];
+                    t[0] = partitions.get(i).get(j).getRight();
+                    System.arraycopy(partitions.get(i).get(j).getLeft(), 0, t, 1, 32 * 32 * 3);
+                    res.get(i).add(t);
+                }
+            }
+
+            // shuffle
+            for (int i = 0; i < nPartitions; ++i) {
+                Collections.shuffle(res.get(i));
+            }
+        } catch(Exception e) {
+            e.printStackTrace();
+        }
+        return res;
+    }
 
     private static int DatasetLength(List<byte[]> dataset) {
         int length = 0;
@@ -120,8 +215,14 @@ public class Cifar10Repository implements IServerLocalRepository {
 
     @Override
     public List<byte[]> partitionAndSerializeDataset(int numPartitions, float ratio) {
-        List<List<byte[]>> partitions = partialSplitDatasetIIDAndShuffle(numPartitions, ratio);
-        return partitions.stream().map(Cifar10Repository::flatten).collect(Collectors.toList());
+        if (useConfig) {
+            List<List<byte[]>> partitions = partialSplitDatasetIIDAndShuffle(numPartitions, ratio);
+            return partitions.stream().map(Cifar10Repository::flatten).collect(Collectors.toList());
+        }
+        else {
+            List<List<byte[]>> partitions = partialSplitDatasetIIDAndShuffleEvenly(numPartitions, ratio);
+            return partitions.stream().map(Cifar10Repository::flatten).collect(Collectors.toList());
+        }
     }
 
     @Override
