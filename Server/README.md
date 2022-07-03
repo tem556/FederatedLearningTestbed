@@ -2,9 +2,9 @@
 
 An implementation of a Federated Learning Server
 
-## Set configure file
+## Set config file
 
-The configure file must exist within the working directory the user sets from command line. The user must also add '''--config true''' to tell the Server that the config.json file must be used, otherwise the dataset it is divided evenly among clients.  
+The config file must exist within the working directory the user sets from command line. The user must also add '''--config true''' to tell the Server that the config.json file must be used, otherwise the dataset it is divided evenly among clients.  
 
 ## Build Docker image
 
