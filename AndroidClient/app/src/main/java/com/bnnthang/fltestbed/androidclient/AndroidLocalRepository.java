@@ -8,6 +8,7 @@ import org.apache.commons.lang3.SerializationUtils;
 import org.deeplearning4j.nn.multilayer.MultiLayerNetwork;
 import org.deeplearning4j.util.ModelSerializer;
 import org.nd4j.linalg.api.ndarray.INDArray;
+import org.nd4j.common.primitives.Pair;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -30,15 +31,16 @@ public class AndroidLocalRepository implements IClientLocalRepository {
     }
 
     @Override
-    public Long downloadModel(Socket socket) throws IOException {
+    public Pair<Long, Long> downloadModel(Socket socket) throws IOException {
         File datasetFile = new File(localFileDir, MODEL_FILENAME);
         datasetFile.createNewFile();
 
         FileOutputStream fos = new FileOutputStream(datasetFile);
         Long readBytes = SocketUtils.readAndSaveBytes(socket, fos);
+        Long configurationEnd = System.currentTimeMillis();
         fos.close();
 
-        return readBytes;
+        return new Pair<>(readBytes, configurationEnd);
     }
 
     @Override
@@ -57,8 +59,9 @@ public class AndroidLocalRepository implements IClientLocalRepository {
     }
 
     @Override
-    public Long updateModel(Socket socket) throws IOException {
+    public Pair<Long, Long> updateModel(Socket socket) throws IOException {
         byte[] bytes = SocketUtils.readBytesWrapper(socket);
+        Long configurationEnd = System.currentTimeMillis();
 
 //        _logger.debug("recv weights length = " + bytes.length);
         System.err.println("recv weights length = " + bytes.length);
@@ -69,28 +72,7 @@ public class AndroidLocalRepository implements IClientLocalRepository {
         model.save(new File(localFileDir, MODEL_FILENAME), true);
         model.close();
 
-        return (long) bytes.length;
-    }
-
-    @Override
-    public Long downloadModel(Socket socket, PowerConsumptionFromBytes powerConsumptionFromBytes) throws IOException {
-        Long readBytes = downloadModel(socket);
-        powerConsumptionFromBytes.increasePowerConsumption(readBytes);
-        return readBytes;
-    }
-
-    @Override
-    public Long downloadDataset(Socket socket, PowerConsumptionFromBytes powerConsumptionFromBytes) throws IOException {
-        Long readBytes = downloadDataset(socket);
-        powerConsumptionFromBytes.increasePowerConsumption(readBytes);
-        return readBytes;
-    }
-
-    @Override
-    public Long updateModel(Socket socket, PowerConsumptionFromBytes powerConsumptionFromBytes) throws IOException {
-        Long readBytes = updateModel(socket);
-        powerConsumptionFromBytes.increasePowerConsumption(readBytes);
-        return readBytes;
+        return new Pair<>((long) bytes.length, configurationEnd);
     }
 
     @Override

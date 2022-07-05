@@ -9,7 +9,7 @@ public class AndroidClientOperations extends BaseClientOperations {
     public AndroidClientOperations(IClientLocalRepository _localRepository,
                                    Double avgPowerPerByte,
                                    Double _mflops) throws IOException {
-        super(_localRepository, avgPowerPerByte, _mflops);
+        super(_localRepository);
     }
 
     @Override
@@ -19,7 +19,6 @@ public class AndroidClientOperations extends BaseClientOperations {
                 trainingReport,
                 BATCH_SIZE,
                 EPOCHS);
-        trainingReport.setComputingPower(mflops * EPOCHS * AVG_POWER_PER_MFLOP);
         trainingWorker.start();
     }
 }
