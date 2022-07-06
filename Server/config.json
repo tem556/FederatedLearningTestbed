@@ -1,7 +1,9 @@
 {
-    "evenLabelDistributionByClient": false,
-    "distributionRatiosByClient": [0.2, 0.3, 0.5],
+    "evenLabelDistributionByClient": true,
+    "distributionRatiosByClient": [0.3, 0.3, 0.4],
     "distributionRatiosByLabels": [[0.5, 0.25, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5],
 				   [0.25, 0.5, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25],
-				   [0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25]]
+				   [0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25]],
+    "useDropping": true,
+    "dropping": [{"round":1,"#clients":1},{"round":2,"#clients":1} ]
 }
