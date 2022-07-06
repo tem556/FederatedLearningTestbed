@@ -9,6 +9,7 @@ import org.deeplearning4j.nn.multilayer.MultiLayerNetwork;
 import org.deeplearning4j.util.ModelSerializer;
 import org.nd4j.common.primitives.Pair;
 import org.nd4j.linalg.api.ndarray.INDArray;
+import org.nd4j.common.primitives.Pair;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -37,6 +38,7 @@ public class AndroidLocalRepository implements IClientLocalRepository {
 
         FileOutputStream fos = new FileOutputStream(datasetFile);
         Long readBytes = SocketUtils.readAndSaveBytes(socket, fos);
+        Long configurationEnd = System.currentTimeMillis();
         fos.close();
         Long configurationEnd = System.currentTimeMillis();
 
