@@ -6,10 +6,8 @@ import com.bnnthang.fltestbed.commonutils.clients.IClientLocalRepository;
 import java.io.IOException;
 
 public class AndroidClientOperations extends BaseClientOperations {
-    public AndroidClientOperations(IClientLocalRepository _localRepository,
-                                   Double avgPowerPerByte,
-                                   Double _mflops) throws IOException {
-        super(_localRepository, avgPowerPerByte, _mflops);
+    public AndroidClientOperations(IClientLocalRepository _localRepository) throws IOException {
+        super(_localRepository);
     }
 
     @Override
@@ -19,7 +17,6 @@ public class AndroidClientOperations extends BaseClientOperations {
                 trainingReport,
                 BATCH_SIZE,
                 EPOCHS);
-        trainingReport.setComputingPower(mflops * EPOCHS * AVG_POWER_PER_MFLOP);
         trainingWorker.start();
     }
 }

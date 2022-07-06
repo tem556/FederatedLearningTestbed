@@ -61,8 +61,8 @@ public class AndroidCifar10TrainingWorker extends Thread {
             model.fit(cifar, _epochs);
             LocalDateTime endTime = LocalDateTime.now();
 
-            _report.setTrainingTime(TimeUtils.millisecondsBetween(startTime, endTime));
-            _report.setParams(model.params().dup());
+            _report.getMetrics().setTrainingTime(TimeUtils.millisecondsBetween(startTime, endTime));
+            _report.getModelUpdate().setWeight(model.params().dup());
 
             model.close();
         } catch (IOException e) {

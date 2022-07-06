@@ -29,10 +29,6 @@ public class ClientThread extends Thread {
 
     private static final Integer DELAY_INTERVAL = 5000;
 
-    private static final Double AVG_POWER_PER_BYTE = 131201.26909090907;
-
-    private static final Double MFLOPS_PER_ROUND = 15.0;
-
     private File localDir = null;
 
     public ClientThread(File _localDir, String host, int port) {
@@ -45,7 +41,7 @@ public class ClientThread extends Thread {
     public void run() {
         try {
             IClientLocalRepository localRepository = new AndroidLocalRepository(localDir);
-            IClientOperations clientOperations = new AndroidClientOperations(localRepository, AVG_POWER_PER_BYTE, MFLOPS_PER_ROUND);
+            IClientOperations clientOperations = new AndroidClientOperations(localRepository);
             BaseClient client = new BaseClient(HOST, PORT, DELAY_INTERVAL, clientOperations);
             client.run();
         } catch (IOException e) {
