@@ -40,7 +40,6 @@ public class AndroidLocalRepository implements IClientLocalRepository {
         Long readBytes = SocketUtils.readAndSaveBytes(socket, fos);
         Long configurationEnd = System.currentTimeMillis();
         fos.close();
-        Long configurationEnd = System.currentTimeMillis();
 
         return new Pair<>(readBytes, configurationEnd);
     }

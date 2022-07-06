@@ -21,44 +21,44 @@ public class AndroidCifar10TrainingWorker extends Thread {
     /**
      * An instance of local repository.
      */
-    private IClientLocalRepository localRepository;
+    private IClientLocalRepository _localRepository;
 
     /**
      * Batch size.
      */
-    private int batchSize;
+    private int _batchSize;
 
     /**
      * Number of epochs to train.
      */
-    private int epochs;
+    private int _epochs;
 
     /**
      * Training report.
      */
-    private TrainingReport report;
+    private TrainingReport _report;
 
-    public AndroidCifar10TrainingWorker(IClientLocalRepository _localRepository,
-                                        TrainingReport _report,
-                                        int _batchSize,
-                                        int _epochs) {
-        localRepository = _localRepository;
-        report = _report;
-        batchSize = _batchSize;
-        epochs = _epochs;
+    public AndroidCifar10TrainingWorker(IClientLocalRepository localRepository,
+                                        TrainingReport report,
+                                        int batchSize,
+                                        int epochs) {
+        _localRepository = localRepository;
+        _report = report;
+        _batchSize = batchSize;
+        _epochs = epochs;
     }
 
     @Override
     public void run() {
         try {
-            MultiLayerNetwork model = ModelSerializer.restoreMultiLayerNetwork(localRepository.getModelFile(), true);
+            MultiLayerNetwork model = ModelSerializer.restoreMultiLayerNetwork(_localRepository.getModelFile(), true);
 
-            ICifar10Loader loader = new AndroidCifar10Loader(localRepository);
-            DataSetIterator cifar = new NewCifar10DSIterator(loader, batchSize);
+            ICifar10Loader loader = new AndroidCifar10Loader(_localRepository);
+            DataSetIterator cifar = new NewCifar10DSIterator(loader, _batchSize);
             model.setListeners(new MemoryListener());
 
             LocalDateTime startTime = LocalDateTime.now();
-            model.fit(cifar, epochs);
+            model.fit(cifar, _epochs);
             LocalDateTime endTime = LocalDateTime.now();
 
             _report.getMetrics().setTrainingTime(TimeUtils.millisecondsBetween(startTime, endTime));
