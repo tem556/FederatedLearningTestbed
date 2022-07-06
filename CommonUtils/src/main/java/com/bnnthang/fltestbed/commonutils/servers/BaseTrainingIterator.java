@@ -5,13 +5,16 @@ import com.bnnthang.fltestbed.commonutils.models.TrainingReport;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NonNull;
+import org.json.simple.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.nd4j.common.primitives.Pair;
 
 import java.rmi.UnexpectedException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.lang.*;
 
 /**
  * Simple implementation for a training iteration.
@@ -47,24 +50,21 @@ public final class BaseTrainingIterator extends Thread {
 
     @Override
     public void run() {
+        JSONObject jsonObject = configuration.getJsonObject();
+        boolean useDropping = (boolean) jsonObject.get("useDropping");
+        ArrayList<JSONObject> dropping = (ArrayList<JSONObject>) jsonObject.get("dropping");
         try {
             // offload dataset to client
             operations.pushDatasetToClients(clients, configuration.getDatasetRatio());
-
-	        _logger.info("Creating Aggregated Log file");
-
-////             make log file for aggregated time
-//            File AgLogFile = new File(logFolder, "aggregated-log.csv");
-//            AgLogFile.createNewFile();
-//            CSVWriter _logWriter = new CSVWriter(new FileWriter(AgLogFile));
-//            _logWriter.writeNext(new String[] {"Round no.", "Aggregated time(ms)"});
 
             // repeat the process a certain number of times
             for (int currentRound = 1;
                  currentRound <= configuration.getRounds();
                  ++currentRound) {
 
-//                LocalDateTime startTime = LocalDateTime.now();
+                if (configuration.getUseConfig() && useDropping && !dropping.isEmpty()){
+                    dropping = dropClients(currentRound, dropping);
+                }
 
                 Long t0 = System.currentTimeMillis();
 
@@ -120,9 +120,6 @@ public final class BaseTrainingIterator extends Thread {
                 operations.evaluateCurrentModel(reports);
                 _logger.info("evaluated new model");
 
-//                LocalDateTime endTime = LocalDateTime.now();
-//                Double roundTime = TimeUtils.millisecondsBetween(startTime, endTime);
-
                 // deallocate arrays
                 for (TrainingReport report : reports) {
                     report.getModelUpdate().getWeight().close();
@@ -131,14 +128,30 @@ public final class BaseTrainingIterator extends Thread {
                 Long t4 = System.currentTimeMillis();
 
                 serverTimeTracker.addRound(t0, t1, t2, t3, t4);
-//                _logWriter.writeNext(new String[] {String.valueOf(currentRound), String.valueOf(roundTime)});
             }
 
-//            _logWriter.close();
 
             operations.done();
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    public ArrayList<JSONObject> dropClients(int currentRound, ArrayList<JSONObject> dropping) throws Exception{
+        JSONObject current = dropping.get(0);
+        int round = ((Long)current.get("round")).intValue();
+        int nClients = ((Long)current.get("#clients")).intValue();
+        if (round != currentRound || nClients > clients.size()){
+            _logger.info("Cancelled dropping clients, remaining number of clients not enough");
+            return dropping;
+        }
+        for (int i = 0; i < nClients; i++){
+            IClientHandler currentClient = clients.get(0);
+            currentClient.done();
+            clients.remove(0);
+        }
+        _logger.info("Removed " + nClients + " clients at round " +round);
+        dropping.remove(0);
+        return dropping;
     }
 }

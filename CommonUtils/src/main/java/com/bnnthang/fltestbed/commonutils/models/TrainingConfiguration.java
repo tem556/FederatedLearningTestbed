@@ -2,7 +2,10 @@ package com.bnnthang.fltestbed.commonutils.models;
 
 import com.bnnthang.fltestbed.commonutils.servers.IAggregationStrategy;
 import lombok.Data;
+import lombok.Getter;
 import lombok.NonNull;
+import lombok.Setter;
+import org.json.simple.*;
 
 /**
  * Encapsulate training configurations.
@@ -38,4 +41,17 @@ public class TrainingConfiguration {
      */
     @NonNull
     private Float datasetRatio;
+
+    /**
+     * True if JSONObject should be used
+     */
+    @NonNull
+    private Boolean useConfig;
+
+    /**
+     * JSON Object that contains quantity and timing of the dropped clients
+     * Can be null
+     */
+    private JSONObject jsonObject;
+
 }
