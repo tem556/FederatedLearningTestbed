@@ -6,9 +6,7 @@ import com.bnnthang.fltestbed.commonutils.clients.IClientLocalRepository;
 import java.io.IOException;
 
 public class AndroidClientOperations extends BaseClientOperations {
-    public AndroidClientOperations(IClientLocalRepository _localRepository,
-                                   Double avgPowerPerByte,
-                                   Double _mflops) throws IOException {
+    public AndroidClientOperations(IClientLocalRepository _localRepository) throws IOException {
         super(_localRepository);
     }
 

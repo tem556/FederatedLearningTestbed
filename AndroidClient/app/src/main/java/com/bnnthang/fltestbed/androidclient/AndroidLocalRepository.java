@@ -7,6 +7,7 @@ import com.bnnthang.fltestbed.commonutils.utils.SocketUtils;
 import org.apache.commons.lang3.SerializationUtils;
 import org.deeplearning4j.nn.multilayer.MultiLayerNetwork;
 import org.deeplearning4j.util.ModelSerializer;
+import org.nd4j.common.primitives.Pair;
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.common.primitives.Pair;
 
@@ -20,7 +21,7 @@ import java.net.Socket;
 
 public class AndroidLocalRepository implements IClientLocalRepository {
 
-    private File localFileDir = null;
+    private File localFileDir;
 
     private static final String DATASET_FILENAME = "dataset";
 
@@ -39,6 +40,7 @@ public class AndroidLocalRepository implements IClientLocalRepository {
         Long readBytes = SocketUtils.readAndSaveBytes(socket, fos);
         Long configurationEnd = System.currentTimeMillis();
         fos.close();
+        Long configurationEnd = System.currentTimeMillis();
 
         return new Pair<>(readBytes, configurationEnd);
     }
