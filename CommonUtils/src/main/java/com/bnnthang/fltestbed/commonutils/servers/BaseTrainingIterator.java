@@ -13,6 +13,7 @@ import org.nd4j.common.primitives.Pair;
 import java.rmi.UnexpectedException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 import java.util.stream.Collectors;
 import java.lang.*;
 
@@ -53,6 +54,8 @@ public final class BaseTrainingIterator extends Thread {
         JSONObject jsonObject = configuration.getJsonObject();
         boolean useDropping = (boolean) jsonObject.get("useDropping");
         ArrayList<JSONObject> dropping = (ArrayList<JSONObject>) jsonObject.get("dropping");
+        // to randomize the dropping of clients
+        Random ran = new Random();
         try {
             // offload dataset to client
             operations.pushDatasetToClients(clients, configuration.getDatasetRatio());
@@ -63,7 +66,7 @@ public final class BaseTrainingIterator extends Thread {
                  ++currentRound) {
 
                 if (configuration.getUseConfig() && useDropping && !dropping.isEmpty()){
-                    dropping = dropClients(currentRound, dropping);
+                    dropping = dropClients(currentRound, dropping, ran);
                 }
 
                 Long t0 = System.currentTimeMillis();
@@ -137,7 +140,7 @@ public final class BaseTrainingIterator extends Thread {
         }
     }
 
-    public ArrayList<JSONObject> dropClients(int currentRound, ArrayList<JSONObject> dropping) throws Exception{
+    public ArrayList<JSONObject> dropClients(int currentRound, ArrayList<JSONObject> dropping, Random ran) throws Exception{
         JSONObject current = dropping.get(0);
         int round = ((Long)current.get("round")).intValue();
         int nClients = ((Long)current.get("#clients")).intValue();
@@ -146,9 +149,11 @@ public final class BaseTrainingIterator extends Thread {
             return dropping;
         }
         for (int i = 0; i < nClients; i++){
-            IClientHandler currentClient = clients.get(0);
+            // chooses a random client from the pool to drop
+            int randomClient = ran.nextInt(clients.size());
+            IClientHandler currentClient = clients.get(randomClient);
             currentClient.done();
-            clients.remove(0);
+            clients.remove(randomClient);
         }
         _logger.info("Removed " + nClients + " clients at round " +round);
         dropping.remove(0);
