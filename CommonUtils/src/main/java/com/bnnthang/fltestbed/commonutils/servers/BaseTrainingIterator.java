@@ -8,7 +8,6 @@ import lombok.NonNull;
 import org.json.simple.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.nd4j.common.primitives.Pair;
 
 import java.rmi.UnexpectedException;
 import java.util.ArrayList;
@@ -52,8 +51,13 @@ public final class BaseTrainingIterator extends Thread {
     @Override
     public void run() {
         JSONObject jsonObject = configuration.getJsonObject();
-        boolean useDropping = (boolean) jsonObject.get("useDropping");
-        ArrayList<JSONObject> dropping = (ArrayList<JSONObject>) jsonObject.get("dropping");
+        boolean useDropping = false;
+        // dummy list, to avoid raising error
+        ArrayList<JSONObject> dropping = new ArrayList<>();
+        if (configuration.getUseConfig()){
+            useDropping = (boolean) jsonObject.get("useDropping");
+            dropping = (ArrayList<JSONObject>) jsonObject.get("dropping");
+        }
         // to randomize the dropping of clients
         Random ran = new Random();
         try {
@@ -65,7 +69,7 @@ public final class BaseTrainingIterator extends Thread {
                  currentRound <= configuration.getRounds();
                  ++currentRound) {
 
-                if (configuration.getUseConfig() && useDropping && !dropping.isEmpty()){
+                if (useDropping && !dropping.isEmpty()){
                     dropping = dropClients(currentRound, dropping, ran);
                 }
 
@@ -140,11 +144,16 @@ public final class BaseTrainingIterator extends Thread {
         }
     }
 
+    /*
+    * Removes the amount of clients specified in the first element in @param dropping, the choice of clients is random.
+    */
     public ArrayList<JSONObject> dropClients(int currentRound, ArrayList<JSONObject> dropping, Random ran) throws Exception{
         JSONObject current = dropping.get(0);
         int round = ((Long)current.get("round")).intValue();
         int nClients = ((Long)current.get("#clients")).intValue();
-        if (round != currentRound || nClients > clients.size()){
+        if (round != currentRound) return dropping;
+        // if to be removed clients more than available in the pool
+        if (nClients > clients.size()){
             _logger.info("Cancelled dropping clients, remaining number of clients not enough");
             return dropping;
         }
