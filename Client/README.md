@@ -14,15 +14,14 @@ java  -jar [path] [--fl/--ml] --workdir [workdir] --nclients [nclients] --host [
 ```
 
 
+
 | Option | Description                                              | Type   | Default | 
-|--------|----------------------------------------------------------|--------|---------|-----------|
+|--------|----------------------------------------------------------|--------|---------|
 | `path` | Path to jar file | path|  None 
 | `--fl/--ml`   | Use `--fl` for decentralized Federated Learning and `--ml` for centralized normal Machine Learning| `option` | `--fl`  
 | `workdir` | Working directory where the client saves the received model and dataset | path | Current Directory 
-| `nclients` | Not sure yet | Int | 1  
 | `Server IP` | IP address of the Server so the client can connect to it | Address | 127.0.0.1 
 | `port` | Port that was set on the Server side | Int | 4062
-
 
 
 ## Build Docker image
