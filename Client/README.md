@@ -8,6 +8,7 @@ To run the Client file, the user must have Java 8 installed. Java 11 and above c
 The user must also have proper github authentication from the contributors to be able to make the jar using maven. This is because the Client file depends on a the `CommonUtils` package.
 
 ## Run Client jar file
+
 ```
 java  -jar [path] [--fl/--ml] --workdir [workdir] --nclients [nclients] --host [Server IP] --port [port]
 ```
