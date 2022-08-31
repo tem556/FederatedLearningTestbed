@@ -3,11 +3,14 @@
 An implementation of a Federated Learning Server
 
 ## Requirements
-To run the Server file, the user must have Java 8 installed. Java 11 and above can lead to segfault issues due to instability of Deeplearning4j.
+The user must have proper github authentication from the contributors to be able to make the jar using maven. This is because the Server file depends on a the `CommonUtils` package. They can do this by setting the `GITHUB_TOKEN` and `GITHUB_USERNAME` environment variables.
 
-The user must also have proper github authentication from the contributors to be able to make the jar using maven. This is because the Server file depends on a the `CommonUtils` package.
+To use the server folder for installing the jar file, run `mvn compile` and then `mvn package`inside it. This saves the JAR file in `/target` from where it can be run.
+
+To install the CIFAR-10 dataset, visit https://www.cs.toronto.edu/~kriz/cifar.html and install the CIFAR-10 binary version. The `workdir` mentioned below must contain a folder called `cifar-10`, this must contain the data batches (e.g. data_batch_1.bin).
 
 ## Run Server jar file
+To run the Server file, the user must have Java 8 installed. Java 11 and above can lead to segfault issues due to instability of Deeplearning4j.
 ```
 java -jar [path] [--fl/--ml] --workdir [workdir] --config [OPTION] --minClients [minClients] --datasetratio [datasetratio] --rounds [#rounds] --port [port]
 ```
