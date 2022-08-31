@@ -2,12 +2,13 @@
 
 An implementation of a Federated Learning Client.
 
-## Requirements
+## Install Client JAR file
+The user must have proper github authentication from the contributors to be able to make the jar using gradle. This is because the Client file depends on a the `CommonUtils` package. They can do this by setting the `GITHUB_TOKEN` and `GITHUB_USERNAME` environment variables.
+
+To use the client folder for installing the jar file, run `gradle build` and then `gradle uberJar`inside it. This saves the JAR file in `/build/libs` from where it can be run.
+
+## Run Client JAR file
 To run the Client file, the user must have Java 8 installed. Java 11 and above can lead to segfault issues due to instability of Deeplearning4j.
-
-The user must also have proper github authentication from the contributors to be able to make the jar using maven. This is because the Client file depends on a the `CommonUtils` package.
-
-## Run Client jar file
 
 ```
 java  -jar [path] [--fl/--ml] --workdir [workdir] --nclients [nclients] --host [Server IP] --port [port]
