@@ -2,9 +2,7 @@ package com.bnnthang.fltestbed.commonutils.models;
 
 import com.bnnthang.fltestbed.commonutils.servers.IAggregationStrategy;
 import lombok.Data;
-import lombok.Getter;
 import lombok.NonNull;
-import lombok.Setter;
 import org.json.simple.*;
 
 /**

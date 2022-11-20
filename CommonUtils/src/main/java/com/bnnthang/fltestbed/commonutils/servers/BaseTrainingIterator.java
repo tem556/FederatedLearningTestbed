@@ -14,7 +14,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 import java.util.stream.Collectors;
-import java.lang.*;
 
 /**
  * Simple implementation for a training iteration.
@@ -123,8 +122,18 @@ public final class BaseTrainingIterator extends Thread {
                 operations.aggregateResults(reports.stream().map(TrainingReport::getModelUpdate).collect(Collectors.toList()), configuration.getAggregationStrategy());
                 _logger.info("aggregated updates");
 
-                // evaluate
-                operations.evaluateCurrentModel(reports);
+                Thread evalThread = new Thread(new EvaluationRunnable(operations, reports));
+                evalThread.start();
+
+                // keep the connections alive
+                while (evalThread.isAlive()) {
+                    for (IClientHandler clientHandler : clients) {
+                        clientHandler.isTraining();
+                    }
+
+                    // delay a bit
+                    sleep(configuration.getPollInterval());
+                }
                 _logger.info("evaluated new model");
 
                 // deallocate arrays

@@ -1,7 +1,6 @@
 package com.bnnthang.fltestbed.commonutils.models;
 
 import com.bnnthang.fltestbed.commonutils.clients.IClientLocalRepository;
-import com.bnnthang.fltestbed.commonutils.utils.SocketUtils;
 import org.datavec.image.loader.Java2DNativeImageLoader;
 import org.nd4j.common.primitives.Pair;
 import org.nd4j.linalg.api.ndarray.INDArray;
@@ -89,9 +88,7 @@ public class BaseCifar10Loader implements ICifar10Loader {
         InputStream inputStream = localRepository.getDatasetInputStream();
 
         // read until end of file
-        int cnt = 0;
         while (inputStream.available() >= ROW_SIZE) {
-            ++cnt;
             Pair<Byte, byte[]> row = readOneRow(inputStream);
             Integer currentFrequency = frequency.getOrDefault((int) row.getFirst(), 0);
             frequency.put((int) row.getFirst(), currentFrequency + 1);

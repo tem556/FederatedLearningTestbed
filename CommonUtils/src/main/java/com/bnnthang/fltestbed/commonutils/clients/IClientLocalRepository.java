@@ -1,6 +1,5 @@
 package com.bnnthang.fltestbed.commonutils.clients;
 
-import com.bnnthang.fltestbed.commonutils.models.PowerConsumptionFromBytes;
 import org.deeplearning4j.nn.multilayer.MultiLayerNetwork;
 import org.nd4j.common.primitives.Pair;
 

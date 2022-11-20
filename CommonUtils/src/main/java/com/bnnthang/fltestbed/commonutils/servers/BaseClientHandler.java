@@ -3,7 +3,6 @@ package com.bnnthang.fltestbed.commonutils.servers;
 import com.bnnthang.fltestbed.commonutils.enums.ClientCommandEnum;
 import com.bnnthang.fltestbed.commonutils.models.TrainingReport;
 import com.bnnthang.fltestbed.commonutils.utils.SocketUtils;
-import com.bnnthang.fltestbed.commonutils.utils.TimeUtils;
 import com.opencsv.CSVWriter;
 import com.opencsv.ICSVWriter;
 import org.nd4j.common.util.SerializationUtils;
@@ -14,7 +13,6 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.net.Socket;
-import java.time.LocalDateTime;
 
 public class BaseClientHandler implements IClientHandler {
     private static final Logger _logger = LoggerFactory.getLogger(BaseClientHandler.class);
