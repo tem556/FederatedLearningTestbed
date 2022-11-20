@@ -6,14 +6,17 @@ import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.dataset.DataSet;
 import org.nd4j.linalg.util.FeatureUtil;
 
-import java.awt.*;
+import java.awt.Color;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class ServerCifar10Loader {
     private File datasetFile;
@@ -51,11 +54,13 @@ public class ServerCifar10Loader {
             int bytesRead = inputStream.read(labelBytes) + inputStream.read(imageBytes);
 
             if (bytesRead != rowSize) {
+                inputStream.close();
                 throw new IOException("read invalid row");
             }
 
             imagesWithLabel.add(new Pair<>(imageBytes, labelBytes[0]));
         }
+        inputStream.close();
     }
 
     private void load(File file) throws IOException {
@@ -69,11 +74,13 @@ public class ServerCifar10Loader {
             int bytesRead = inputStream.read(labelBytes) + inputStream.read(imageBytes);
 
             if (bytesRead != rowSize) {
+                inputStream.close();
                 throw new IOException("read invalid row");
             }
 
             imagesWithLabel.add(new Pair<>(imageBytes, labelBytes[0]));
         }
+        inputStream.close();
     }
 
     public void getPartialDataset(double ratio) {
@@ -106,7 +113,8 @@ public class ServerCifar10Loader {
     }
 
     public DataSet createDataSet(int batchSize, int fromIndex) throws IOException {
-        if (imagesWithLabel.isEmpty()) return DataSet.empty();
+        if (imagesWithLabel.isEmpty())
+            return DataSet.empty();
 
         List<DataSet> atomicDataSets = new ArrayList<>();
         int toIndex = Math.min(imagesWithLabel.size(), fromIndex + batchSize);

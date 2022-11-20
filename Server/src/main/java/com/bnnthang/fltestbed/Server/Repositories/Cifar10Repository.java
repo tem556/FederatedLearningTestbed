@@ -245,6 +245,7 @@ public class Cifar10Repository implements IServerLocalRepository {
         byte[] bytes = new byte[modelLength];
         int readBytes = fis.read(bytes, 0, modelLength);
         if (readBytes != modelLength) {
+            fis.close();
             throw new IOException(String.format("read %d bytes; expected %d bytes", readBytes, modelLength));
         }
         fis.close();
