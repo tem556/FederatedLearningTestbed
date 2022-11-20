@@ -1,4 +1,4 @@
-# FederatedLearningTestbed
+# RealFL
 
 This repository implements basic steps in the model-centric federated learning (FL) model.
 
