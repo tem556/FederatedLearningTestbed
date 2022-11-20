@@ -15,21 +15,20 @@ import org.nd4j.linalg.api.ndarray.INDArray;
 import java.io.*;
 import java.text.SimpleDateFormat;
 import java.util.*;
-import java.lang.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.json.simple.*;
-import org.json.simple.parser.*;
 
-public class    Cifar10Repository implements IServerLocalRepository {
+public class Cifar10Repository implements IServerLocalRepository {
     private static final Logger _logger = LogManager.getLogger(Cifar10Repository.class);
 
     private final String workingDirectory;
     private final boolean useConfig;
     private final JSONObject jsonObject;
-    private String currentModelName = "newmodel.zip";
-    private String currentResultFileName = null;
+
+    // TODO: add some flexibility for this
+    private String currentModelName = "base_model.zip";
 
     private final Map<Byte, List<byte[]>> imagesByLabel;
 
@@ -100,14 +99,15 @@ public class    Cifar10Repository implements IServerLocalRepository {
 
         return res;
     }
+
     // Checks that the ratios for each label in JSONArray distribution sum up to 1
-    public boolean isValidLabelDistribution(ArrayList<ArrayList<Double>> distribution){
-        for (int i = 0; i < 9; i++){
+    public boolean isValidLabelDistribution(ArrayList<ArrayList<Double>> distribution) {
+        for (int i = 0; i < 9; i++) {
             int finalI = i;
             Double one = 1.0;
             // Make the Stream that contains the ratios for the ith label
             Stream ithRatios = distribution.stream().map(a -> a.get(finalI));
-            if (!one.equals(ithRatios.mapToDouble(a -> (double) a).sum())){
+            if (!one.equals(ithRatios.mapToDouble(a -> (double) a).sum())) {
                 return false;
             }
         }
@@ -115,28 +115,31 @@ public class    Cifar10Repository implements IServerLocalRepository {
     }
 
     public boolean isValidJSON(ArrayList<Double> distributionRatiosC, ArrayList<ArrayList<Double>> distributionRatiosL,
-                               int nPartitions, boolean even){
+            int nPartitions, boolean even) {
         Double one = 1.0;
         // Only checks array that is being used
-        if (even){
-            if (distributionRatiosC.size() != nPartitions) return false;
-            else return (one.equals(distributionRatiosC.stream().mapToDouble(a -> (Double)a).sum()));
-        }
-        else{
-            if (distributionRatiosL.size() != nPartitions) return false;
-            else return isValidLabelDistribution(distributionRatiosL);
+        if (even) {
+            if (distributionRatiosC.size() != nPartitions)
+                return false;
+            else
+                return (one.equals(distributionRatiosC.stream().mapToDouble(a -> (Double) a).sum()));
+        } else {
+            if (distributionRatiosL.size() != nPartitions)
+                return false;
+            else
+                return isValidLabelDistribution(distributionRatiosL);
         }
     }
 
-    public List<List<byte[]>> partialSplitDatasetIIDAndShuffle(int nPartitions, float ratio) throws IOException{
+    public List<List<byte[]>> partialSplitDatasetIIDAndShuffle(int nPartitions, float ratio) throws IOException {
         ArrayList<Double> distributionRatiosByClient;
         ArrayList<ArrayList<Double>> distributionRatiosByLabels;
         boolean evenLabelDistribution;
-        evenLabelDistribution = (boolean)jsonObject.get("evenLabelDistributionByClient");
-        distributionRatiosByClient = (ArrayList<Double>)jsonObject.get("distributionRatiosByClient");
-        distributionRatiosByLabels = (ArrayList<ArrayList<Double>>)jsonObject.get("distributionRatiosByLabels");
+        evenLabelDistribution = (boolean) jsonObject.get("evenLabelDistributionByClient");
+        distributionRatiosByClient = (ArrayList<Double>) jsonObject.get("distributionRatiosByClient");
+        distributionRatiosByLabels = (ArrayList<ArrayList<Double>>) jsonObject.get("distributionRatiosByLabels");
 
-        if (!isValidJSON(distributionRatiosByClient, distributionRatiosByLabels, nPartitions, evenLabelDistribution)){
+        if (!isValidJSON(distributionRatiosByClient, distributionRatiosByLabels, nPartitions, evenLabelDistribution)) {
             throw new IOException("Invalid JSON configuration");
         }
         _logger.debug("JSON file passed preconditions");
@@ -157,8 +160,8 @@ public class    Cifar10Repository implements IServerLocalRepository {
             for (int partition = 0; partition < nPartitions; partition++) {
                 if (evenLabelDistribution) {
                     subRatio = distributionRatiosByClient.get(partition).floatValue();
-                }
-                else subRatio = (distributionRatiosByLabels.get(partition)).get(label).floatValue();
+                } else
+                    subRatio = (distributionRatiosByLabels.get(partition)).get(label).floatValue();
                 nSamples = Integer.min(Math.round(subRatio * ratio * images.size()), images.size());
                 for (int i = usedImages; i < usedImages + nSamples; ++i) {
                     assert i < images.size() : "Problem in accessing images";
@@ -200,27 +203,27 @@ public class    Cifar10Repository implements IServerLocalRepository {
         byte[] res = new byte[length];
         int cnt = 0;
         for (byte[] bytes : dataset) {
-//            _logger.debug(String.format("??? %d %d %d %d", bytes[0], bytes[1], bytes[2], bytes[3]));
+            // _logger.debug(String.format("??? %d %d %d %d", bytes[0], bytes[1], bytes[2],
+            // bytes[3]));
             System.arraycopy(bytes, 0, res, cnt, bytes.length);
             cnt += bytes.length;
         }
-//        if (cnt != (32 * 32 * 3 + 1) * dataset.size()) {
-//            _logger.error("wrong dataset!");
-//        }
+        // if (cnt != (32 * 32 * 3 + 1) * dataset.size()) {
+        // _logger.error("wrong dataset!");
+        // }
         return res;
     }
 
     @Override
-    public List<byte[]> partitionAndSerializeDataset(int numPartitions, float ratio){
+    public List<byte[]> partitionAndSerializeDataset(int numPartitions, float ratio) {
         if (useConfig) {
             try {
                 List<List<byte[]>> partitions = partialSplitDatasetIIDAndShuffle(numPartitions, ratio);
                 return partitions.stream().map(Cifar10Repository::flatten).collect(Collectors.toList());
-            } catch (Exception e){
+            } catch (Exception e) {
                 e.printStackTrace();
             }
-        }
-        else {
+        } else {
             List<List<byte[]>> partitions = partialSplitDatasetIIDAndShuffleEvenly(numPartitions, ratio);
             return partitions.stream().map(Cifar10Repository::flatten).collect(Collectors.toList());
         }
@@ -237,7 +240,7 @@ public class    Cifar10Repository implements IServerLocalRepository {
     @Override
     public byte[] loadAndSerializeLatestModel() throws IOException {
         File f = new File(workingDirectory, currentModelName);
-        int modelLength = (int)f.length();
+        int modelLength = (int) f.length();
         FileInputStream fis = new FileInputStream(f);
         byte[] bytes = new byte[modelLength];
         int readBytes = fis.read(bytes, 0, modelLength);
@@ -259,20 +262,24 @@ public class    Cifar10Repository implements IServerLocalRepository {
 
     @Override
     public void saveNewModel(MultiLayerNetwork newModel) throws IOException {
-        String newModelName = "model-" + (new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss").format(Calendar.getInstance().getTime())) + ".zip";
+        String newModelName = "model-"
+                + (new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss").format(Calendar.getInstance().getTime())) + ".zip";
         newModel.save(new File(workingDirectory, newModelName));
         currentModelName = newModelName;
     }
 
     @Override
     public void createNewResultFile() throws IOException {
-//        String newResultFileName = "result-" + (new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss").format(Calendar.getInstance().getTime())) + ".csv";
-//        currentResultFileName = newResultFileName;
-//        File newResultFile = new File(workingDirectory, newResultFileName);
-//        newResultFile.createNewFile();
-//        FileWriter writer = new FileWriter(newResultFile, true);
-//        writer.write("accuracy,precision,recall,f1,training time (ms),downlink time (ms),uplink time (ms),communicating power (j), computing power (j)\n");
-//        writer.close();
+        // String newResultFileName = "result-" + (new
+        // SimpleDateFormat("yyyy-MM-dd-HH-mm-ss").format(Calendar.getInstance().getTime()))
+        // + ".csv";
+        // currentResultFileName = newResultFileName;
+        // File newResultFile = new File(workingDirectory, newResultFileName);
+        // newResultFile.createNewFile();
+        // FileWriter writer = new FileWriter(newResultFile, true);
+        // writer.write("accuracy,precision,recall,f1,training time (ms),downlink time
+        // (ms),uplink time (ms),communicating power (j), computing power (j)\n");
+        // writer.close();
     }
 
     @Override
@@ -286,7 +293,7 @@ public class    Cifar10Repository implements IServerLocalRepository {
     public Evaluation evaluateCurrentModel() {
         try {
             File testDatasetFile = new File(workingDirectory, "cifar-10/test_batch.bin");
-            ServerCifar10Loader loader = new ServerCifar10Loader(testDatasetFile, 123456);
+            ServerCifar10Loader loader = new ServerCifar10Loader(testDatasetFile, 1234567);
             ServerCifar10DataSetIterator cifarEval = new ServerCifar10DataSetIterator(loader, 123, 1, 123456);
             MultiLayerNetwork model = loadLatestModel();
             Evaluation eval = model.evaluate(cifarEval);
