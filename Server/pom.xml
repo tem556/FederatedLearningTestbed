@@ -23,7 +23,7 @@
     </repository>
     <repository>
       <id>GithubPackages</id>
-      <url>https://maven.pkg.github.com/bnnthang/FederatedLearningTestbed</url>
+      <url>https://maven.pkg.github.com/bnnthang/RealFL</url>
       <snapshots>
         <enabled>true</enabled>
       </snapshots>
@@ -34,7 +34,7 @@
     <dependency>
       <groupId>com.bnnthang.fltestbed</groupId>
       <artifactId>commonutils</artifactId>
-      <version>1.28-SNAPSHOT</version>
+      <version>1.29-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>junit</groupId>
