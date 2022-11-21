@@ -9,6 +9,8 @@ To use the server folder for installing the jar file, run `mvn compile` and then
 
 To install the CIFAR-10 dataset, visit https://www.cs.toronto.edu/~kriz/cifar.html and install the CIFAR-10 binary version. The `workdir` mentioned below must contain a folder called `cifar-10`, this must contain the data batches (e.g. data_batch_1.bin).
 
+The `newmodel.zip` file is an untrained cifar-10 model stored in deeplearning4j's native format for deep learning models. The server reads from this file to initialize the model, and then sends it over to the clients. This file must also be in the `workdir` mentioned below along with the `cifar-10` folder.
+
 ## Run Server jar file
 To run the Server file, the user must have Java 8 installed. Java 11 and above can lead to segfault issues due to instability of Deeplearning4j.
 ```
@@ -20,7 +22,7 @@ java -jar [path] [--fl/--ml] --workdir [workdir] --config [OPTION] --minClients 
 |--------|----------------------------------------------------------|--------|---------|
 | `path` | Path to jar file | path|  None 
 | `--fl/--ml`   | Use `--fl` for decentralized Federated Learning and `--ml` for centralized normal Machine Learning| `option` | `--fl`  
-| `workdir` | Working directory where the server saves the model and the training results | path | Current Directory 
+| `workdir` | Working directory where the server saves the model and the training results. The server also expects the `cifat-10` directory and the `newmodel.zip` mentioned above. | path | Current Directory 
 | `OPTION` | Set to true if config.json file is to be used, otherwise data will be divided evenly among clients | bool | false
 | `minClients` | The minimum amount of Clients before that server starts training | Int | 1  
 | `datasetratio`| Percentage of the total dataset that is to be used for training. Ranges from 0 (min) to 1 (max) | float | 1
