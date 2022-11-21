@@ -22,7 +22,7 @@ java -jar [path] [--fl/--ml] --workdir [workdir] --config [OPTION] --minClients 
 |--------|----------------------------------------------------------|--------|---------|
 | `path` | Path to jar file | path|  None 
 | `--fl/--ml`   | Use `--fl` for decentralized Federated Learning and `--ml` for centralized normal Machine Learning| `option` | `--fl`  
-| `workdir` | Working directory where the server saves the model and the training results. The server also expects the `cifat-10` directory and the `newmodel.zip` mentioned above. | path | Current Directory 
+| `workdir` | Working directory where the server saves the model and the training results. The server also expects the `cifat-10` folder and the `newmodel.zip` mentioned above. | path | Current Directory 
 | `OPTION` | Set to true if config.json file is to be used, otherwise data will be divided evenly among clients | bool | false
 | `minClients` | The minimum amount of Clients before that server starts training | Int | 1  
 | `datasetratio`| Percentage of the total dataset that is to be used for training. Ranges from 0 (min) to 1 (max) | float | 1
