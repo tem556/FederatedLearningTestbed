@@ -29,6 +29,10 @@ public class Cifar10TrainingWorker extends Thread {
      * Training report.
      */
     private TrainingReport report;
+    /**
+     * If the Health dataset is to be used.
+     */
+    private boolean useHealthDataset;
 
     public Cifar10TrainingWorker(IClientLocalRepository _localRepository,
                                  TrainingReport _report,
@@ -45,12 +49,19 @@ public class Cifar10TrainingWorker extends Thread {
         try {
             MultiLayerNetwork model = ModelSerializer.restoreMultiLayerNetwork(localRepository.getModelFile(), true);
 
-            ICifar10Loader loader = new BaseCifar10Loader(localRepository);
-            DataSetIterator cifar = new NewCifar10DSIterator(loader, batchSize);
+            IDatasetLoader loader = new BaseDatasetLoader(localRepository);
+
+            DataSetIterator iterator;
+            if (localRepository.getUseHealthDataset()) {
+                iterator = new NewChestXrayDSIterator(loader, batchSize);
+            }
+            else
+                iterator = new NewCifar10DSIterator(loader, batchSize);
+
             model.setListeners(new MemoryListener());
 
             LocalDateTime startTime = LocalDateTime.now();
-            model.fit(cifar, epochs);
+            model.fit(iterator, epochs);
             LocalDateTime endTime = LocalDateTime.now();
 
             report.getMetrics().setTrainingTime(TimeUtils.millisecondsBetween(startTime, endTime));

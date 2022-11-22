@@ -14,7 +14,7 @@ import java.net.Socket;
 public class BaseClientOperations implements IClientOperations {
     private static final Logger _logger = LoggerFactory.getLogger(BaseClientOperations.class);
 
-    protected static final int BATCH_SIZE = 12;
+    protected static final int BATCH_SIZE = 128;
 
     protected static final int EPOCHS = 2;
 

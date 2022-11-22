@@ -24,6 +24,9 @@ public class AppArgs {
     @Parameter(names = "--config", description = "Set to true if config.json file is to be used, otherwise data will be divided evenly among clients")
     public Boolean useConfig = false;
 
+    @Parameter(names = "--healthdataset", description = "Set to true if the health dataset is to be used, otherwise cifar-10 dataset will be used")
+    public Boolean useHealthDataset = false;
+
     @Parameter(names = "--fl")
     public Boolean fl = false;
 

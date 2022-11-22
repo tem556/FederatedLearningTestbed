@@ -6,7 +6,7 @@ import org.nd4j.linalg.dataset.DataSet;
 import java.io.IOException;
 import java.util.Map;
 
-public interface ICifar10Loader {
+public interface IDatasetLoader {
     long count() throws IOException;
     Map<Integer, Integer> getDataDistribution() throws IOException;
     DataSet createDataSet(int batchSize, int fromIndex) throws IOException;
