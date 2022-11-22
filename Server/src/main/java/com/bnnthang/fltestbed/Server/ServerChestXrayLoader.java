@@ -53,6 +53,7 @@ public class ServerChestXrayLoader {
     public ServerChestXrayLoader(File datasetFile) throws IOException {
         this.imagesWithLabel = new ArrayList<>();
         load(datasetFile);
+        Collections.shuffle(imagesWithLabel);
     }
 
     private void load(File file) throws IOException {
