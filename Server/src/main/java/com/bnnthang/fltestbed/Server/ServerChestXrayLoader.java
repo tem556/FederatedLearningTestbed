@@ -14,7 +14,6 @@ import java.io.InputStream;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -140,8 +139,6 @@ public class ServerChestXrayLoader {
 
         Java2DNativeImageLoader imageLoader = new Java2DNativeImageLoader(IMAGE_HEIGHT, IMAGE_WIDTH, IMAGE_CHANNELS);
         INDArray image = imageLoader.asMatrix(bufferedImage, true);
-
-        System.out.println(Arrays.toString(image.shape()));
 
         return image;
     }

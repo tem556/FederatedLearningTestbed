@@ -1,6 +1,6 @@
 package com.bnnthang.fltestbed.Client;
 
-import com.bnnthang.fltestbed.commonutils.models.BaseDatasetLoader;
+import com.bnnthang.fltestbed.commonutils.models.BaseCifar10Loader;
 import com.bnnthang.fltestbed.commonutils.models.MemoryListener;
 import com.bnnthang.fltestbed.commonutils.models.NewCifar10DSIterator;
 import org.datavec.image.loader.CifarLoader;
@@ -19,7 +19,6 @@ import org.nd4j.linalg.activations.Activation;
 import org.nd4j.linalg.api.memory.MemoryWorkspace;
 import org.nd4j.linalg.api.memory.conf.WorkspaceConfiguration;
 import org.nd4j.linalg.api.memory.enums.*;
-import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.factory.Nd4j;
 import org.nd4j.linalg.learning.config.AdaDelta;
 import org.nd4j.linalg.lossfunctions.LossFunctions;
@@ -84,11 +83,10 @@ public class ML {
         return model;
     }
 
-    public static void trainAndEval() throws IOException {
-        String path = "C:\\Users\\buinn\\DoNotTouch\\crap\\testbed\\dirclient0";
-        LocalRepositoryImpl repo = new LocalRepositoryImpl(path + "/model.zip", path + "/dataset", false);
-        BaseDatasetLoader loader = new BaseDatasetLoader(repo);
-//        BaseCifar10DataSetIterator mycifar = new BaseCifar10DataSetIterator(loader, 33, 1);
+    public static void cifar10TrainAndEval(String workDir) throws IOException {
+        // TODO: remove magic values
+        Cifar10Repository repo = new Cifar10Repository(workDir + "/model.zip", workDir + "/dataset");
+        BaseCifar10Loader loader = new BaseCifar10Loader(repo);
         NewCifar10DSIterator newCifar = new NewCifar10DSIterator(loader, 23);
 
         WorkspaceConfiguration wc = WorkspaceConfiguration.builder()

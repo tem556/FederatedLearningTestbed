@@ -19,7 +19,7 @@ import java.util.HashMap;
 import java.util.ArrayList;
 import java.util.List;
 
-public class BaseDatasetLoader implements IDatasetLoader {
+public class ChestXrayDatasetLoader implements IDatasetLoader {
     /**
      * Label size (in bytes).
      */
@@ -28,12 +28,12 @@ public class BaseDatasetLoader implements IDatasetLoader {
     /**
      * Image height (in pixels).
      */
-    protected static int IMAGE_HEIGHT = 32;
+    protected static int IMAGE_HEIGHT = 180;
 
     /**
      * Image width (in pixels).
      */
-    protected static int IMAGE_WIDTH = 32;
+    protected static int IMAGE_WIDTH = 180;
 
     /**
      * Image channels.
@@ -58,28 +58,22 @@ public class BaseDatasetLoader implements IDatasetLoader {
     /**
      * Logger.
      */
-    private static final Logger _logger = LoggerFactory.getLogger(BaseDatasetLoader.class);
+    private static final Logger _logger = LoggerFactory.getLogger(ChestXrayDatasetLoader.class);
 
     private long rowCount = -1;
 
     /**
-     * Instantiate <code>MyCifar10Loader</code>
+     * Instantiate <code>ChestXrayLoader</code>
+     * 
      * @param _localRepository an instance of <code>ILocalRepository</code>
      */
-    public BaseDatasetLoader(IClientLocalRepository _localRepository) {
-
+    public ChestXrayDatasetLoader(IClientLocalRepository _localRepository) {
         localRepository = _localRepository;
-        // if health dataset, change configuration
-        if (localRepository.getUseHealthDataset()){
-            IMAGE_WIDTH = 180;
-            IMAGE_HEIGHT = 180;
-            IMAGE_SIZE = IMAGE_WIDTH * IMAGE_HEIGHT * IMAGE_CHANNELS;
-            ROW_SIZE = LABEL_SIZE + IMAGE_SIZE;
-        }
     }
 
     /**
      * Count the number of elements in the dataset
+     * 
      * @return the number of elements in the dataset
      */
     public long count() throws IOException {
@@ -91,6 +85,7 @@ public class BaseDatasetLoader implements IDatasetLoader {
 
     /**
      * Count the number of occurrences of each label
+     * 
      * @return a map showing the data distribution for all labels
      * @throws IOException if I/O errors happen
      */
@@ -114,10 +109,11 @@ public class BaseDatasetLoader implements IDatasetLoader {
 
     /**
      * Create dataset.
+     * 
      * @param batchSize batch size
      * @param fromIndex starting index
      * @return a dataset that contains images from index <code>fromIndex</code>
-     * to <code>fromIndex + batchSize - 1</code> inclusive
+     *         to <code>fromIndex + batchSize - 1</code> inclusive
      * @throws IOException if I/O errors occur
      */
     public DataSet createDataSet(int batchSize, int fromIndex) throws IOException {
@@ -143,6 +139,7 @@ public class BaseDatasetLoader implements IDatasetLoader {
 
     /**
      * Convert image byte array to <code>INDArray</code>.
+     * 
      * @param imageBytes byte array of an image
      * @return a corresponding <code>INDArray</code> instance
      * @throws IOException if I/O errors happen
@@ -165,18 +162,14 @@ public class BaseDatasetLoader implements IDatasetLoader {
             }
         }
 
-        ImageIO.write(bufferedImage, "jpg", new File("/home/temoor/Desktop/FL/image.jpg"));
-
-
         Java2DNativeImageLoader imageLoader = new Java2DNativeImageLoader(IMAGE_HEIGHT, IMAGE_WIDTH, IMAGE_CHANNELS);
-
-
 
         return imageLoader.asMatrix(bufferedImage, true);
     }
 
     /**
      * Read one row in the dataset.
+     * 
      * @param inputStream the input stream to the dataset
      * @return a pair contains a label and an image
      * @throws IOException if I/O errors happen
