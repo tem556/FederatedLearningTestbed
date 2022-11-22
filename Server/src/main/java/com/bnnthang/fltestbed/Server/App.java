@@ -39,7 +39,11 @@ public class App {
     }
 
     private static void ml(AppArgs args) throws IOException {
-        ML.trainAndEval(args.rounds, args.datasetRatio, args.workDir);
+        if (args.useHealthDataset) {
+            ML.trainAndEvalPneumonia(args.rounds, args.datasetRatio, args.workDir);
+        } else {
+            ML.trainAndEvalCifar10(args.rounds, args.datasetRatio, args.workDir);
+        }
     }
 
     private static void fl(AppArgs args) throws IOException, InterruptedException, URISyntaxException {
