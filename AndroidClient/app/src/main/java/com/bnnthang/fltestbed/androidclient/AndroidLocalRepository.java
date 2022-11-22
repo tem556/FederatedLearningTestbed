@@ -1,7 +1,6 @@
 package com.bnnthang.fltestbed.androidclient;
 
 import com.bnnthang.fltestbed.commonutils.clients.IClientLocalRepository;
-import com.bnnthang.fltestbed.commonutils.models.PowerConsumptionFromBytes;
 import com.bnnthang.fltestbed.commonutils.utils.SocketUtils;
 
 import org.apache.commons.lang3.SerializationUtils;
@@ -9,7 +8,6 @@ import org.deeplearning4j.nn.multilayer.MultiLayerNetwork;
 import org.deeplearning4j.util.ModelSerializer;
 import org.nd4j.common.primitives.Pair;
 import org.nd4j.linalg.api.ndarray.INDArray;
-import org.nd4j.common.primitives.Pair;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -106,7 +104,7 @@ public class AndroidLocalRepository implements IClientLocalRepository {
     }
 
     @Override
-    public File getModelFile() throws IOException {
+    public File getModelFile() {
         return new File(localFileDir, MODEL_FILENAME);
     }
 

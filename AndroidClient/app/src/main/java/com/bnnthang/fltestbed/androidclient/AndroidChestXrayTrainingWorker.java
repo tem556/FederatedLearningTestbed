@@ -3,6 +3,7 @@ package com.bnnthang.fltestbed.androidclient;
 import com.bnnthang.fltestbed.commonutils.clients.IClientLocalRepository;
 import com.bnnthang.fltestbed.commonutils.models.IDatasetLoader;
 import com.bnnthang.fltestbed.commonutils.models.MemoryListener;
+import com.bnnthang.fltestbed.commonutils.models.NewChestXrayDSIterator;
 import com.bnnthang.fltestbed.commonutils.models.NewCifar10DSIterator;
 import com.bnnthang.fltestbed.commonutils.models.TrainingReport;
 import com.bnnthang.fltestbed.commonutils.utils.TimeUtils;
@@ -14,7 +15,7 @@ import org.nd4j.linalg.dataset.api.iterator.DataSetIterator;
 import java.io.IOException;
 import java.time.LocalDateTime;
 
-public class AndroidCifar10TrainingWorker implements Runnable {
+public class AndroidChestXrayTrainingWorker implements Runnable {
     /**
      * An instance of local repository.
      */
@@ -35,10 +36,10 @@ public class AndroidCifar10TrainingWorker implements Runnable {
      */
     private TrainingReport _report;
 
-    public AndroidCifar10TrainingWorker(IClientLocalRepository localRepository,
-                                        TrainingReport report,
-                                        int batchSize,
-                                        int epochs) {
+    public AndroidChestXrayTrainingWorker(IClientLocalRepository localRepository,
+                                          TrainingReport report,
+                                          int batchSize,
+                                          int epochs) {
         _localRepository = localRepository;
         _report = report;
         _batchSize = batchSize;
@@ -50,16 +51,17 @@ public class AndroidCifar10TrainingWorker implements Runnable {
         try {
             MultiLayerNetwork model = ModelSerializer.restoreMultiLayerNetwork(_localRepository.getModelFile(), true);
 
-            IDatasetLoader loader = new AndroidCifar10Loader(_localRepository);
-            DataSetIterator cifar = new NewCifar10DSIterator(loader, _batchSize);
+            IDatasetLoader loader = new AndroidChestXrayLoader(_localRepository);
+            DataSetIterator chestXray = new NewChestXrayDSIterator(loader, _batchSize);
             model.setListeners(new MemoryListener());
 
             LocalDateTime startTime = LocalDateTime.now();
-            model.fit(cifar, _epochs);
+            model.fit(chestXray, _epochs);
             LocalDateTime endTime = LocalDateTime.now();
 
             _report.getMetrics().setTrainingTime(TimeUtils.millisecondsBetween(startTime, endTime));
             _report.getModelUpdate().setWeight(model.params().dup());
+
 
             model.close();
         } catch (IOException e) {

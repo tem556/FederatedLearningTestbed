@@ -29,81 +29,26 @@ public class ClientThread extends Thread {
 
     private static final Integer DELAY_INTERVAL = 5000;
 
+    private int _datasetIndex = 0;
+
     private File localDir = null;
 
-    public ClientThread(File _localDir, String host, int port) {
+    public ClientThread(int datasetIndex, File _localDir, String host, int port) {
         localDir = _localDir;
         HOST = host;
         PORT = port;
+        _datasetIndex = datasetIndex;
     }
 
     @Override
     public void run() {
         try {
             IClientLocalRepository localRepository = new AndroidLocalRepository(localDir);
-            IClientOperations clientOperations = new AndroidClientOperations(localRepository);
+            IClientOperations clientOperations = new AndroidClientOperations(_datasetIndex, localRepository);
             BaseClient client = new BaseClient(HOST, PORT, DELAY_INTERVAL, clientOperations);
             client.run();
         } catch (IOException e) {
             e.printStackTrace();
         }
-    }
-
-    private static int height = 32;
-    private static int width = 32;
-    private static int channels = 3;
-    private static int numLabels = 10;
-    private static int batchSize = 96;
-    private static long seed = 123L;
-    private static int epochs = 4;
-
-    public MultiLayerNetwork getModel()  {
-//        log.info("Building simple convolutional network...");
-        MultiLayerConfiguration conf = new NeuralNetConfiguration.Builder()
-                .seed(seed)
-                .updater(new AdaDelta())
-                .optimizationAlgo(OptimizationAlgorithm.STOCHASTIC_GRADIENT_DESCENT)
-                .weightInit(WeightInit.XAVIER)
-                .list()
-                .layer(new ConvolutionLayer.Builder().kernelSize(3,3).stride(1,1).padding(1,1).activation(Activation.LEAKYRELU)
-                        .nIn(channels).nOut(32).build())
-                .layer(new BatchNormalization())
-                .layer(new SubsamplingLayer.Builder().kernelSize(2,2).stride(2,2).poolingType(SubsamplingLayer.PoolingType.MAX).build())
-
-                .layer(new ConvolutionLayer.Builder().kernelSize(1,1).stride(1,1).padding(1,1).activation(Activation.LEAKYRELU)
-                        .nOut(16).build())
-                .layer(new BatchNormalization())
-                .layer(new ConvolutionLayer.Builder().kernelSize(3,3).stride(1,1).padding(1,1).activation(Activation.LEAKYRELU)
-                        .nOut(64).build())
-                .layer(new BatchNormalization())
-                .layer(new SubsamplingLayer.Builder().kernelSize(2,2).stride(2,2).poolingType(SubsamplingLayer.PoolingType.MAX).build())
-
-                .layer(new ConvolutionLayer.Builder().kernelSize(1,1).stride(1,1).padding(1,1).activation(Activation.LEAKYRELU)
-                        .nOut(32).build())
-                .layer(new BatchNormalization())
-                .layer(new ConvolutionLayer.Builder().kernelSize(3,3).stride(1,1).padding(1,1).activation(Activation.LEAKYRELU)
-                        .nOut(128).build())
-                .layer(new BatchNormalization())
-                .layer(new ConvolutionLayer.Builder().kernelSize(1,1).stride(1,1).padding(1,1).activation(Activation.LEAKYRELU)
-                        .nOut(64).build())
-                .layer(new BatchNormalization())
-                .layer(new ConvolutionLayer.Builder().kernelSize(1,1).stride(1,1).padding(1,1).activation(Activation.LEAKYRELU)
-                        .nOut(numLabels).build())
-                .layer(new BatchNormalization())
-
-                .layer(new SubsamplingLayer.Builder().kernelSize(2,2).stride(2,2).poolingType(SubsamplingLayer.PoolingType.AVG).build())
-
-                .layer(new OutputLayer.Builder(LossFunctions.LossFunction.NEGATIVELOGLIKELIHOOD)
-                        .name("output")
-                        .nOut(numLabels)
-                        .dropOut(0.8)
-                        .activation(Activation.SOFTMAX)
-                        .build())
-                .setInputType(InputType.convolutional(height, width, channels))
-                .build();
-
-        MultiLayerNetwork model = new MultiLayerNetwork(conf);
-        model.init();
-        return model;
     }
 }
