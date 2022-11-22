@@ -23,10 +23,14 @@ public class LocalRepositoryImpl implements IClientLocalRepository {
 
     @NonNull
     private final String pathToDataset;
+    @NonNull
+    public final boolean useHealthDataset;
 
-    public LocalRepositoryImpl(@NonNull String _pathToModel, @NonNull String _pathToDataset) {
+    public LocalRepositoryImpl(@NonNull String _pathToModel, @NonNull String _pathToDataset,
+                               @NonNull boolean _useHealthDataset) {
         pathToModel = _pathToModel;
         pathToDataset = _pathToDataset;
+        useHealthDataset = _useHealthDataset;
     }
 
     @Override
@@ -116,4 +120,7 @@ public class LocalRepositoryImpl implements IClientLocalRepository {
     public String getModelPath() {
         return pathToModel;
     }
+
+    @Override
+    public Boolean getUseHealthDataset(){return useHealthDataset;}
 }

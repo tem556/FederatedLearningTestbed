@@ -56,7 +56,7 @@ public class App {
 
         TrainingConfiguration trainingConfiguration = new TrainingConfiguration(args.numClients, args.rounds, 5000, new FedAvg(), args.datasetRatio, args.useConfig);
         trainingConfiguration.setJsonObject(jsonObject);
-        IServerOperations serverOperations = new BaseServerOperations(new Cifar10Repository(args.workDir, args.useConfig, jsonObject));
+        IServerOperations serverOperations = new BaseServerOperations(new Cifar10Repository(args.workDir, args.useConfig, jsonObject, args.useHealthDataset));
         ServerParameters serverParameters = new ServerParameters(args.port, trainingConfiguration, serverOperations);
         BaseServer server = new BaseServer(serverParameters);
         server.start();

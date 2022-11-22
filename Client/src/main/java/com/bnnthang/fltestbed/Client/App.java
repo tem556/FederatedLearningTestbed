@@ -22,6 +22,7 @@ public class App {
     private static final String DEFAULT_WORK_DIR = "C:/Users/buinn/DoNotTouch/crap/testbed";
 
     private static final int DEFAULT_NUM_CLIENTS = 1;
+    private static final boolean DEFAULT_USE_HEALTH_DATASET = false;
 
     public static void main(String[] args) throws IOException, InterruptedException {
         switch (args[0]) {
@@ -62,7 +63,8 @@ public class App {
 
             String pathToModel = clientDir + "/model.zip";
             String pathToDataset = clientDir + "/dataset";
-            IClientLocalRepository localRepository = new LocalRepositoryImpl(pathToModel, pathToDataset);
+            Boolean useHealthDataset = parameters.getUseHealthDataset();
+            IClientLocalRepository localRepository = new LocalRepositoryImpl(pathToModel, pathToDataset, useHealthDataset);
             IClientOperations clientOperations = new BaseClientOperations(localRepository);
             BaseClient client = new BaseClient(parameters.getServerHost(), parameters.getServerPort(), 5000, clientOperations);
             client.start();
@@ -83,6 +85,7 @@ public class App {
         int port = DEFAULT_SERVER_PORT;
         String workDir = DEFAULT_WORK_DIR;
         int numClients = DEFAULT_NUM_CLIENTS;
+        boolean useHealthDataset = DEFAULT_USE_HEALTH_DATASET;
         for (int i = 1; i < args.length; i += 2) {
             switch (args[i]) {
                 case "--host":
@@ -97,10 +100,13 @@ public class App {
                 case "--nclients":
                     numClients = Integer.parseInt(args[i + 1]);
                     break;
+                case "--healthdataset":
+                    useHealthDataset = Boolean.parseBoolean(args[i + 1]);
+                    break;
                 default:
                     throw new UnsupportedOperationException("unsupported parameter: " + args[i]);
             }
         }
-        return new ClientParameters(host, port, workDir, numClients);
+        return new ClientParameters(host, port, workDir, numClients, useHealthDataset);
     }
 }

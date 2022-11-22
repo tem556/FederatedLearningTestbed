@@ -9,12 +9,17 @@ import org.nd4j.linalg.util.FeatureUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.*;
+import java.util.Map;
+import java.util.HashMap;
+import java.util.ArrayList;
+import java.util.List;
 
-public class BaseCifar10Loader implements ICifar10Loader {
+public class BaseDatasetLoader implements IDatasetLoader {
     /**
      * Label size (in bytes).
      */
@@ -23,27 +28,27 @@ public class BaseCifar10Loader implements ICifar10Loader {
     /**
      * Image height (in pixels).
      */
-    protected final static int IMAGE_HEIGHT = 32;
+    protected static int IMAGE_HEIGHT = 32;
 
     /**
      * Image width (in pixels).
      */
-    protected final static int IMAGE_WIDTH = 32;
+    protected static int IMAGE_WIDTH = 32;
 
     /**
      * Image channels.
      */
-    protected final static int IMAGE_CHANNELS = 3;
+    protected static int IMAGE_CHANNELS = 3;
 
     /**
      * Image size (in bytes).
      */
-    protected final static int IMAGE_SIZE = IMAGE_WIDTH * IMAGE_HEIGHT * IMAGE_CHANNELS;
+    protected static int IMAGE_SIZE = IMAGE_WIDTH * IMAGE_HEIGHT * IMAGE_CHANNELS;
 
     /**
      * Row size (in bytes).
      */
-    protected final static int ROW_SIZE = LABEL_SIZE + IMAGE_SIZE;
+    protected static int ROW_SIZE = LABEL_SIZE + IMAGE_SIZE;
 
     /**
      * Local file repository.
@@ -53,7 +58,7 @@ public class BaseCifar10Loader implements ICifar10Loader {
     /**
      * Logger.
      */
-    private static final Logger _logger = LoggerFactory.getLogger(BaseCifar10Loader.class);
+    private static final Logger _logger = LoggerFactory.getLogger(BaseDatasetLoader.class);
 
     private long rowCount = -1;
 
@@ -61,8 +66,16 @@ public class BaseCifar10Loader implements ICifar10Loader {
      * Instantiate <code>MyCifar10Loader</code>
      * @param _localRepository an instance of <code>ILocalRepository</code>
      */
-    public BaseCifar10Loader(IClientLocalRepository _localRepository) {
+    public BaseDatasetLoader(IClientLocalRepository _localRepository) {
+
         localRepository = _localRepository;
+        // if health dataset, change configuration
+        if (localRepository.getUseHealthDataset()){
+            IMAGE_WIDTH = 180;
+            IMAGE_HEIGHT = 180;
+            IMAGE_SIZE = IMAGE_WIDTH * IMAGE_HEIGHT * IMAGE_CHANNELS;
+            ROW_SIZE = LABEL_SIZE + IMAGE_SIZE;
+        }
     }
 
     /**
@@ -152,7 +165,12 @@ public class BaseCifar10Loader implements ICifar10Loader {
             }
         }
 
+        ImageIO.write(bufferedImage, "jpg", new File("/home/temoor/Desktop/FL/image.jpg"));
+
+
         Java2DNativeImageLoader imageLoader = new Java2DNativeImageLoader(IMAGE_HEIGHT, IMAGE_WIDTH, IMAGE_CHANNELS);
+
+
 
         return imageLoader.asMatrix(bufferedImage, true);
     }

@@ -1,6 +1,6 @@
 package com.bnnthang.fltestbed.Client;
 
-import com.bnnthang.fltestbed.commonutils.models.BaseCifar10Loader;
+import com.bnnthang.fltestbed.commonutils.models.BaseDatasetLoader;
 import com.bnnthang.fltestbed.commonutils.models.MemoryListener;
 import com.bnnthang.fltestbed.commonutils.models.NewCifar10DSIterator;
 import org.datavec.image.loader.CifarLoader;
@@ -86,8 +86,8 @@ public class ML {
 
     public static void trainAndEval() throws IOException {
         String path = "C:\\Users\\buinn\\DoNotTouch\\crap\\testbed\\dirclient0";
-        LocalRepositoryImpl repo = new LocalRepositoryImpl(path + "/model.zip", path + "/dataset");
-        BaseCifar10Loader loader = new BaseCifar10Loader(repo);
+        LocalRepositoryImpl repo = new LocalRepositoryImpl(path + "/model.zip", path + "/dataset", false);
+        BaseDatasetLoader loader = new BaseDatasetLoader(repo);
 //        BaseCifar10DataSetIterator mycifar = new BaseCifar10DataSetIterator(loader, 33, 1);
         NewCifar10DSIterator newCifar = new NewCifar10DSIterator(loader, 23);
 
