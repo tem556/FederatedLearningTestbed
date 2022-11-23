@@ -23,9 +23,14 @@ public class Cifar10Repository implements IClientLocalRepository {
     @NonNull
     private final String pathToDataset;
 
-    public Cifar10Repository(@NonNull String _pathToModel, @NonNull String _pathToDataset) {
+    @NonNull
+    private final Boolean useHealthDataset;
+
+    public Cifar10Repository(@NonNull String _pathToModel, @NonNull String _pathToDataset,
+                             @NonNull Boolean _useHealthDataset) {
         pathToModel = _pathToModel;
         pathToDataset = _pathToDataset;
+        useHealthDataset = _useHealthDataset;
     }
 
     @Override
@@ -115,4 +120,7 @@ public class Cifar10Repository implements IClientLocalRepository {
     public String getModelPath() {
         return pathToModel;
     }
+
+    @Override
+    public Boolean useHealthDataset() { return useHealthDataset; }
 }

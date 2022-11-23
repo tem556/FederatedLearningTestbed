@@ -15,7 +15,7 @@ public class AppArgs {
     @Parameter(names = "--workdir", description = "Working directory where the server saves the model and the training results")
     public String workDir = System.getProperty("user.dir");
 
-    @Parameter(names = "--health", description = "Set to true if the health dataset is to be used, otherwise cifar-10 dataset will be used")
+    @Parameter(names = "--healthdataset", description = "Set to true if the health dataset is to be used, otherwise cifar-10 dataset will be used")
     public Boolean useHealthDataset = false;
 
     @Parameter(names = "--fl")

@@ -128,7 +128,7 @@ public class ChestXrayDatasetLoader implements IDatasetLoader {
         for (int i = fromIndex; i < toIndex; ++i) {
             Pair<Byte, byte[]> row = readOneRow(inputStream);
             INDArray image = bytesToImage(row.getSecond());
-            INDArray label = FeatureUtil.toOutcomeVector(row.getFirst(), 10);
+            INDArray label = FeatureUtil.toOutcomeVector(row.getFirst(), 2);
             atomicDataSets.add(new DataSet(image, label));
         }
 

@@ -54,8 +54,9 @@ public class App {
             // TODO: remove these magic values
             String pathToModel = clientDir + "/model.zip";
             String pathToDataset = clientDir + "/dataset";
+            Boolean useHealthDataset = appArgs.useHealthDataset;
 
-            IClientLocalRepository localRepository = new Cifar10Repository(pathToModel, pathToDataset);
+            IClientLocalRepository localRepository = new Cifar10Repository(pathToModel, pathToDataset, useHealthDataset);
             IClientOperations clientOperations = new BaseClientOperations(localRepository);
             BaseClient client = new BaseClient(appArgs.host, appArgs.port, 5000, clientOperations);
             client.start();

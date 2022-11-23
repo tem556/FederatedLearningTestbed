@@ -14,7 +14,8 @@ import com.bnnthang.fltestbed.commonutils.models.NewChestXrayDSIterator;
 import com.bnnthang.fltestbed.commonutils.models.TrainingReport;
 import com.bnnthang.fltestbed.commonutils.utils.TimeUtils;
 
-public class ChestXrayTrainingWorker implements Runnable {
+import java.util.Arrays;
+public class ChestXrayTrainingWorker extends Thread {
     /**
      * An instance of local repository.
      */
