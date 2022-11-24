@@ -66,7 +66,7 @@ public class BaseClientOperations implements IClientOperations {
 
     @Override
     public void handleTrain() throws IOException {
-        if (localRepository.useHealthDataset()){
+        if (localRepository.getDatasetName().equals("ChestXray")){
             trainingWorker = new ChestXrayTrainingWorker(
                     localRepository,
                     trainingReport,

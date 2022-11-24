@@ -86,7 +86,7 @@ public class ML {
     public static void cifar10TrainAndEval(String workDir) throws IOException {
         // TODO: remove magic values
         // TODO: add a healthdataset ML model for the client's side
-        Cifar10Repository repo = new Cifar10Repository(workDir + "/model.zip", workDir + "/dataset", false);
+        Cifar10Repository repo = new Cifar10Repository(workDir + "/model.zip", workDir + "/dataset");
         Cifar10DatasetLoader loader = new Cifar10DatasetLoader(repo);
         NewCifar10DSIterator newCifar = new NewCifar10DSIterator(loader, 23);
 
