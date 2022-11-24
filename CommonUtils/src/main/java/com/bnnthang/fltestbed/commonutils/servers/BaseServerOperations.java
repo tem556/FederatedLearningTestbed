@@ -137,6 +137,7 @@ public class BaseServerOperations implements IServerOperations {
                 String.valueOf(evaluation.recall()),
                 String.valueOf(evaluation.f1()),
         });
+        _logWriter.flush();
     }
 
     @Override

@@ -82,13 +82,10 @@ public final class SocketUtils {
             byte[] buf = new byte[toRead];
             int bytesRead = socket.getInputStream().read(buf);
 
-//            _logger.debug(String.format("to read %d read %d", toRead, bytesRead));
-
             outputStream.write(buf, 0, bytesRead);
             outputStream.flush();
 
             current += bytesRead;
-//            _logger.debug("so far: " + current);
         }
 
         return (long) size;
