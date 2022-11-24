@@ -19,4 +19,5 @@ public interface IClientLocalRepository {
     InputStream getDatasetInputStream() throws IOException;
     File getModelFile() throws IOException;
     String getModelPath();
+    String getDatasetName();
 }

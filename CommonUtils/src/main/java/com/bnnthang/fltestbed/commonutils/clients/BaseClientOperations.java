@@ -66,11 +66,20 @@ public class BaseClientOperations implements IClientOperations {
 
     @Override
     public void handleTrain() throws IOException {
-        trainingWorker = new Cifar10TrainingWorker(
-                localRepository,
-                trainingReport,
-                BATCH_SIZE,
-                EPOCHS);
+        if (localRepository.getDatasetName().equals("ChestXray")){
+            trainingWorker = new ChestXrayTrainingWorker(
+                    localRepository,
+                    trainingReport,
+                    BATCH_SIZE,
+                    EPOCHS
+            );
+        } else {
+            trainingWorker = new Cifar10TrainingWorker(
+                    localRepository,
+                    trainingReport,
+                    BATCH_SIZE,
+                    EPOCHS);
+        }
         trainingWorker.start();
     }
 

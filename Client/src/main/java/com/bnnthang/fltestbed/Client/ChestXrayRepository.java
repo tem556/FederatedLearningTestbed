@@ -14,8 +14,8 @@ import org.nd4j.linalg.api.ndarray.INDArray;
 import java.io.*;
 import java.net.Socket;
 
-public class Cifar10Repository implements IClientLocalRepository {
-    private static final Logger _logger = LogManager.getLogger(Cifar10Repository.class);
+public class ChestXrayRepository implements IClientLocalRepository {
+    private static final Logger _logger = LogManager.getLogger(ChestXrayRepository.class);
 
     @NonNull
     private final String pathToModel;
@@ -23,7 +23,7 @@ public class Cifar10Repository implements IClientLocalRepository {
     @NonNull
     private final String pathToDataset;
 
-    public Cifar10Repository(@NonNull String _pathToModel, @NonNull String _pathToDataset) {
+    public ChestXrayRepository(@NonNull String _pathToModel, @NonNull String _pathToDataset) {
         pathToModel = _pathToModel;
         pathToDataset = _pathToDataset;
     }
@@ -117,5 +117,5 @@ public class Cifar10Repository implements IClientLocalRepository {
     }
 
     @Override
-    public String getDatasetName() { return "Cifar10"; }
+    public String getDatasetName() { return "ChestXray"; }
 }

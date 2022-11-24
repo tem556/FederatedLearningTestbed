@@ -52,10 +52,24 @@ public class App {
                 Files.createDirectory(path);
 
             // TODO: remove these magic values
-            String pathToModel = clientDir + "/model.zip";
-            String pathToDataset = clientDir + "/dataset";
+            String pathToModel;
+            String pathToDataset;
+            Boolean useHealthDataset = appArgs.useHealthDataset;
+            if (useHealthDataset) {
+                pathToModel = clientDir + "/xrayModel.zip";
+                pathToDataset = clientDir + "/xrayDataset";
+            } else {
+                pathToModel = clientDir + "/cifar10Model.zip";
+                pathToDataset = clientDir + "/cifar10Dataset";
+            }
 
-            IClientLocalRepository localRepository = new Cifar10Repository(pathToModel, pathToDataset);
+                IClientLocalRepository localRepository;
+            if (useHealthDataset) {
+                localRepository = new ChestXrayRepository(pathToModel, pathToDataset);
+            } else {
+                localRepository = new Cifar10Repository(pathToModel, pathToDataset);
+            }
+
             IClientOperations clientOperations = new BaseClientOperations(localRepository);
             BaseClient client = new BaseClient(appArgs.host, appArgs.port, 5000, clientOperations);
             client.start();
