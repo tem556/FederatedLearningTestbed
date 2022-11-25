@@ -3,6 +3,7 @@ package com.bnnthang.fltestbed.commonutils.models;
 import com.bnnthang.fltestbed.commonutils.servers.IAggregationStrategy;
 import lombok.Data;
 import lombok.NonNull;
+import lombok.AllArgsConstructor;
 import java.util.ArrayList;
 import java.util.List;
 import org.json.simple.JSONObject;
@@ -11,6 +12,7 @@ import org.json.simple.JSONObject;
  * Encapsulate training configurations.
  */
 @Data
+@AllArgsConstructor
 public class TrainingConfiguration {
     /**
      * The minimum number of clients in a training round.

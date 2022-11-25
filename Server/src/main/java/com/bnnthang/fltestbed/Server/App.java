@@ -93,12 +93,8 @@ public class App {
         }
 
         TrainingConfiguration trainingConfiguration = new TrainingConfiguration(args.numClients, args.rounds, 1000,
-                new FedAvg(), args.datasetRatio.floatValue(), args.useConfig);
-        trainingConfiguration.setEvenLabelDistribution(evenLabelDistribution);
-        trainingConfiguration.setDistributionRatiosByClient(distributionRatiosByClient);
-        trainingConfiguration.setDistributionRatiosByLabels(distributionRatiosByLabels);
-        trainingConfiguration.setUseDropping(useDropping);
-        trainingConfiguration.setDropping(dropping);
+                new FedAvg(), args.datasetRatio.floatValue(), args.useConfig, evenLabelDistribution,
+                distributionRatiosByClient, distributionRatiosByLabels, useDropping, dropping);
 
         // TODO: replace this with Factory pattern.
         IServerOperations serverOperations;
