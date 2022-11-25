@@ -75,7 +75,5 @@ public class TrainingConfiguration {
      */
     private List<Integer> dropping;
 
-    private JSONObject jsonObject;
-
 
 }
