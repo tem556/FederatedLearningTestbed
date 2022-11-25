@@ -7,14 +7,11 @@ import java.io.IOException;
 
 public class ServerCifar10DataSetIterator extends RecordReaderDataSetIterator {
     private int counter = 0;
-    private int numSamples = 0;
     public ServerCifar10Loader loader;
 
-    public ServerCifar10DataSetIterator(ServerCifar10Loader _loader, int batchSize,
-                                    int labelIndex, int _numSamples) {
-        super(null, batchSize, labelIndex, 10);
+    public ServerCifar10DataSetIterator(ServerCifar10Loader _loader, int batchSize) {
+        super(null, batchSize, 1, 10);
         loader = _loader;
-        numSamples = _numSamples;
     }
 
     @Override

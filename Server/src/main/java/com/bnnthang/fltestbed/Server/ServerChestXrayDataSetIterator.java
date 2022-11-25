@@ -7,16 +7,11 @@ import java.io.IOException;
 
 public class ServerChestXrayDataSetIterator extends RecordReaderDataSetIterator {
     private int counter = 0;
-    private int numSamples = 0;
     public ServerChestXrayLoader loader;
 
-    public ServerChestXrayDataSetIterator(ServerChestXrayLoader _loader,
-                                          int batchSize,
-                                          int labelIndex,
-                                          int _numSamples) {
-        super(null, batchSize, labelIndex, 2);
+    public ServerChestXrayDataSetIterator(ServerChestXrayLoader _loader, int batchSize) {
+        super(null, batchSize, 1, 2);
         loader = _loader;
-        numSamples = _numSamples;
     }
 
     @Override

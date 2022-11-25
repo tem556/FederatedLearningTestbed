@@ -48,12 +48,19 @@ public class ServerChestXrayLoader {
      */
     protected static int ROW_SIZE = LABEL_SIZE + IMAGE_SIZE;
 
+    /**
+     * Loaded image array.
+     */
     private List<Pair<byte[], Byte>> imagesWithLabel;
 
-    public ServerChestXrayLoader(File datasetFile) throws IOException {
-        this.imagesWithLabel = new ArrayList<>();
-        load(datasetFile);
-        Collections.shuffle(imagesWithLabel);
+    public ServerChestXrayLoader(File[] files, Double ratio) throws IOException {
+        // Load all files.
+        for (File file : files) {
+            load(file);
+        }
+
+        // Get a dataset sample.
+        getPartialDataset(ratio);
     }
 
     private void load(File file) throws IOException {
@@ -100,6 +107,7 @@ public class ServerChestXrayLoader {
             dist.put(kvp.getSecond(), dist.get(kvp.getSecond()) + 1);
         }
 
+        // TODO: replace with nicer printing logic.
         System.out.println("data distribution--------------");
         System.out.println(dist);
         System.out.println("-------------------------------");

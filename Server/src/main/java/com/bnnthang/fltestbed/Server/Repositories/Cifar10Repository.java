@@ -289,13 +289,7 @@ public class Cifar10Repository implements IServerLocalRepository {
 
     @Override
     public void createNewResultFile() throws IOException {
-        // String newResultFileName = "result-" + (new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss").format(Calendar.getInstance().getTime())) + ".csv";
-        // currentResultFileName = newResultFileName;
-        // File newResultFile = new File(workingDirectory, newResultFileName);
-        // newResultFile.createNewFile();
-        // FileWriter writer = new FileWriter(newResultFile, true);
-        // writer.write("accuracy,precision,recall,f1,training time (ms),downlink time (ms),uplink time (ms),communicating power (j), computing power (j)\n");
-        // writer.close();
+        throw new UnsupportedOperationException("Deprecated method.");
     }
 
     @Override
@@ -314,8 +308,8 @@ public class Cifar10Repository implements IServerLocalRepository {
             else
                 testDatasetFile = new File(workingDirectory, "cifar-10/test_batch.bin");
 
-            ServerCifar10Loader loader = new ServerCifar10Loader(testDatasetFile, 1234567);
-            ServerCifar10DataSetIterator cifarEval = new ServerCifar10DataSetIterator(loader, 123, 1, 123456);
+            ServerCifar10Loader loader = new ServerCifar10Loader(new File[] { testDatasetFile }, 1.0);
+            ServerCifar10DataSetIterator cifarEval = new ServerCifar10DataSetIterator(loader, 123);
             MultiLayerNetwork model = loadLatestModel();
             Evaluation eval = model.evaluate(cifarEval);
             model.close();

@@ -19,48 +19,25 @@ import java.util.List;
 import java.util.Map;
 
 public class ServerCifar10Loader {
-    private File datasetFile;
+    /**
+     * Loaded image array.
+     */
     private List<Pair<byte[], Byte>> imagesWithLabel;
-    private int maxSamples;
 
-    public ServerCifar10Loader(File datasetFile, int maxSamples) throws IOException {
-        this.datasetFile = datasetFile;
+    public ServerCifar10Loader(File[] files, Double ratio) throws IOException {
         this.imagesWithLabel = new ArrayList<>();
-        this.maxSamples = maxSamples;
-        load();
-        Collections.shuffle(imagesWithLabel);
-    }
 
-    public ServerCifar10Loader(File[] files) throws IOException {
-        this.imagesWithLabel = new ArrayList<>();
-        this.maxSamples = 1234567;
-        for (File file : files)
+        // Load all files.
+        for (File file : files) {
             load(file);
-        Collections.shuffle(imagesWithLabel);
+        }
+
+        // Get a dataset sample.
+        getPartialDataset(ratio);
     }
 
     public int getSize() {
         return imagesWithLabel.size();
-    }
-
-    private void load() throws IOException {
-        InputStream inputStream = new FileInputStream(datasetFile);
-        int imageSize = 32 * 32 * 3;
-        int labelSize = 1;
-        int rowSize = imageSize + labelSize;
-        while (inputStream.available() >= rowSize) {
-            byte[] labelBytes = new byte[labelSize];
-            byte[] imageBytes = new byte[imageSize];
-            int bytesRead = inputStream.read(labelBytes) + inputStream.read(imageBytes);
-
-            if (bytesRead != rowSize) {
-                inputStream.close();
-                throw new IOException("read invalid row");
-            }
-
-            imagesWithLabel.add(new Pair<>(imageBytes, labelBytes[0]));
-        }
-        inputStream.close();
     }
 
     private void load(File file) throws IOException {
@@ -107,6 +84,7 @@ public class ServerCifar10Loader {
             dist.put(kvp.getSecond(), dist.get(kvp.getSecond()) + 1);
         }
 
+        // TODO: replace this with a nicer printing logic
         System.out.println("data distribution--------------");
         System.out.println(dist);
         System.out.println("-------------------------------");
