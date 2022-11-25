@@ -79,6 +79,10 @@ public class App {
         ArrayList<ArrayList<Double>> distributionRatiosByLabels = null;
         boolean useDropping = false;
         List<Integer> dropping = null;
+        boolean useWeights = false;
+        Double [] weightsArr = new Double[args.numClients];
+        Arrays.fill(weightsArr, 1.0/args.numClients);
+        List<Double> weights = Arrays.asList(weightsArr);
         if (args.useConfig) {
             try {
                 JSONParser parser = new JSONParser();
@@ -87,13 +91,19 @@ public class App {
                 distributionRatiosByClient = (ArrayList<Double>) jsonObject.get("distributionRatiosByClient");
                 distributionRatiosByLabels = (ArrayList<ArrayList<Double>>) jsonObject.get("distributionRatiosByLabels");
                 dropping = getDropping((ArrayList<JSONObject>) jsonObject.get("dropping"), args.rounds);
+                useWeights = (boolean) jsonObject.get("useWeights");
+                weights = (useWeights) ? (List<Double>) jsonObject.get("weights") : weights;
             } catch (Exception e) {
                 e.printStackTrace();
             }
         }
-
+        // Make sure the weights are appropriate
+        if (weights.size() != args.numClients) {
+            throw new IOException("Invalid number of weights in JSON");
+        }
+        
         TrainingConfiguration trainingConfiguration = new TrainingConfiguration(args.numClients, args.rounds, 1000,
-                new FedAvg(), args.datasetRatio.floatValue(), args.useConfig, evenLabelDistribution,
+                new FedAvg(weights), args.datasetRatio.floatValue(), args.useConfig, evenLabelDistribution,
                 distributionRatiosByClient, distributionRatiosByLabels, useDropping, dropping);
 
         // TODO: replace this with Factory pattern.
