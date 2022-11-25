@@ -54,6 +54,8 @@ public class ServerChestXrayLoader {
     private List<Pair<byte[], Byte>> imagesWithLabel;
 
     public ServerChestXrayLoader(File[] files, Double ratio) throws IOException {
+        imagesWithLabel = new ArrayList<>();
+
         // Load all files.
         for (File file : files) {
             load(file);
@@ -65,12 +67,10 @@ public class ServerChestXrayLoader {
 
     private void load(File file) throws IOException {
         InputStream inputStream = new FileInputStream(file);
-        int imageSize = IMAGE_HEIGHT * IMAGE_WIDTH * IMAGE_CHANNELS;
-        int labelSize = 1;
-        int rowSize = imageSize + labelSize;
+        int rowSize = IMAGE_HEIGHT * IMAGE_WIDTH * IMAGE_CHANNELS + LABEL_SIZE;
         while (inputStream.available() >= rowSize) {
-            byte[] labelBytes = new byte[labelSize];
-            byte[] imageBytes = new byte[imageSize];
+            byte[] labelBytes = new byte[LABEL_SIZE];
+            byte[] imageBytes = new byte[IMAGE_HEIGHT * IMAGE_WIDTH * IMAGE_CHANNELS];
             int bytesRead = inputStream.read(labelBytes) + inputStream.read(imageBytes);
 
             if (bytesRead != rowSize) {

@@ -54,7 +54,9 @@ public class BaseClient extends Thread {
         try {
             serve();
         } catch (Exception e) {
-            e.printStackTrace();
+            _logger.error(e.getMessage());
+            operations.terminate();
+            this.interrupt();
         }
     }
 

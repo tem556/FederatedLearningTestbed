@@ -2,6 +2,7 @@ package com.bnnthang.fltestbed.Server;
 
 import com.beust.jcommander.JCommander;
 import com.bnnthang.fltestbed.Server.AggregationStrategies.FedAvg;
+import com.bnnthang.fltestbed.Server.Repositories.ChestXrayRepository;
 import com.bnnthang.fltestbed.Server.Repositories.Cifar10Repository;
 import com.bnnthang.fltestbed.commonutils.models.ServerParameters;
 import com.bnnthang.fltestbed.commonutils.models.TrainingConfiguration;
@@ -68,11 +69,19 @@ public class App {
         TrainingConfiguration trainingConfiguration = new TrainingConfiguration(args.numClients, args.rounds, 1000,
                 new FedAvg(), args.datasetRatio.floatValue(), args.useConfig);
         trainingConfiguration.setJsonObject(jsonObject);
-        IServerOperations serverOperations = new BaseServerOperations(
-                new Cifar10Repository(args.workDir, args.useConfig, jsonObject, args.useHealthDataset));
+
+        // TODO: replace this with Factory pattern.
+        IServerOperations serverOperations;
+        if (args.useHealthDataset) {
+            serverOperations = new BaseServerOperations(new ChestXrayRepository(args.workDir, args.useConfig, jsonObject));
+        } else {
+            serverOperations = new BaseServerOperations(new Cifar10Repository(args.workDir, args.useConfig, jsonObject, false));
+        }
+        
         ServerParameters serverParameters = new ServerParameters(args.port, trainingConfiguration, serverOperations);
         BaseServer server = new BaseServer(serverParameters);
         server.start();
+        _logger.info("Server is up.");
         server.join();
     }
 }

@@ -97,9 +97,6 @@ public class BaseServerOperations implements IServerOperations {
         if (acceptedClients.size() >= serverParameters.getTrainingConfiguration().getMinClients()) {
             _logger.debug("triggered training");
 
-            // create result file
-            localRepository.createNewResultFile();
-
             trainingIterator = new BaseTrainingIterator(
                     this,
                     acceptedClients,
