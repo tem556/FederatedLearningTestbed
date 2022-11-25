@@ -3,6 +3,7 @@ package com.bnnthang.fltestbed.Server.Repositories;
 import com.bnnthang.fltestbed.Server.ServerCifar10DataSetIterator;
 import com.bnnthang.fltestbed.Server.ServerCifar10Loader;
 import com.bnnthang.fltestbed.commonutils.servers.IServerLocalRepository;
+import com.bnnthang.fltestbed.commonutils.models.TrainingConfiguration;
 import org.apache.commons.lang3.SerializationUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.logging.log4j.LogManager;
@@ -25,7 +26,7 @@ public class Cifar10Repository implements IServerLocalRepository {
 
     private final String workingDirectory;
     private final boolean useConfig;
-    private final JSONObject jsonObject;
+    private final TrainingConfiguration trainingConfiguration;
     private int IMAGE_HEIGHT = 32;
     private int IMAGE_CHANNELS = 3;
     private int NUM_OF_LABELS = 10;
@@ -35,13 +36,13 @@ public class Cifar10Repository implements IServerLocalRepository {
 
     private final Map<Byte, List<byte[]>> imagesByLabel;
 
-    public Cifar10Repository(String _workingDirectory, boolean _useConfig, JSONObject _jsonObject) throws IOException {
+    public Cifar10Repository(String _workingDirectory, boolean _useConfig,
+                             TrainingConfiguration _trainingConfiguration) throws IOException {
         workingDirectory = _workingDirectory;
         useConfig = _useConfig;
-        jsonObject = _jsonObject;
+        trainingConfiguration = _trainingConfiguration;
 
         imagesByLabel = new HashMap<>();
-
         // load cifar-10 dataset
         load(new FileInputStream(workingDirectory + "/cifar-10/data_batch_1.bin"));
         load(new FileInputStream(workingDirectory + "/cifar-10/data_batch_2.bin"));
@@ -133,12 +134,9 @@ public class Cifar10Repository implements IServerLocalRepository {
     }
 
     public List<List<byte[]>> partialSplitDatasetIIDAndShuffle(int nPartitions, float ratio) throws IOException {
-        ArrayList<Double> distributionRatiosByClient;
-        ArrayList<ArrayList<Double>> distributionRatiosByLabels;
-        boolean evenLabelDistribution;
-        evenLabelDistribution = (boolean) jsonObject.get("evenLabelDistributionByClient");
-        distributionRatiosByClient = (ArrayList<Double>) jsonObject.get("distributionRatiosByClient");
-        distributionRatiosByLabels = (ArrayList<ArrayList<Double>>) jsonObject.get("distributionRatiosByLabels");
+        boolean evenLabelDistribution = trainingConfiguration.getEvenLabelDistribution();
+        ArrayList<Double> distributionRatiosByClient = trainingConfiguration.getDistributionRatiosByClient();
+        ArrayList<ArrayList<Double>> distributionRatiosByLabels = trainingConfiguration.getDistributionRatiosByLabels();
 
         if (!isValidJSON(distributionRatiosByClient, distributionRatiosByLabels, nPartitions, evenLabelDistribution)) {
             throw new IOException("Invalid JSON configuration");

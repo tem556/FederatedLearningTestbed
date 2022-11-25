@@ -3,6 +3,7 @@ package com.bnnthang.fltestbed.Server.Repositories;
 import com.bnnthang.fltestbed.Server.ServerChestXrayDataSetIterator;
 import com.bnnthang.fltestbed.Server.ServerChestXrayLoader;
 import com.bnnthang.fltestbed.commonutils.servers.IServerLocalRepository;
+import com.bnnthang.fltestbed.commonutils.models.TrainingConfiguration;
 import org.apache.commons.lang3.SerializationUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.logging.log4j.LogManager;
@@ -50,18 +51,18 @@ public class ChestXrayRepository implements IServerLocalRepository {
 
     private final boolean useConfig;
 
-    private final JSONObject jsonObject;
+    private final TrainingConfiguration trainingConfiguration;
 
     // TODO: add some flexibility for this
     private String currentModelName = "xraymodel.zip";
 
     private final Map<Byte, List<byte[]>> imagesByLabel;
 
-    public ChestXrayRepository(String _workingDirectory, boolean _useConfig, JSONObject _jsonObject)
-            throws IOException {
+    public ChestXrayRepository(String _workingDirectory, boolean _useConfig,
+                             TrainingConfiguration _trainingConfiguration) throws IOException {
         workingDirectory = _workingDirectory;
         useConfig = _useConfig;
-        jsonObject = _jsonObject;
+        trainingConfiguration = _trainingConfiguration;
 
         imagesByLabel = new HashMap<>();
 
@@ -154,12 +155,9 @@ public class ChestXrayRepository implements IServerLocalRepository {
     }
 
     public List<List<byte[]>> partialSplitDatasetIIDAndShuffle(int nPartitions, float ratio) throws IOException {
-        ArrayList<Double> distributionRatiosByClient;
-        ArrayList<ArrayList<Double>> distributionRatiosByLabels;
-        boolean evenLabelDistribution;
-        evenLabelDistribution = (boolean) jsonObject.get("evenLabelDistributionByClient");
-        distributionRatiosByClient = (ArrayList<Double>) jsonObject.get("distributionRatiosByClient");
-        distributionRatiosByLabels = (ArrayList<ArrayList<Double>>) jsonObject.get("distributionRatiosByLabels");
+        boolean evenLabelDistribution = trainingConfiguration.getEvenLabelDistribution();
+        ArrayList<Double> distributionRatiosByClient = trainingConfiguration.getDistributionRatiosByClient();
+        ArrayList<ArrayList<Double>> distributionRatiosByLabels = trainingConfiguration.getDistributionRatiosByLabels();
 
         if (!isValidJSON(distributionRatiosByClient, distributionRatiosByLabels, nPartitions, evenLabelDistribution)) {
             throw new IOException("Invalid JSON configuration");
