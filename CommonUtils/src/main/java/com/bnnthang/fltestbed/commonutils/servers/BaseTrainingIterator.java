@@ -49,14 +49,9 @@ public final class BaseTrainingIterator extends Thread {
 
     @Override
     public void run() {
-        JSONObject jsonObject = configuration.getJsonObject();
-        boolean useDropping = false;
-        // dummy list, to avoid raising error
-        ArrayList<JSONObject> dropping = new ArrayList<>();
-        if (configuration.getUseConfig()){
-            useDropping = (boolean) jsonObject.get("useDropping");
-            dropping = (ArrayList<JSONObject>) jsonObject.get("dropping");
-        }
+        boolean useDropping = configuration.getUseDropping();
+        List<Integer> dropping = configuration.getDropping();
+
         // to randomize the dropping of clients
         Random ran = new Random();
         try {
@@ -68,8 +63,9 @@ public final class BaseTrainingIterator extends Thread {
                  currentRound <= configuration.getRounds();
                  ++currentRound) {
 
-                if (useDropping && !dropping.isEmpty()){
-                    dropping = dropClients(currentRound, dropping, ran);
+                if (useDropping && (dropping.get(currentRound) != 0)){
+                    dropClients(dropping.get(currentRound), ran);
+                    _logger.info("Removed " + dropping.get(currentRound) + " clients at round " + currentRound);
                 }
 
                 Long t0 = System.currentTimeMillis();
@@ -156,15 +152,11 @@ public final class BaseTrainingIterator extends Thread {
     /*
     * Removes the amount of clients specified in the first element in @param dropping, the choice of clients is random.
     */
-    public ArrayList<JSONObject> dropClients(int currentRound, ArrayList<JSONObject> dropping, Random ran) throws Exception{
-        JSONObject current = dropping.get(0);
-        int round = ((Long)current.get("round")).intValue();
-        int nClients = ((Long)current.get("#clients")).intValue();
-        if (round != currentRound) return dropping;
+    public void dropClients(Integer nClients, Random ran) throws Exception{
         // if to be removed clients more than available in the pool
         if (nClients > clients.size()){
             _logger.info("Cancelled dropping clients, remaining number of clients not enough");
-            return dropping;
+            return;
         }
         for (int i = 0; i < nClients; i++){
             // chooses a random client from the pool to drop
@@ -173,8 +165,5 @@ public final class BaseTrainingIterator extends Thread {
             currentClient.done();
             clients.remove(randomClient);
         }
-        _logger.info("Removed " + nClients + " clients at round " +round);
-        dropping.remove(0);
-        return dropping;
     }
 }
