@@ -27,7 +27,7 @@ public class ClientThread extends Thread {
 
     private Integer PORT = null;
 
-    private static final Integer DELAY_INTERVAL = 5000;
+    private static final Integer DELAY_INTERVAL = 1000;
 
     private int _datasetIndex = 0;
 

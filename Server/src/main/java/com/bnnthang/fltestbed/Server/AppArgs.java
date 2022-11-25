@@ -19,7 +19,7 @@ public class AppArgs {
     public String apkPath = System.getProperty("user.dir") + "/app-debug.apk";
 
     @Parameter(names = "--datasetratio", description = "How much of the total dataset that is used for training")
-    public Float datasetRatio = 1.0F;
+    public Double datasetRatio = 1.0;
 
     @Parameter(names = "--config", description = "Set to true if config.json file is to be used, otherwise data will be divided evenly among clients")
     public Boolean useConfig = false;
@@ -32,4 +32,7 @@ public class AppArgs {
 
     @Parameter(names = "--ml")
     public Boolean ml = false;
+
+    @Parameter(names = "--model")
+    public Boolean model = false;
 }

@@ -28,6 +28,13 @@ public class App {
             fl(appArgs);
         } else if (appArgs.ml) {
             ml(appArgs);
+        } else if (appArgs.model) {
+            // TODO: replace this with factory pattern (perhaps in commonutils)
+            if (appArgs.useHealthDataset) {
+                ML.getBaseChestXrayModel(appArgs.workDir);
+            } else {
+                ML.getBaseCifar10Model(appArgs.workDir);
+            }
         } else {
             _logger.info("no training model specified.");
         }
@@ -58,9 +65,11 @@ public class App {
             }
         }
 
-        TrainingConfiguration trainingConfiguration = new TrainingConfiguration(args.numClients, args.rounds, 5000, new FedAvg(), args.datasetRatio, args.useConfig);
+        TrainingConfiguration trainingConfiguration = new TrainingConfiguration(args.numClients, args.rounds, 1000,
+                new FedAvg(), args.datasetRatio.floatValue(), args.useConfig);
         trainingConfiguration.setJsonObject(jsonObject);
-        IServerOperations serverOperations = new BaseServerOperations(new Cifar10Repository(args.workDir, args.useConfig, jsonObject, args.useHealthDataset));
+        IServerOperations serverOperations = new BaseServerOperations(
+                new Cifar10Repository(args.workDir, args.useConfig, jsonObject, args.useHealthDataset));
         ServerParameters serverParameters = new ServerParameters(args.port, trainingConfiguration, serverOperations);
         BaseServer server = new BaseServer(serverParameters);
         server.start();
