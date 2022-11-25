@@ -33,9 +33,13 @@ public class ChestXrayRepository implements IServerLocalRepository {
     private static final Integer IMAGE_HEIGHT = 180;
 
     /**
+     * Image channels
+     */
+    private static final Integer IMAGE_CHANNELS = 3;
+    /**
      * Labels.
      */
-    private static final Integer LABELS = 2;
+    private static final Integer NUM_OF_LABELS = 2;
 
     /**
      * Logger.
@@ -66,7 +70,7 @@ public class ChestXrayRepository implements IServerLocalRepository {
     }
 
     private void load(InputStream inputStream) throws IOException {
-        int imageSize = IMAGE_WIDTH * IMAGE_HEIGHT * 3;
+        int imageSize = IMAGE_WIDTH * IMAGE_HEIGHT * IMAGE_CHANNELS;
         int labelSize = 1;
         int rowSize = imageSize + labelSize;
         while (inputStream.available() >= rowSize) {
@@ -89,7 +93,7 @@ public class ChestXrayRepository implements IServerLocalRepository {
             partitions.add(new ArrayList<>());
         }
         int partition = 0;
-        for (byte label = 0; label < LABELS; ++label) {
+        for (byte label = 0; label < NUM_OF_LABELS; ++label) {
             List<byte[]> images = imagesByLabel.get(label);
             Collections.shuffle(images);
             int nSamples = Integer.min(Math.round(ratio * images.size()), images.size());
@@ -103,9 +107,9 @@ public class ChestXrayRepository implements IServerLocalRepository {
         for (int i = 0; i < nPartitions; ++i) {
             res.add(new ArrayList<>());
             for (int j = 0; j < partitions.get(i).size(); ++j) {
-                byte[] t = new byte[IMAGE_HEIGHT * IMAGE_WIDTH * 3 + 1];
+                byte[] t = new byte[IMAGE_HEIGHT * IMAGE_WIDTH * IMAGE_CHANNELS + 1];
                 t[0] = partitions.get(i).get(j).getRight();
-                System.arraycopy(partitions.get(i).get(j).getLeft(), 0, t, 1, IMAGE_HEIGHT * IMAGE_WIDTH * 3);
+                System.arraycopy(partitions.get(i).get(j).getLeft(), 0, t, 1, IMAGE_HEIGHT * IMAGE_WIDTH * IMAGE_CHANNELS);
                 res.get(i).add(t);
             }
         }
@@ -120,7 +124,7 @@ public class ChestXrayRepository implements IServerLocalRepository {
 
     // Checks that the ratios for each label in JSONArray distribution sum up to 1
     public boolean isValidLabelDistribution(ArrayList<ArrayList<Double>> distribution) {
-        for (int i = 0; i < LABELS; i++) {
+        for (int i = 0; i < NUM_OF_LABELS; i++) {
             int finalI = i;
             Double one = 1.0;
             // Make the Stream that contains the ratios for the ith label
@@ -170,7 +174,7 @@ public class ChestXrayRepository implements IServerLocalRepository {
         int usedImages;
         int nSamples;
         float subRatio;
-        for (byte label = 0; label < LABELS; ++label) {
+        for (byte label = 0; label < NUM_OF_LABELS; ++label) {
             usedImages = 0;
             List<byte[]> images = imagesByLabel.get(label);
             Collections.shuffle(images);
@@ -193,9 +197,9 @@ public class ChestXrayRepository implements IServerLocalRepository {
         for (int i = 0; i < nPartitions; ++i) {
             res.add(new ArrayList<>());
             for (int j = 0; j < partitions.get(i).size(); ++j) {
-                byte[] t = new byte[IMAGE_HEIGHT * IMAGE_WIDTH * 3 + 1];
+                byte[] t = new byte[IMAGE_HEIGHT * IMAGE_WIDTH * IMAGE_CHANNELS + 1];
                 t[0] = partitions.get(i).get(j).getRight();
-                System.arraycopy(partitions.get(i).get(j).getLeft(), 0, t, 1, IMAGE_HEIGHT * IMAGE_WIDTH * 3);
+                System.arraycopy(partitions.get(i).get(j).getLeft(), 0, t, 1, IMAGE_HEIGHT * IMAGE_WIDTH * IMAGE_CHANNELS);
                 res.get(i).add(t);
             }
         }

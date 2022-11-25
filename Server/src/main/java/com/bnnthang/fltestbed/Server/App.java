@@ -75,7 +75,7 @@ public class App {
         if (args.useHealthDataset) {
             serverOperations = new BaseServerOperations(new ChestXrayRepository(args.workDir, args.useConfig, jsonObject));
         } else {
-            serverOperations = new BaseServerOperations(new Cifar10Repository(args.workDir, args.useConfig, jsonObject, false));
+            serverOperations = new BaseServerOperations(new Cifar10Repository(args.workDir, args.useConfig, jsonObject));
         }
         
         ServerParameters serverParameters = new ServerParameters(args.port, trainingConfiguration, serverOperations);
