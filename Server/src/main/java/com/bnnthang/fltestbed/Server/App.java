@@ -2,12 +2,12 @@ package com.bnnthang.fltestbed.Server;
 
 import com.beust.jcommander.JCommander;
 import com.bnnthang.fltestbed.Server.AggregationStrategies.FedAvg;
-import com.bnnthang.fltestbed.Server.Repositories.ChestXrayRepository;
-import com.bnnthang.fltestbed.Server.Repositories.Cifar10Repository;
+import com.bnnthang.fltestbed.Server.Repositories.IServerLocalRepositoryFactory;
 import com.bnnthang.fltestbed.commonutils.models.ServerParameters;
 import com.bnnthang.fltestbed.commonutils.models.TrainingConfiguration;
 import com.bnnthang.fltestbed.commonutils.servers.BaseServer;
 import com.bnnthang.fltestbed.commonutils.servers.BaseServerOperations;
+import com.bnnthang.fltestbed.commonutils.servers.IServerLocalRepository;
 import com.bnnthang.fltestbed.commonutils.servers.IServerOperations;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -71,6 +71,31 @@ public class App {
         return Arrays.asList(droppingList);
     }
 
+    private static ArrayList<Double> getWeights(AppArgs args, boolean evenLabelD, ArrayList<Double> dByClient, 
+                                                ArrayList<ArrayList<Double>> dByLabels) throws IOException {
+        ArrayList<Double> weights;
+        if (!args.useConfig) {
+            Double [] weightsArr = new Double[args.numClients];
+            Arrays.fill(weightsArr, 1.0/args.numClients);
+            weights = new ArrayList<Double>(Arrays.asList(weightsArr));
+        } else if (args.useConfig && evenLabelD) {
+            weights = dByClient;
+        } else {
+            ArrayList<Double> res = new ArrayList<Double>();
+            for (int i = 0; i < args.numClients; i++) {
+                // get the sum of the list for the ith client
+                Double curr = (dByLabels.get(i)).stream().mapToDouble(a -> (double) a).sum();
+                res.add(curr/args.numClients);
+            }
+            weights = res;
+        }
+        // Make sure the weights are appropriate
+        if (weights.size() != args.numClients) {
+            throw new IOException("Invalid number of weights in JSON");
+        }
+        return weights;
+    }
+
     private static void fl(AppArgs args) throws IOException, InterruptedException, URISyntaxException {
         // Make sure jsonObject is only dereferenced when useConfig is true
         JSONObject jsonObject = null;
@@ -92,17 +117,15 @@ public class App {
             }
         }
 
+        ArrayList<Double> weights = getWeights(args, evenLabelDistribution, distributionRatiosByClient, distributionRatiosByLabels);
         TrainingConfiguration trainingConfiguration = new TrainingConfiguration(args.numClients, args.rounds, 1000,
-                new FedAvg(), args.datasetRatio.floatValue(), args.useConfig, evenLabelDistribution,
+                new FedAvg(weights), args.datasetRatio.floatValue(), args.useConfig, evenLabelDistribution,
                 distributionRatiosByClient, distributionRatiosByLabels, useDropping, dropping);
 
-        // TODO: replace this with Factory pattern.
-        IServerOperations serverOperations;
-        if (args.useHealthDataset) {
-            serverOperations = new BaseServerOperations(new ChestXrayRepository(args.workDir, args.useConfig, trainingConfiguration));
-        } else {
-            serverOperations = new BaseServerOperations(new Cifar10Repository(args.workDir, args.useConfig, trainingConfiguration));
-        }
+        IServerLocalRepository localRepository = IServerLocalRepositoryFactory.getRepository(args.useHealthDataset, args.workDir,
+                                                                                             args.useConfig, trainingConfiguration);
+        BaseServerOperations serverOperations = new BaseServerOperations(localRepository);
+        
         
         ServerParameters serverParameters = new ServerParameters(args.port, trainingConfiguration, serverOperations);
         BaseServer server = new BaseServer(serverParameters);

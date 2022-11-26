@@ -68,7 +68,7 @@ public class TrainingConfiguration {
     private ArrayList<ArrayList<Double>> distributionRatiosByLabels;
 
     /**
-     * If clients should be dropped
+     * True if clients should be dropped
      */
     private Boolean useDropping;
 
@@ -76,6 +76,4 @@ public class TrainingConfiguration {
      * List of size rounds, where the number at the ith index represents number of clients to be dropped at ith round
      */
     private List<Integer> dropping;
-
-
 }
