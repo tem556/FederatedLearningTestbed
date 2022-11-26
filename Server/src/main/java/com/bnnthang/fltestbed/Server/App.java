@@ -2,12 +2,12 @@ package com.bnnthang.fltestbed.Server;
 
 import com.beust.jcommander.JCommander;
 import com.bnnthang.fltestbed.Server.AggregationStrategies.FedAvg;
-import com.bnnthang.fltestbed.Server.Repositories.ChestXrayRepository;
-import com.bnnthang.fltestbed.Server.Repositories.Cifar10Repository;
+import com.bnnthang.fltestbed.Server.Repositories.IServerLocalRepositoryFactory;
 import com.bnnthang.fltestbed.commonutils.models.ServerParameters;
 import com.bnnthang.fltestbed.commonutils.models.TrainingConfiguration;
 import com.bnnthang.fltestbed.commonutils.servers.BaseServer;
 import com.bnnthang.fltestbed.commonutils.servers.BaseServerOperations;
+import com.bnnthang.fltestbed.commonutils.servers.IServerLocalRepository;
 import com.bnnthang.fltestbed.commonutils.servers.IServerOperations;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,7 +18,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Arrays;
 import java.util.Iterator;
-import java.util.stream.Stream;
 import java.net.URISyntaxException;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -123,13 +122,10 @@ public class App {
                 new FedAvg(weights), args.datasetRatio.floatValue(), args.useConfig, evenLabelDistribution,
                 distributionRatiosByClient, distributionRatiosByLabels, useDropping, dropping);
 
-        // TODO: replace this with Factory pattern.
-        IServerOperations serverOperations;
-        if (args.useHealthDataset) {
-            serverOperations = new BaseServerOperations(new ChestXrayRepository(args.workDir, args.useConfig, trainingConfiguration));
-        } else {
-            serverOperations = new BaseServerOperations(new Cifar10Repository(args.workDir, args.useConfig, trainingConfiguration));
-        }
+        IServerLocalRepository localRepository = IServerLocalRepositoryFactory.getRepository(args.useHealthDataset, args.workDir,
+                                                                                             args.useConfig, trainingConfiguration);
+        BaseServerOperations serverOperations = new BaseServerOperations(localRepository);
+        
         
         ServerParameters serverParameters = new ServerParameters(args.port, trainingConfiguration, serverOperations);
         BaseServer server = new BaseServer(serverParameters);
