@@ -5,9 +5,12 @@ import com.bnnthang.fltestbed.commonutils.servers.IServerLocalRepository;
 
 import java.io.IOException;
 
-public class IServerLocalRepositoryFactory {
-    public static IServerLocalRepository getRepository(boolean useHealthDataset, String workDir, 
-                                                  boolean useConfig, TrainingConfiguration trainingConfiguration) throws IOException{
+public class ServerLocalRepositoryFactory {
+    public static IServerLocalRepository getRepository(
+            boolean useHealthDataset,
+            String workDir,
+            boolean useConfig,
+            TrainingConfiguration trainingConfiguration) throws IOException {
         if (useHealthDataset) {
             return new ChestXrayRepository(workDir, useConfig, trainingConfiguration);
         } else {

@@ -2,13 +2,12 @@ package com.bnnthang.fltestbed.Server;
 
 import com.beust.jcommander.JCommander;
 import com.bnnthang.fltestbed.Server.AggregationStrategies.FedAvg;
-import com.bnnthang.fltestbed.Server.Repositories.IServerLocalRepositoryFactory;
+import com.bnnthang.fltestbed.Server.Repositories.ServerLocalRepositoryFactory;
 import com.bnnthang.fltestbed.commonutils.models.ServerParameters;
 import com.bnnthang.fltestbed.commonutils.models.TrainingConfiguration;
 import com.bnnthang.fltestbed.commonutils.servers.BaseServer;
 import com.bnnthang.fltestbed.commonutils.servers.BaseServerOperations;
 import com.bnnthang.fltestbed.commonutils.servers.IServerLocalRepository;
-import com.bnnthang.fltestbed.commonutils.servers.IServerOperations;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -59,24 +58,24 @@ public class App {
     }
 
     private static List<Integer> getDropping(ArrayList<JSONObject> jsonObjects, Integer rounds) {
-        Integer [] droppingList = new Integer[rounds];
+        Integer[] droppingList = new Integer[rounds];
         Arrays.fill(droppingList, 0);
         Iterator<JSONObject> iter = jsonObjects.iterator();
         while (iter.hasNext()) {
             JSONObject current = iter.next();
-            int round = ((Long)current.get("round")).intValue();
-            int nClients = ((Long)current.get("#clients")).intValue();
+            int round = ((Long) current.get("round")).intValue();
+            int nClients = ((Long) current.get("#clients")).intValue();
             droppingList[round] = nClients;
         }
         return Arrays.asList(droppingList);
     }
 
-    private static ArrayList<Double> getWeights(AppArgs args, boolean evenLabelD, ArrayList<Double> dByClient, 
-                                                ArrayList<ArrayList<Double>> dByLabels) throws IOException {
+    private static ArrayList<Double> getWeights(AppArgs args, boolean evenLabelD, ArrayList<Double> dByClient,
+            ArrayList<ArrayList<Double>> dByLabels) throws IOException {
         ArrayList<Double> weights;
         if (!args.useConfig) {
-            Double [] weightsArr = new Double[args.numClients];
-            Arrays.fill(weightsArr, 1.0/args.numClients);
+            Double[] weightsArr = new Double[args.numClients];
+            Arrays.fill(weightsArr, 1.0 / args.numClients);
             weights = new ArrayList<Double>(Arrays.asList(weightsArr));
         } else if (args.useConfig && evenLabelD) {
             weights = dByClient;
@@ -85,7 +84,7 @@ public class App {
             for (int i = 0; i < args.numClients; i++) {
                 // get the sum of the list for the ith client
                 Double curr = (dByLabels.get(i)).stream().mapToDouble(a -> (double) a).sum();
-                res.add(curr/args.numClients);
+                res.add(curr / args.numClients);
             }
             weights = res;
         }
@@ -117,16 +116,19 @@ public class App {
             }
         }
 
-        ArrayList<Double> weights = getWeights(args, evenLabelDistribution, distributionRatiosByClient, distributionRatiosByLabels);
+        ArrayList<Double> weights = getWeights(args, evenLabelDistribution, distributionRatiosByClient,
+                distributionRatiosByLabels);
         TrainingConfiguration trainingConfiguration = new TrainingConfiguration(args.numClients, args.rounds, 1000,
                 new FedAvg(weights), args.datasetRatio.floatValue(), args.useConfig, evenLabelDistribution,
                 distributionRatiosByClient, distributionRatiosByLabels, useDropping, dropping);
 
-        IServerLocalRepository localRepository = IServerLocalRepositoryFactory.getRepository(args.useHealthDataset, args.workDir,
-                                                                                             args.useConfig, trainingConfiguration);
+        IServerLocalRepository localRepository = ServerLocalRepositoryFactory.getRepository(
+                args.useHealthDataset,
+                args.workDir,
+                args.useConfig,
+                trainingConfiguration);
         BaseServerOperations serverOperations = new BaseServerOperations(localRepository);
-        
-        
+
         ServerParameters serverParameters = new ServerParameters(args.port, trainingConfiguration, serverOperations);
         BaseServer server = new BaseServer(serverParameters);
         server.start();
