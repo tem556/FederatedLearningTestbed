@@ -1,16 +1,16 @@
 package com.bnnthang.fltestbed.Server.AggregationStrategies;
 
-import  com.bnnthang.fltestbed.commonutils.models.ModelUpdate;
+import com.bnnthang.fltestbed.commonutils.models.ModelUpdate;
 import com.bnnthang.fltestbed.commonutils.servers.IAggregationStrategy;
 import org.deeplearning4j.nn.multilayer.MultiLayerNetwork;
 import org.nd4j.linalg.api.ndarray.INDArray;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.io.IOException;
 
 public class FedAvg implements IAggregationStrategy {
-    private final List<Double> weights;
-    public FedAvg(List<Double> _weights) {
+    private final ArrayList<Double> weights;
+    public FedAvg(ArrayList<Double> _weights) {
         weights = _weights;
     }
     @Override

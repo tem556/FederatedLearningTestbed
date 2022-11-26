@@ -68,7 +68,7 @@ public class TrainingConfiguration {
     private ArrayList<ArrayList<Double>> distributionRatiosByLabels;
 
     /**
-     * Ture if clients should be dropped
+     * True if clients should be dropped
      */
     private Boolean useDropping;
 
