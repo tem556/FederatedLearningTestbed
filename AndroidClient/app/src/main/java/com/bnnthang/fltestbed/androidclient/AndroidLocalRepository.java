@@ -112,4 +112,9 @@ public class AndroidLocalRepository implements IClientLocalRepository {
     public String getModelPath() {
         return MODEL_FILENAME;
     }
+
+    @Override
+    public String getDatasetName() {
+        throw new UnsupportedOperationException("Not implemented.");
+    }
 }
