@@ -4,7 +4,6 @@ import com.bnnthang.fltestbed.commonutils.clients.IClientLocalRepository;
 import com.bnnthang.fltestbed.commonutils.models.IDatasetLoader;
 import com.bnnthang.fltestbed.commonutils.models.MemoryListener;
 import com.bnnthang.fltestbed.commonutils.models.NewChestXrayDSIterator;
-import com.bnnthang.fltestbed.commonutils.models.NewCifar10DSIterator;
 import com.bnnthang.fltestbed.commonutils.models.TrainingReport;
 import com.bnnthang.fltestbed.commonutils.utils.TimeUtils;
 
