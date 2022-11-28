@@ -11,10 +11,10 @@ public class AndroidClientOperations<T> extends BaseClientOperations {
     /**
      * Small batch size.
      */
-    protected int ANDROID_BATCH_SIZE = 16;
+    protected static final int ANDROID_BATCH_SIZE = 16;
 
     public AndroidClientOperations(int datasetIndex, IClientLocalRepository _localRepository) throws IOException {
-        super(_localRepository);
+        super(_localRepository, ANDROID_BATCH_SIZE);
         this.datasetIndex = datasetIndex;
     }
 
