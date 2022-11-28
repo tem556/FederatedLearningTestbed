@@ -70,7 +70,7 @@ public class App {
                 localRepository = new Cifar10Repository(pathToModel, pathToDataset);
             }
 
-            IClientOperations clientOperations = new BaseClientOperations(localRepository);
+            IClientOperations clientOperations = new BaseClientOperations(localRepository, appArgs.batchSize);
             BaseClient client = new BaseClient(appArgs.host, appArgs.port, 5000, clientOperations);
             client.start();
 

@@ -285,7 +285,6 @@ public class Cifar10Repository implements IServerLocalRepository {
     public Evaluation evaluateCurrentModel() {
         try {
             File testDatasetFile = new File(workingDirectory, "cifar-10/test_batch.bin"); // load test file
-
             ServerCifar10Loader loader = new ServerCifar10Loader(new File[] { testDatasetFile }, 1.0);
             ServerCifar10DataSetIterator cifarEval = new ServerCifar10DataSetIterator(loader, 16);
             MultiLayerNetwork model = loadLatestModel();

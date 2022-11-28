@@ -6,7 +6,7 @@
 
   <groupId>com.bnnthang.fltestbed</groupId>
   <artifactId>Server</artifactId>
-  <version>1.1-SNAPSHOT</version>
+  <version>1.1-STABLE</version>
   <packaging>jar</packaging>
 
   <name>Federated Learning Server</name>
@@ -34,7 +34,7 @@
     <dependency>
       <groupId>com.bnnthang.fltestbed</groupId>
       <artifactId>commonutils</artifactId>
-      <version>1.30-SNAPSHOT</version>
+      <version>1.31-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>junit</groupId>

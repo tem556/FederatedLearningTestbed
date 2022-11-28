@@ -300,7 +300,6 @@ public class ChestXrayRepository implements IServerLocalRepository {
     public Evaluation evaluateCurrentModel() {
         try {
             File testDatasetFile = new File(workingDirectory, "test_batch.bin");
-            _logger.debug(workingDirectory);
             DataSetIterator iterEval = new ServerChestXrayDataSetIterator(
                     new ServerChestXrayLoader(new File[] { testDatasetFile }, 1.0), 16);
             MultiLayerNetwork model = loadLatestModel();
