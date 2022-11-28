@@ -8,6 +8,11 @@ import java.io.IOException;
 public class AndroidClientOperations<T> extends BaseClientOperations {
     protected int datasetIndex = 0;
 
+    /**
+     * Small batch size.
+     */
+    protected int ANDROID_BATCH_SIZE = 16;
+
     public AndroidClientOperations(int datasetIndex, IClientLocalRepository _localRepository) throws IOException {
         super(_localRepository);
         this.datasetIndex = datasetIndex;
@@ -15,7 +20,7 @@ public class AndroidClientOperations<T> extends BaseClientOperations {
 
     @Override
     public void handleTrain() {
-        trainingWorker = new Thread(WorkerFactory.getTrainingWorker(datasetIndex, localRepository, trainingReport, BATCH_SIZE, EPOCHS));
+        trainingWorker = new Thread(WorkerFactory.getTrainingWorker(datasetIndex, localRepository, trainingReport, ANDROID_BATCH_SIZE, EPOCHS));
         trainingWorker.start();
     }
 }
