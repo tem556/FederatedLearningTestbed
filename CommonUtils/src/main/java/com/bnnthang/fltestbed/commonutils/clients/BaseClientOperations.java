@@ -14,7 +14,7 @@ import java.net.Socket;
 public class BaseClientOperations implements IClientOperations {
     private static final Logger _logger = LoggerFactory.getLogger(BaseClientOperations.class);
 
-    protected static final int BATCH_SIZE = 128;
+    protected int batchSize;
 
     protected static final int EPOCHS = 2;
 
@@ -24,9 +24,11 @@ public class BaseClientOperations implements IClientOperations {
 
     protected TrainingReport trainingReport;
 
-    public BaseClientOperations(IClientLocalRepository _localRepository) throws IOException {
+    public BaseClientOperations(IClientLocalRepository _localRepository,
+                                Integer _batchSize) throws IOException {
         localRepository = _localRepository;
         trainingReport = new TrainingReport();
+        batchSize = _batchSize;
     }
 
     @Override
@@ -66,18 +68,19 @@ public class BaseClientOperations implements IClientOperations {
 
     @Override
     public void handleTrain() throws IOException {
+        // TODO: change to factory pattern
         if (localRepository.getDatasetName().equals("ChestXray")){
             trainingWorker = new ChestXrayTrainingWorker(
                     localRepository,
                     trainingReport,
-                    BATCH_SIZE,
+                    batchSize,
                     EPOCHS
             );
         } else {
             trainingWorker = new Cifar10TrainingWorker(
                     localRepository,
                     trainingReport,
-                    BATCH_SIZE,
+                    batchSize,
                     EPOCHS);
         }
         trainingWorker.start();

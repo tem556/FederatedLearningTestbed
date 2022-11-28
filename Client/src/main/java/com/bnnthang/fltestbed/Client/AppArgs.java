@@ -18,6 +18,9 @@ public class AppArgs {
     @Parameter(names = "--healthdataset", description = "Set to true if the health dataset is to be used, otherwise cifar-10 dataset will be used")
     public Boolean useHealthDataset = false;
 
+    @Parameter(names = "--batchsize", description = "Batch size to be used for training")
+    public Integer batchSize = 16;
+
     @Parameter(names = "--fl")
     public Boolean fl = false;
 
