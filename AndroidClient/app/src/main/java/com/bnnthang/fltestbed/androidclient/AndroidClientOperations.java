@@ -6,6 +6,9 @@ import com.bnnthang.fltestbed.commonutils.clients.IClientLocalRepository;
 import java.io.IOException;
 
 public class AndroidClientOperations<T> extends BaseClientOperations {
+    /**
+     * Decide which dataset (CIFAR-10 or Chest Xray) to use.
+     */
     protected int datasetIndex = 0;
 
     /**

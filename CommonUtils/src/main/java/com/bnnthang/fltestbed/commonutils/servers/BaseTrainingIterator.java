@@ -5,7 +5,6 @@ import com.bnnthang.fltestbed.commonutils.models.TrainingReport;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NonNull;
-import org.json.simple.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -23,7 +22,7 @@ public final class BaseTrainingIterator extends Thread {
     /**
      * Logger.
      */
-    private static final Logger _logger = LoggerFactory.getLogger(BaseTrainingIterator.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(BaseTrainingIterator.class);
 
     /**
      * Supported operations.
@@ -59,28 +58,26 @@ public final class BaseTrainingIterator extends Thread {
             operations.pushDatasetToClients(clients, configuration.getDatasetRatio());
 
             // repeat the process a certain number of times
-            for (int currentRound = 1;
-                 currentRound <= configuration.getRounds();
-                 ++currentRound) {
+            for (int currentRound = 1; currentRound <= configuration.getRounds(); ++currentRound) {
 
-                if (useDropping && (dropping.get(currentRound) != 0)){
+                if (useDropping && (dropping.get(currentRound) != 0)) {
                     dropClients(dropping.get(currentRound), ran);
-                    _logger.info("Removed " + dropping.get(currentRound) + " clients at round " + currentRound);
+                    LOGGER.info("Removed " + dropping.get(currentRound) + " clients at round " + currentRound);
                 }
 
                 Long t0 = System.currentTimeMillis();
 
-                _logger.info("current round = " + currentRound);
+                LOGGER.info("current round = " + currentRound);
 
                 // offload model to clients
                 operations.pushModelToClients(clients);
-                _logger.info("pushed updated model to all clients");
+                LOGGER.info("pushed updated model to all clients");
                 Long t1 = System.currentTimeMillis();
 
                 for (IClientHandler client : clients) {
                     client.startTraining();
                 }
-                _logger.info("asked all clients to train");
+                LOGGER.info("asked all clients to train");
 
                 // wait for trainings to finish
                 do {
@@ -103,7 +100,7 @@ public final class BaseTrainingIterator extends Thread {
                 // aggregate results
                 // TODO: parallelize this
                 List<TrainingReport> reports = new ArrayList<>();
-                _logger.info("getting training reports...");
+                LOGGER.info("getting training reports...");
                 for (IClientHandler client : clients) {
                     TrainingReport report = client.getTrainingReport();
                     if (report == null) {
@@ -111,12 +108,14 @@ public final class BaseTrainingIterator extends Thread {
                     }
                     reports.add(report);
                 }
-                _logger.info("got all training reports");
+                LOGGER.info("got all training reports");
 
                 Long t3 = System.currentTimeMillis();
 
-                operations.aggregateResults(reports.stream().map(TrainingReport::getModelUpdate).collect(Collectors.toList()), configuration.getAggregationStrategy());
-                _logger.info("aggregated updates");
+                operations.aggregateResults(
+                        reports.stream().map(TrainingReport::getModelUpdate).collect(Collectors.toList()),
+                        configuration.getAggregationStrategy());
+                LOGGER.info("aggregated updates");
 
                 Thread evalThread = new Thread(new EvaluationRunnable(operations, reports));
                 evalThread.start();
@@ -130,7 +129,7 @@ public final class BaseTrainingIterator extends Thread {
                     // delay a bit
                     sleep(configuration.getPollInterval());
                 }
-                _logger.info("evaluated new model");
+                LOGGER.info("evaluated new model");
 
                 // deallocate arrays
                 for (TrainingReport report : reports) {
@@ -142,23 +141,23 @@ public final class BaseTrainingIterator extends Thread {
                 serverTimeTracker.addRound(t0, t1, t2, t3, t4);
             }
 
-
             operations.done();
         } catch (Exception e) {
-            e.printStackTrace();
+            LOGGER.error("EXCEPTION", e);
         }
     }
 
     /*
-    * Removes the amount of clients specified in the first element in @param dropping, the choice of clients is random.
-    */
-    public void dropClients(Integer nClients, Random ran) throws Exception{
+     * Removes the amount of clients specified in the first element in @param
+     * dropping, the choice of clients is random.
+     */
+    public void dropClients(Integer nClients, Random ran) throws Exception {
         // if to be removed clients more than available in the pool
-        if (nClients > clients.size()){
-            _logger.info("Cancelled dropping clients, remaining number of clients not enough");
+        if (nClients > clients.size()) {
+            LOGGER.info("Cancelled dropping clients, remaining number of clients not enough");
             return;
         }
-        for (int i = 0; i < nClients; i++){
+        for (int i = 0; i < nClients; i++) {
             // chooses a random client from the pool to drop
             int randomClient = ran.nextInt(clients.size());
             IClientHandler currentClient = clients.get(randomClient);

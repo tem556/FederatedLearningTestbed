@@ -16,7 +16,7 @@ public class BaseServer extends Thread {
     /**
      * Logger.
      */
-    private static final Logger _logger = LoggerFactory.getLogger(BaseServer.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(BaseServer.class);
 
     /**
      * Socket opened for connections.
@@ -45,7 +45,7 @@ public class BaseServer extends Thread {
         try {
             serve();
         } catch (Exception e) {
-            e.printStackTrace();
+            LOGGER.error("EXCEPTION", e);
         }
     }
 
@@ -58,7 +58,7 @@ public class BaseServer extends Thread {
         do {
             Socket client = _serverSocket.accept();
 
-            _logger.debug("getting client");
+            LOGGER.debug("getting client");
 
             if (serverOperations.isTraining()) {
                 // reject client if server is training

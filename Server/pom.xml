@@ -10,7 +10,7 @@
   <packaging>jar</packaging>
 
   <name>Federated Learning Server</name>
-  <url>https://github.com/bnnthang/FederatedLearningTestbed</url>
+  <url>https://github.com/bnnthang/RealFL</url>
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -34,7 +34,7 @@
     <dependency>
       <groupId>com.bnnthang.fltestbed</groupId>
       <artifactId>commonutils</artifactId>
-      <version>1.31-SNAPSHOT</version>
+      <version>1.32-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>junit</groupId>

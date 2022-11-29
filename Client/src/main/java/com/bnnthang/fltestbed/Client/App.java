@@ -52,6 +52,7 @@ public class App {
                 Files.createDirectory(path);
 
             // TODO: remove these magic values
+            // TODO: use the factory pattern
             String pathToModel;
             String pathToDataset;
             Boolean useHealthDataset = appArgs.useHealthDataset;

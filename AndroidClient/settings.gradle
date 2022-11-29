@@ -14,7 +14,7 @@ dependencyResolutionManagement {
         mavenLocal()
         maven {
             name = "GitHubPackages"
-            url = uri("https://maven.pkg.github.com/bnnthang/FederatedLearningTestbed")
+            url = uri("https://maven.pkg.github.com/bnnthang/RealFL")
             credentials {
                 username = System.getenv("GITHUB_USERNAME")
                 password = System.getenv("GITHUB_TOKEN")
@@ -22,5 +22,6 @@ dependencyResolutionManagement {
         }
     }
 }
+
 rootProject.name = "AndroidClient"
 include ':app'

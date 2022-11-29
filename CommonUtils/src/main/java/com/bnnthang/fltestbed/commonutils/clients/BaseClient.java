@@ -8,7 +8,6 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.net.Socket;
-import java.rmi.UnexpectedException;
 
 /**
  * Simple implementation of a Federated Learning client.
@@ -77,7 +76,7 @@ public class BaseClient extends Thread {
 
             if (bytesRead < 0) {
                 operations.terminate();
-                _logger.error("unexpectedly finished");
+                _logger.error("Negative number of bytes read.");
                 break;
             } else if (bytesRead == 0) {
                 sleep(delayInterval);
@@ -134,9 +133,9 @@ public class BaseClient extends Thread {
      * Check if server rejects connection.
      * @return <code>true</code> iff client is moved to training queue
      * @throws IOException if I/O errors happen
-     * @throws UnexpectedException if reads unexpected bytes
+     * @throws UnsupportedOperationException if reads unexpected bytes
      */
-    private Boolean acceptedOrRejected() throws IOException, UnexpectedException {
+    private Boolean acceptedOrRejected() throws IOException, UnsupportedOperationException {
         switch (SocketUtils.readInteger(socket)) {
             case 0:
                 operations.handleAccepted(socket);
@@ -145,7 +144,7 @@ public class BaseClient extends Thread {
                 operations.handleRejected(socket);
                 return false;
             default:
-                throw new UnexpectedException("unexpected command index");
+                throw new UnsupportedOperationException("unexpected command index");
         }
     }
 }
