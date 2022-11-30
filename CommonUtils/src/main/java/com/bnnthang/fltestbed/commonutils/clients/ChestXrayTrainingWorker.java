@@ -1,15 +1,20 @@
 package com.bnnthang.fltestbed.commonutils.clients;
 
-import com.bnnthang.fltestbed.commonutils.models.*;
-import com.bnnthang.fltestbed.commonutils.utils.TimeUtils;
+import java.io.IOException;
+import java.time.LocalDateTime;
+
 import org.deeplearning4j.nn.multilayer.MultiLayerNetwork;
 import org.deeplearning4j.util.ModelSerializer;
 import org.nd4j.linalg.dataset.api.iterator.DataSetIterator;
 
-import java.io.IOException;
-import java.time.LocalDateTime;
+import com.bnnthang.fltestbed.commonutils.models.ChestXrayDatasetLoader;
+import com.bnnthang.fltestbed.commonutils.models.IDatasetLoader;
+import com.bnnthang.fltestbed.commonutils.models.MemoryListener;
+import com.bnnthang.fltestbed.commonutils.models.NewChestXrayDSIterator;
+import com.bnnthang.fltestbed.commonutils.models.TrainingReport;
+import com.bnnthang.fltestbed.commonutils.utils.TimeUtils;
 
-public class Cifar10TrainingWorker extends Thread {
+public class ChestXrayTrainingWorker extends Thread {
     /**
      * An instance of local repository.
      */
@@ -30,10 +35,10 @@ public class Cifar10TrainingWorker extends Thread {
      */
     private TrainingReport report;
 
-    public Cifar10TrainingWorker(IClientLocalRepository _localRepository,
-                                 TrainingReport _report,
-                                 int _batchSize,
-                                 int _epochs) {
+    public ChestXrayTrainingWorker(IClientLocalRepository _localRepository,
+                                   TrainingReport _report,
+                                   int _batchSize,
+                                   int _epochs) {
         localRepository = _localRepository;
         report = _report;
         batchSize = _batchSize;
@@ -45,9 +50,9 @@ public class Cifar10TrainingWorker extends Thread {
         try {
             MultiLayerNetwork model = ModelSerializer.restoreMultiLayerNetwork(localRepository.getModelFile(), true);
 
-            IDatasetLoader loader = new Cifar10DatasetLoader(localRepository);
+            IDatasetLoader loader = new ChestXrayDatasetLoader(localRepository);
 
-            DataSetIterator iterator = new NewCifar10DSIterator(loader, batchSize);
+            DataSetIterator iterator = new NewChestXrayDSIterator(loader, batchSize);
 
             model.setListeners(new MemoryListener());
 

@@ -1,24 +1,23 @@
-package com.bnnthang.fltestbed.androidclient;
-
-import android.graphics.Bitmap;
+package com.bnnthang.fltestbed.commonutils.models;
 
 import com.bnnthang.fltestbed.commonutils.clients.IClientLocalRepository;
-import com.bnnthang.fltestbed.commonutils.models.IDatasetLoader;
-
-import org.datavec.image.loader.AndroidNativeImageLoader;
+import org.datavec.image.loader.Java2DNativeImageLoader;
 import org.nd4j.common.primitives.Pair;
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.dataset.DataSet;
 import org.nd4j.linalg.util.FeatureUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
+import java.util.HashMap;
+import java.util.ArrayList;
+import java.util.List;
 
-public class AndroidCifar10Loader implements IDatasetLoader {
+public class ChestXrayDatasetLoader implements IDatasetLoader {
     /**
      * Label size (in bytes).
      */
@@ -27,27 +26,27 @@ public class AndroidCifar10Loader implements IDatasetLoader {
     /**
      * Image height (in pixels).
      */
-    protected final static int IMAGE_HEIGHT = 32;
+    protected static int IMAGE_HEIGHT = 180;
 
     /**
      * Image width (in pixels).
      */
-    protected final static int IMAGE_WIDTH = 32;
+    protected static int IMAGE_WIDTH = 180;
 
     /**
      * Image channels.
      */
-    protected final static int IMAGE_CHANNELS = 3;
+    protected static int IMAGE_CHANNELS = 3;
 
     /**
      * Image size (in bytes).
      */
-    protected final static int IMAGE_SIZE = IMAGE_WIDTH * IMAGE_HEIGHT * IMAGE_CHANNELS;
+    protected static int IMAGE_SIZE = IMAGE_WIDTH * IMAGE_HEIGHT * IMAGE_CHANNELS;
 
     /**
      * Row size (in bytes).
      */
-    protected final static int ROW_SIZE = LABEL_SIZE + IMAGE_SIZE;
+    protected static int ROW_SIZE = LABEL_SIZE + IMAGE_SIZE;
 
     /**
      * Local file repository.
@@ -55,29 +54,39 @@ public class AndroidCifar10Loader implements IDatasetLoader {
     protected IClientLocalRepository localRepository;
 
     /**
-     * Instantiate <code>AndroidCifar10Loader</code>
-     *
+     * Logger.
+     */
+    private static final Logger _logger = LoggerFactory.getLogger(ChestXrayDatasetLoader.class);
+
+    private long rowCount = -1;
+
+    /**
+     * Instantiate <code>ChestXrayLoader</code>
+     * 
      * @param _localRepository an instance of <code>ILocalRepository</code>
      */
-    public AndroidCifar10Loader(IClientLocalRepository _localRepository) {
+    public ChestXrayDatasetLoader(IClientLocalRepository _localRepository) {
         localRepository = _localRepository;
     }
 
     /**
      * Count the number of elements in the dataset
+     * 
      * @return the number of elements in the dataset
      */
-    @Override
     public long count() throws IOException {
-        return localRepository.getDatasetSize() / ROW_SIZE;
+        if (rowCount < 0) {
+            rowCount = localRepository.getDatasetSize() / ROW_SIZE;
+        }
+        return rowCount;
     }
 
     /**
      * Count the number of occurrences of each label
+     * 
      * @return a map showing the data distribution for all labels
      * @throws IOException if I/O errors happen
      */
-    @Override
     public Map<Integer, Integer> getDataDistribution() throws IOException {
         Map<Integer, Integer> frequency = new HashMap<>();
 
@@ -91,18 +100,20 @@ public class AndroidCifar10Loader implements IDatasetLoader {
             frequency.put((int) row.getFirst(), currentFrequency + 1);
         }
 
+        inputStream.close();
+
         return frequency;
     }
 
     /**
      * Create dataset.
+     * 
      * @param batchSize batch size
      * @param fromIndex starting index
      * @return a dataset that contains images from index <code>fromIndex</code>
-     * to <code>fromIndex + batchSize - 1</code> inclusive
+     *         to <code>fromIndex + batchSize - 1</code> inclusive
      * @throws IOException if I/O errors occur
      */
-    @Override
     public DataSet createDataSet(int batchSize, int fromIndex) throws IOException {
         if (!localRepository.datasetExists())
             return DataSet.empty();
@@ -115,49 +126,48 @@ public class AndroidCifar10Loader implements IDatasetLoader {
         for (int i = fromIndex; i < toIndex; ++i) {
             Pair<Byte, byte[]> row = readOneRow(inputStream);
             INDArray image = bytesToImage(row.getSecond());
-            INDArray label = FeatureUtil.toOutcomeVector(row.getFirst(), 10);
+            INDArray label = FeatureUtil.toOutcomeVector(row.getFirst(), 2);
             atomicDataSets.add(new DataSet(image, label));
         }
+
+        inputStream.close();
 
         return DataSet.merge(atomicDataSets);
     }
 
     /**
      * Convert image byte array to <code>INDArray</code>.
+     * 
      * @param imageBytes byte array of an image
      * @return a corresponding <code>INDArray</code> instance
      * @throws IOException if I/O errors happen
      */
-    @Override
     public INDArray bytesToImage(byte[] imageBytes) throws IOException {
-        int[] rgbaImage = new int[IMAGE_HEIGHT * IMAGE_WIDTH];
+        int[] rgbImage = new int[IMAGE_HEIGHT * IMAGE_WIDTH];
         for (int y = 0; y < IMAGE_HEIGHT; ++y) {
             for (int x = 0; x < IMAGE_WIDTH; ++x) {
-                int r = imageBytes[y * IMAGE_WIDTH + x];
-                int g = imageBytes[IMAGE_HEIGHT * IMAGE_WIDTH + y * IMAGE_WIDTH + x];
-                int b = imageBytes[2 * IMAGE_HEIGHT * IMAGE_WIDTH + y * IMAGE_WIDTH + x];
-                rgbaImage[y * IMAGE_WIDTH + x] = (255 << 24) + (r << 16) + (g << 8) + b;
+                int r = 0xFF & imageBytes[y * IMAGE_WIDTH + x];
+                int g = 0xFF & imageBytes[IMAGE_HEIGHT * IMAGE_WIDTH + y * IMAGE_WIDTH + x];
+                int b = 0xFF & imageBytes[2 * IMAGE_HEIGHT * IMAGE_WIDTH + y * IMAGE_WIDTH + x];
+                rgbImage[y * IMAGE_WIDTH + x] = (0xFF << 24) + (r << 16) + (g << 8) + b;
             }
         }
 
-        Bitmap bmp = Bitmap.createBitmap(rgbaImage, IMAGE_WIDTH, IMAGE_HEIGHT, Bitmap.Config.ARGB_8888);
-        AndroidNativeImageLoader imageLoader = new AndroidNativeImageLoader(IMAGE_HEIGHT, IMAGE_WIDTH, IMAGE_CHANNELS);
-        INDArray arr = imageLoader.asMatrix(bmp);
-
-        for (int y = 0; y < 32; ++y) {
-            for (int x = 0; x < 32; ++x) {
-                double b = arr.getDouble(0, 0, y, x);
-                double r = arr.getDouble(0, 2, y, x);
-                arr.putScalar(0, 0, y, x, r);
-                arr.putScalar(0, 2, y, x, b);
+        BufferedImage bufferedImage = new BufferedImage(IMAGE_WIDTH, IMAGE_HEIGHT, BufferedImage.TYPE_INT_RGB);
+        for (int y = 0; y < IMAGE_HEIGHT; ++y) {
+            for (int x = 0; x < IMAGE_WIDTH; ++x) {
+                bufferedImage.setRGB(x, y, rgbImage[y * IMAGE_WIDTH + x]);
             }
         }
 
-        return arr;
+        Java2DNativeImageLoader imageLoader = new Java2DNativeImageLoader(IMAGE_HEIGHT, IMAGE_WIDTH, IMAGE_CHANNELS);
+
+        return imageLoader.asMatrix(bufferedImage, true);
     }
 
     /**
      * Read one row in the dataset.
+     * 
      * @param inputStream the input stream to the dataset
      * @return a pair contains a label and an image
      * @throws IOException if I/O errors happen

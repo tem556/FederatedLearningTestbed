@@ -5,6 +5,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.RadioGroup;
 
 public class MainActivity extends AppCompatActivity {
     @Override
@@ -13,11 +14,16 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
     }
 
-    public void startbutton_onclick(View view) throws Exception {
-        String host = ((EditText) findViewById(R.id.editTextHost)).getText().toString();
-        int port = Integer.parseInt(((EditText) findViewById(R.id.editTextPort)).getText().toString());
+    public void startbutton_onclick(View view) {
+        String host = ((EditText) findViewById(R.id.hostEditText)).getText().toString();
+        int port = Integer.parseInt(((EditText) findViewById(R.id.portEditText)).getText().toString());
 
-        ClientThread clientThread = new ClientThread(getFilesDir(), host, port);
+        RadioGroup radioButtonGroup = (RadioGroup) findViewById(R.id.datasetRadioGroup);
+        int radioButtonID = radioButtonGroup.getCheckedRadioButtonId();
+        View radioButton = radioButtonGroup.findViewById(radioButtonID);
+        int idx = radioButtonGroup.indexOfChild(radioButton);
+
+        ClientThread clientThread = new ClientThread(idx, getFilesDir(), host, port);
         clientThread.start();
     }
 }

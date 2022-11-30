@@ -7,9 +7,10 @@ import java.util.List;
 
 public interface IAggregationStrategy {
     /**
-     * Implementation for the aggregation strategy.
+     * Implementation for the average aggregation strategy.
      * @param trainingReports training reports from clients
      * @throws Exception if problems happen while aggregating
      */
     MultiLayerNetwork aggregate(MultiLayerNetwork model, List<ModelUpdate> trainingReports) throws Exception;
+
 }

@@ -5,12 +5,12 @@ import org.nd4j.linalg.dataset.DataSet;
 
 import java.io.IOException;
 
-public class ServerCifar10DataSetIterator extends RecordReaderDataSetIterator {
+public class ServerChestXrayDataSetIterator extends RecordReaderDataSetIterator {
     private int counter = 0;
-    public ServerCifar10Loader loader;
+    public ServerChestXrayLoader loader;
 
-    public ServerCifar10DataSetIterator(ServerCifar10Loader _loader, int batchSize) {
-        super(null, batchSize, 1, 10);
+    public ServerChestXrayDataSetIterator(ServerChestXrayLoader _loader, int batchSize) {
+        super(null, batchSize, 1, 2);
         loader = _loader;
     }
 

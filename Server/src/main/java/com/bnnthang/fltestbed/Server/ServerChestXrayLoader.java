@@ -6,26 +6,55 @@ import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.dataset.DataSet;
 import org.nd4j.linalg.util.FeatureUtil;
 
-import java.awt.Color;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Map;
+import java.util.HashMap;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
-public class ServerCifar10Loader {
+public class ServerChestXrayLoader {
+    /**
+     * Label size (in bytes).
+     */
+    protected final static int LABEL_SIZE = 1;
+
+    /**
+     * Image height (in pixels).
+     */
+    protected static int IMAGE_HEIGHT = 180;
+
+    /**
+     * Image width (in pixels).
+     */
+    protected static int IMAGE_WIDTH = 180;
+
+    /**
+     * Image channels.
+     */
+    protected static int IMAGE_CHANNELS = 3;
+
+    /**
+     * Image size (in bytes).
+     */
+    protected static int IMAGE_SIZE = IMAGE_WIDTH * IMAGE_HEIGHT * IMAGE_CHANNELS;
+
+    /**
+     * Row size (in bytes).
+     */
+    protected static int ROW_SIZE = LABEL_SIZE + IMAGE_SIZE;
+
     /**
      * Loaded image array.
      */
     private List<Pair<byte[], Byte>> imagesWithLabel;
 
-    public ServerCifar10Loader(File[] files, Double ratio) throws IOException {
-        this.imagesWithLabel = new ArrayList<>();
+    public ServerChestXrayLoader(File[] files, Double ratio) throws IOException {
+        imagesWithLabel = new ArrayList<>();
 
         // Load all files.
         for (File file : files) {
@@ -36,18 +65,12 @@ public class ServerCifar10Loader {
         getPartialDataset(ratio);
     }
 
-    public int getSize() {
-        return imagesWithLabel.size();
-    }
-
     private void load(File file) throws IOException {
         InputStream inputStream = new FileInputStream(file);
-        int imageSize = 32 * 32 * 3;
-        int labelSize = 1;
-        int rowSize = imageSize + labelSize;
+        int rowSize = IMAGE_HEIGHT * IMAGE_WIDTH * IMAGE_CHANNELS + LABEL_SIZE;
         while (inputStream.available() >= rowSize) {
-            byte[] labelBytes = new byte[labelSize];
-            byte[] imageBytes = new byte[imageSize];
+            byte[] labelBytes = new byte[LABEL_SIZE];
+            byte[] imageBytes = new byte[IMAGE_HEIGHT * IMAGE_WIDTH * IMAGE_CHANNELS];
             int bytesRead = inputStream.read(labelBytes) + inputStream.read(imageBytes);
 
             if (bytesRead != rowSize) {
@@ -84,7 +107,7 @@ public class ServerCifar10Loader {
             dist.put(kvp.getSecond(), dist.get(kvp.getSecond()) + 1);
         }
 
-        // TODO: replace this with a nicer printing logic
+        // TODO: replace with nicer printing logic.
         System.out.println("data distribution--------------");
         System.out.println(dist);
         System.out.println("-------------------------------");
@@ -98,7 +121,7 @@ public class ServerCifar10Loader {
         int toIndex = Math.min(imagesWithLabel.size(), fromIndex + batchSize);
         for (int i = fromIndex; i < toIndex; ++i) {
             INDArray image = bytesToImage(imagesWithLabel.get(i).getFirst());
-            INDArray label = FeatureUtil.toOutcomeVector(imagesWithLabel.get(i).getSecond(), 10);
+            INDArray label = FeatureUtil.toOutcomeVector(imagesWithLabel.get(i).getSecond(), 2);
             atomicDataSets.add(new DataSet(image, label));
         }
 
@@ -106,26 +129,30 @@ public class ServerCifar10Loader {
     }
 
     private INDArray bytesToImage(byte[] imageBytes) throws IOException {
-        int[] rgbImage = new int[1024];
-        for (int y = 0; y < 32; ++y) {
-            for (int x = 0; x < 32; ++x) {
-                int r = 0xFF & imageBytes[y * 32 + x];
-                int g = 0xFF & imageBytes[1024 + y * 32 + x];
-                int b = 0xFF & imageBytes[2048 + y * 32 + x];
-                rgbImage[y * 32 + x] = new Color(r, g, b).getRGB();
+        int[] rgbImage = new int[IMAGE_HEIGHT * IMAGE_WIDTH];
+        for (int y = 0; y < IMAGE_HEIGHT; ++y) {
+            for (int x = 0; x < IMAGE_WIDTH; ++x) {
+                int r = 0xFF & imageBytes[y * IMAGE_WIDTH + x];
+                int g = 0xFF & imageBytes[IMAGE_HEIGHT * IMAGE_WIDTH + y * IMAGE_WIDTH + x];
+                int b = 0xFF & imageBytes[2 * IMAGE_HEIGHT * IMAGE_WIDTH + y * IMAGE_WIDTH + x];
+                rgbImage[y * IMAGE_WIDTH + x] = (0xFF << 24) + (r << 16) + (g << 8) + b;
             }
         }
 
-        BufferedImage bufferedImage = new BufferedImage(32, 32, BufferedImage.TYPE_INT_RGB);
-        for (int y = 0; y < 32; ++y) {
-            for (int x = 0; x < 32; ++x) {
-                bufferedImage.setRGB(x, y, rgbImage[y * 32 + x]);
+        BufferedImage bufferedImage = new BufferedImage(IMAGE_WIDTH, IMAGE_HEIGHT, BufferedImage.TYPE_INT_RGB);
+        for (int y = 0; y < IMAGE_HEIGHT; ++y) {
+            for (int x = 0; x < IMAGE_WIDTH; ++x) {
+                bufferedImage.setRGB(x, y, rgbImage[y * IMAGE_WIDTH + x]);
             }
         }
 
-        Java2DNativeImageLoader imageLoader = new Java2DNativeImageLoader(32, 32, 3);
+        Java2DNativeImageLoader imageLoader = new Java2DNativeImageLoader(IMAGE_HEIGHT, IMAGE_WIDTH, IMAGE_CHANNELS);
         INDArray image = imageLoader.asMatrix(bufferedImage, true);
 
         return image;
+    }
+    
+    public int getSize() {
+        return imagesWithLabel.size();
     }
 }

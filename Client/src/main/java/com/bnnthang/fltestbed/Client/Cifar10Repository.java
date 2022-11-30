@@ -1,7 +1,6 @@
 package com.bnnthang.fltestbed.Client;
 
 import com.bnnthang.fltestbed.commonutils.clients.IClientLocalRepository;
-import com.bnnthang.fltestbed.commonutils.models.PowerConsumptionFromBytes;
 import com.bnnthang.fltestbed.commonutils.utils.SocketUtils;
 import lombok.NonNull;
 import org.apache.commons.lang3.SerializationUtils;
@@ -15,8 +14,8 @@ import org.nd4j.linalg.api.ndarray.INDArray;
 import java.io.*;
 import java.net.Socket;
 
-public class LocalRepositoryImpl implements IClientLocalRepository {
-    private static final Logger _logger = LogManager.getLogger(LocalRepositoryImpl.class);
+public class Cifar10Repository implements IClientLocalRepository {
+    private static final Logger _logger = LogManager.getLogger(Cifar10Repository.class);
 
     @NonNull
     private final String pathToModel;
@@ -24,7 +23,7 @@ public class LocalRepositoryImpl implements IClientLocalRepository {
     @NonNull
     private final String pathToDataset;
 
-    public LocalRepositoryImpl(@NonNull String _pathToModel, @NonNull String _pathToDataset) {
+    public Cifar10Repository(@NonNull String _pathToModel, @NonNull String _pathToDataset) {
         pathToModel = _pathToModel;
         pathToDataset = _pathToDataset;
     }
@@ -116,4 +115,7 @@ public class LocalRepositoryImpl implements IClientLocalRepository {
     public String getModelPath() {
         return pathToModel;
     }
+
+    @Override
+    public String getDatasetName() { return "Cifar10"; }
 }

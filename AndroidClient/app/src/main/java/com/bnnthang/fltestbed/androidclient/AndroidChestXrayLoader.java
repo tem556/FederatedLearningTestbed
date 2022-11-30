@@ -18,7 +18,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class AndroidCifar10Loader implements IDatasetLoader {
+public class AndroidChestXrayLoader implements IDatasetLoader {
     /**
      * Label size (in bytes).
      */
@@ -27,12 +27,12 @@ public class AndroidCifar10Loader implements IDatasetLoader {
     /**
      * Image height (in pixels).
      */
-    protected final static int IMAGE_HEIGHT = 32;
+    protected final static int IMAGE_HEIGHT = 180;
 
     /**
      * Image width (in pixels).
      */
-    protected final static int IMAGE_WIDTH = 32;
+    protected final static int IMAGE_WIDTH = 180;
 
     /**
      * Image channels.
@@ -50,6 +50,11 @@ public class AndroidCifar10Loader implements IDatasetLoader {
     protected final static int ROW_SIZE = LABEL_SIZE + IMAGE_SIZE;
 
     /**
+     * Number of outcomes.
+     */
+    protected final static int OUTCOMES = 2;
+
+    /**
      * Local file repository.
      */
     protected IClientLocalRepository localRepository;
@@ -59,7 +64,7 @@ public class AndroidCifar10Loader implements IDatasetLoader {
      *
      * @param _localRepository an instance of <code>ILocalRepository</code>
      */
-    public AndroidCifar10Loader(IClientLocalRepository _localRepository) {
+    public AndroidChestXrayLoader(IClientLocalRepository _localRepository) {
         localRepository = _localRepository;
     }
 
@@ -104,8 +109,9 @@ public class AndroidCifar10Loader implements IDatasetLoader {
      */
     @Override
     public DataSet createDataSet(int batchSize, int fromIndex) throws IOException {
-        if (!localRepository.datasetExists())
+        if (!localRepository.datasetExists()) {
             return DataSet.empty();
+        }
 
         InputStream inputStream = localRepository.getDatasetInputStream();
         inputStream.skip((long) fromIndex * ROW_SIZE);
@@ -115,7 +121,7 @@ public class AndroidCifar10Loader implements IDatasetLoader {
         for (int i = fromIndex; i < toIndex; ++i) {
             Pair<Byte, byte[]> row = readOneRow(inputStream);
             INDArray image = bytesToImage(row.getSecond());
-            INDArray label = FeatureUtil.toOutcomeVector(row.getFirst(), 10);
+            INDArray label = FeatureUtil.toOutcomeVector(row.getFirst(), OUTCOMES);
             atomicDataSets.add(new DataSet(image, label));
         }
 
@@ -144,8 +150,8 @@ public class AndroidCifar10Loader implements IDatasetLoader {
         AndroidNativeImageLoader imageLoader = new AndroidNativeImageLoader(IMAGE_HEIGHT, IMAGE_WIDTH, IMAGE_CHANNELS);
         INDArray arr = imageLoader.asMatrix(bmp);
 
-        for (int y = 0; y < 32; ++y) {
-            for (int x = 0; x < 32; ++x) {
+        for (int y = 0; y < IMAGE_HEIGHT; ++y) {
+            for (int x = 0; x < IMAGE_WIDTH; ++x) {
                 double b = arr.getDouble(0, 0, y, x);
                 double r = arr.getDouble(0, 2, y, x);
                 arr.putScalar(0, 0, y, x, r);

@@ -3,12 +3,15 @@ package com.bnnthang.fltestbed.commonutils.models;
 import com.bnnthang.fltestbed.commonutils.servers.IAggregationStrategy;
 import lombok.Data;
 import lombok.NonNull;
-import org.json.simple.*;
+import lombok.AllArgsConstructor;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Encapsulate training configurations.
  */
 @Data
+@AllArgsConstructor
 public class TrainingConfiguration {
     /**
      * The minimum number of clients in a training round.
@@ -47,9 +50,29 @@ public class TrainingConfiguration {
     private Boolean useConfig;
 
     /**
-     * JSON Object that contains quantity and timing of the dropped clients
-     * Can be null
+     * Boolean that is only used when useConfig is true. Is true if data is to be distributed among clients
+     * with different ratios, but labels remain evenly distributed. Is false if labels are to be distributed unevenly
      */
-    private JSONObject jsonObject;
+    private Boolean evenLabelDistribution;
 
+    /**
+     * List of doubles where index i in this array would be a float between 0 and 1,
+     * and would decide how much data the ith client would take
+     */
+    private ArrayList<Double> distributionRatiosByClient;
+
+    /**
+     * List of List of doubles where jth column in ith row decides how much of class j would the ith clients get.
+     */
+    private ArrayList<ArrayList<Double>> distributionRatiosByLabels;
+
+    /**
+     * True if clients should be dropped
+     */
+    private Boolean useDropping;
+
+    /**
+     * List of size rounds, where the number at the ith index represents number of clients to be dropped at ith round
+     */
+    private List<Integer> dropping;
 }

@@ -12,7 +12,7 @@ public class MemoryListener extends BaseTrainingListener {
 
     @Override
     public void iterationDone(Model model, int iteration, int epoch) {
-        if (iteration % 50 != 0) {
+        if (iteration % 25 != 0) {
             return;
         }
 

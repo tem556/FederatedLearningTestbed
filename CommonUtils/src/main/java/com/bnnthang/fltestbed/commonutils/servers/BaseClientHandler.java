@@ -15,7 +15,7 @@ import java.io.IOException;
 import java.net.Socket;
 
 public class BaseClientHandler implements IClientHandler {
-    private static final Logger _logger = LoggerFactory.getLogger(BaseClientHandler.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(BaseClientHandler.class);
 
     protected int _id;
 
@@ -67,12 +67,12 @@ public class BaseClientHandler implements IClientHandler {
         SocketUtils.sendInteger(_socket, ClientCommandEnum.DATASETPUSH.ordinal());
         SocketUtils.sendBytesWrapper(_socket, bytes);
 
-        _logger.debug("pushed dataset length = " + bytes.length);
+        LOGGER.debug("pushed dataset length = " + bytes.length);
     }
 
     @Override
     public void pushModel(byte[] bytes) throws IOException {
-        _logger.debug(localModel ? "pushing weights" : "pushing");
+        LOGGER.debug(localModel ? "pushing weights" : "pushing");
 
         localModel = true;
 
@@ -80,7 +80,7 @@ public class BaseClientHandler implements IClientHandler {
         SocketUtils.sendInteger(_socket, ClientCommandEnum.MODELPUSH.ordinal());
         SocketUtils.sendBytesWrapper(_socket, bytes);
 
-        _logger.debug("pushed model length = " + bytes.length);
+        LOGGER.debug("pushed model length = " + bytes.length);
     }
 
     @Override
@@ -123,7 +123,7 @@ public class BaseClientHandler implements IClientHandler {
             int flag = SocketUtils.readInteger(_socket);
             res = flag != 0;
         } catch (IOException e) {
-            e.printStackTrace();
+            LOGGER.error("EXCEPTION", e);
         }
         return res;
     }

@@ -1,7 +1,7 @@
 package com.bnnthang.fltestbed.Server.Repositories;
 
-import com.bnnthang.fltestbed.Server.ServerCifar10DataSetIterator;
-import com.bnnthang.fltestbed.Server.ServerCifar10Loader;
+import com.bnnthang.fltestbed.Server.ServerChestXrayDataSetIterator;
+import com.bnnthang.fltestbed.Server.ServerChestXrayLoader;
 import com.bnnthang.fltestbed.commonutils.servers.IServerLocalRepository;
 import com.bnnthang.fltestbed.commonutils.models.TrainingConfiguration;
 import org.apache.commons.lang3.SerializationUtils;
@@ -12,6 +12,7 @@ import org.deeplearning4j.nn.multilayer.MultiLayerNetwork;
 import org.deeplearning4j.util.ModelSerializer;
 import org.nd4j.evaluation.classification.Evaluation;
 import org.nd4j.linalg.api.ndarray.INDArray;
+import org.nd4j.linalg.dataset.api.iterator.DataSetIterator;
 
 import java.io.*;
 import java.text.SimpleDateFormat;
@@ -21,38 +22,56 @@ import java.util.stream.Stream;
 
 import org.json.simple.*;
 
-public class Cifar10Repository implements IServerLocalRepository {
-    private static final Logger _logger = LogManager.getLogger(Cifar10Repository.class);
+public class ChestXrayRepository implements IServerLocalRepository {
+    /**
+     * Image Width.
+     */
+    private static final Integer IMAGE_WIDTH = 180;
+
+    /**
+     * Image Height.
+     */
+    private static final Integer IMAGE_HEIGHT = 180;
+
+    /**
+     * Image channels
+     */
+    private static final Integer IMAGE_CHANNELS = 3;
+    /**
+     * Labels.
+     */
+    private static final Integer NUM_OF_LABELS = 2;
+
+    /**
+     * Logger.
+     */
+    private static final Logger _logger = LogManager.getLogger(ChestXrayRepository.class);
 
     private final String workingDirectory;
+
     private final boolean useConfig;
+
     private final TrainingConfiguration trainingConfiguration;
-    private int IMAGE_HEIGHT = 32;
-    private int IMAGE_CHANNELS = 3;
-    private int NUM_OF_LABELS = 10;
 
     // TODO: add some flexibility for this
-    private String currentModelName = "base_model.zip";
+    private String currentModelName = "xraymodel.zip";
 
     private final Map<Byte, List<byte[]>> imagesByLabel;
 
-    public Cifar10Repository(String _workingDirectory, boolean _useConfig,
+    public ChestXrayRepository(String _workingDirectory, boolean _useConfig,
                              TrainingConfiguration _trainingConfiguration) throws IOException {
         workingDirectory = _workingDirectory;
         useConfig = _useConfig;
         trainingConfiguration = _trainingConfiguration;
 
         imagesByLabel = new HashMap<>();
-        // load cifar-10 dataset
-        load(new FileInputStream(workingDirectory + "/cifar-10/data_batch_1.bin"));
-        load(new FileInputStream(workingDirectory + "/cifar-10/data_batch_2.bin"));
-        load(new FileInputStream(workingDirectory + "/cifar-10/data_batch_3.bin"));
-        load(new FileInputStream(workingDirectory + "/cifar-10/data_batch_4.bin"));
-        load(new FileInputStream(workingDirectory + "/cifar-10/data_batch_5.bin"));
+
+        // load chest x-ray dataset
+        load(new FileInputStream(workingDirectory + "/train_batch.bin"));
     }
 
     private void load(InputStream inputStream) throws IOException {
-        int imageSize = IMAGE_HEIGHT * IMAGE_HEIGHT * IMAGE_CHANNELS;
+        int imageSize = IMAGE_WIDTH * IMAGE_HEIGHT * IMAGE_CHANNELS;
         int labelSize = 1;
         int rowSize = imageSize + labelSize;
         while (inputStream.available() >= rowSize) {
@@ -89,9 +108,9 @@ public class Cifar10Repository implements IServerLocalRepository {
         for (int i = 0; i < nPartitions; ++i) {
             res.add(new ArrayList<>());
             for (int j = 0; j < partitions.get(i).size(); ++j) {
-                byte[] t = new byte[IMAGE_HEIGHT * IMAGE_HEIGHT * IMAGE_CHANNELS + 1];
+                byte[] t = new byte[IMAGE_HEIGHT * IMAGE_WIDTH * IMAGE_CHANNELS + 1];
                 t[0] = partitions.get(i).get(j).getRight();
-                System.arraycopy(partitions.get(i).get(j).getLeft(), 0, t, 1, IMAGE_HEIGHT * IMAGE_HEIGHT * IMAGE_CHANNELS);
+                System.arraycopy(partitions.get(i).get(j).getLeft(), 0, t, 1, IMAGE_HEIGHT * IMAGE_WIDTH * IMAGE_CHANNELS);
                 res.get(i).add(t);
             }
         }
@@ -103,6 +122,7 @@ public class Cifar10Repository implements IServerLocalRepository {
 
         return res;
     }
+
     // Checks that the ratios for each label in JSONArray distribution sum up to 1
     public boolean isValidLabelDistribution(ArrayList<ArrayList<Double>> distribution) {
         for (int i = 0; i < NUM_OF_LABELS; i++) {
@@ -118,16 +138,17 @@ public class Cifar10Repository implements IServerLocalRepository {
     }
 
     public boolean isValidJSON(ArrayList<Double> distributionRatiosC, ArrayList<ArrayList<Double>> distributionRatiosL,
-                               int nPartitions, boolean even) {
+            int nPartitions, boolean even) {
         Double one = 1.0;
         // Only checks array that is being used
-        if (even){
-            if (distributionRatiosC.size() != nPartitions) return false;
+        if (even) {
+            if (distributionRatiosC.size() != nPartitions)
+                return false;
             else
-                return (one.equals(distributionRatiosC.stream().mapToDouble(a -> (Double)a).sum()));
-        }
-        else{
-            if (distributionRatiosL.size() != nPartitions) return false;
+                return (one.equals(distributionRatiosC.stream().mapToDouble(a -> (Double) a).sum()));
+        } else {
+            if (distributionRatiosL.size() != nPartitions)
+                return false;
             else
                 return isValidLabelDistribution(distributionRatiosL);
         }
@@ -159,8 +180,7 @@ public class Cifar10Repository implements IServerLocalRepository {
             for (int partition = 0; partition < nPartitions; partition++) {
                 if (evenLabelDistribution) {
                     subRatio = distributionRatiosByClient.get(partition).floatValue();
-                }
-                else
+                } else
                     subRatio = (distributionRatiosByLabels.get(partition)).get(label).floatValue();
                 nSamples = Integer.min(Math.round(subRatio * ratio * images.size()), images.size());
                 for (int i = usedImages; i < usedImages + nSamples; ++i) {
@@ -175,9 +195,9 @@ public class Cifar10Repository implements IServerLocalRepository {
         for (int i = 0; i < nPartitions; ++i) {
             res.add(new ArrayList<>());
             for (int j = 0; j < partitions.get(i).size(); ++j) {
-                byte[] t = new byte[IMAGE_HEIGHT * IMAGE_HEIGHT * IMAGE_CHANNELS + 1];
+                byte[] t = new byte[IMAGE_HEIGHT * IMAGE_WIDTH * IMAGE_CHANNELS + 1];
                 t[0] = partitions.get(i).get(j).getRight();
-                System.arraycopy(partitions.get(i).get(j).getLeft(), 0, t, 1, IMAGE_HEIGHT * IMAGE_HEIGHT * IMAGE_CHANNELS);
+                System.arraycopy(partitions.get(i).get(j).getLeft(), 0, t, 1, IMAGE_HEIGHT * IMAGE_WIDTH * IMAGE_CHANNELS);
                 res.get(i).add(t);
             }
         }
@@ -203,14 +223,9 @@ public class Cifar10Repository implements IServerLocalRepository {
         byte[] res = new byte[length];
         int cnt = 0;
         for (byte[] bytes : dataset) {
-            // _logger.debug(String.format("??? %d %d %d %d", bytes[0], bytes[1], bytes[2],
-            // bytes[3]));
             System.arraycopy(bytes, 0, res, cnt, bytes.length);
             cnt += bytes.length;
         }
-        // if (cnt != (32 * 32 * 3 + 1) * dataset.size()) {
-        //     _logger.error("wrong dataset!");
-        // }
         return res;
     }
 
@@ -219,13 +234,13 @@ public class Cifar10Repository implements IServerLocalRepository {
         if (useConfig) {
             try {
                 List<List<byte[]>> partitions = partialSplitDatasetIIDAndShuffle(numPartitions, ratio);
-                return partitions.stream().map(Cifar10Repository::flatten).collect(Collectors.toList());
+                return partitions.stream().map(ChestXrayRepository::flatten).collect(Collectors.toList());
             } catch (Exception e) {
                 e.printStackTrace();
             }
         } else {
             List<List<byte[]>> partitions = partialSplitDatasetIIDAndShuffleEvenly(numPartitions, ratio);
-            return partitions.stream().map(Cifar10Repository::flatten).collect(Collectors.toList());
+            return partitions.stream().map(ChestXrayRepository::flatten).collect(Collectors.toList());
         }
         return null;
     }
@@ -245,6 +260,7 @@ public class Cifar10Repository implements IServerLocalRepository {
         byte[] bytes = new byte[modelLength];
         int readBytes = fis.read(bytes, 0, modelLength);
         if (readBytes != modelLength) {
+            fis.close();
             throw new IOException(String.format("read %d bytes; expected %d bytes", readBytes, modelLength));
         }
         fis.close();
@@ -262,9 +278,8 @@ public class Cifar10Repository implements IServerLocalRepository {
 
     @Override
     public void saveNewModel(MultiLayerNetwork newModel) throws IOException {
-        String newModelName = "cifarmodel-" +
-                (new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss").format(Calendar.getInstance().getTime())) + ".zip";
-
+        String newModelName = "xraymodel-"
+                + (new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss").format(Calendar.getInstance().getTime())) + ".zip";
         newModel.save(new File(workingDirectory, newModelName));
         currentModelName = newModelName;
     }
@@ -284,15 +299,15 @@ public class Cifar10Repository implements IServerLocalRepository {
     @Override
     public Evaluation evaluateCurrentModel() {
         try {
-            File testDatasetFile = new File(workingDirectory, "cifar-10/test_batch.bin"); // load test file
-            ServerCifar10Loader loader = new ServerCifar10Loader(new File[] { testDatasetFile }, 1.0);
-            ServerCifar10DataSetIterator cifarEval = new ServerCifar10DataSetIterator(loader, 16);
+            File testDatasetFile = new File(workingDirectory, "test_batch.bin");
+            DataSetIterator iterEval = new ServerChestXrayDataSetIterator(
+                    new ServerChestXrayLoader(new File[] { testDatasetFile }, 1.0), 16);
             MultiLayerNetwork model = loadLatestModel();
-            Evaluation eval = model.evaluate(cifarEval);
+            Evaluation eval = model.evaluate(iterEval);
             model.close();
             return eval;
         } catch (Exception e) {
-            e.printStackTrace();
+            _logger.error(e.getStackTrace());
         }
         return null;
     }

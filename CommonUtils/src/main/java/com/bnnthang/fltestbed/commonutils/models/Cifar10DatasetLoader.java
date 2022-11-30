@@ -12,9 +12,12 @@ import org.slf4j.LoggerFactory;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.*;
+import java.util.Map;
+import java.util.HashMap;
+import java.util.ArrayList;
+import java.util.List;
 
-public class BaseCifar10Loader implements ICifar10Loader {
+public class Cifar10DatasetLoader implements IDatasetLoader {
     /**
      * Label size (in bytes).
      */
@@ -23,27 +26,27 @@ public class BaseCifar10Loader implements ICifar10Loader {
     /**
      * Image height (in pixels).
      */
-    protected final static int IMAGE_HEIGHT = 32;
+    protected static int IMAGE_HEIGHT = 32;
 
     /**
      * Image width (in pixels).
      */
-    protected final static int IMAGE_WIDTH = 32;
+    protected static int IMAGE_WIDTH = 32;
 
     /**
      * Image channels.
      */
-    protected final static int IMAGE_CHANNELS = 3;
+    protected static int IMAGE_CHANNELS = 3;
 
     /**
      * Image size (in bytes).
      */
-    protected final static int IMAGE_SIZE = IMAGE_WIDTH * IMAGE_HEIGHT * IMAGE_CHANNELS;
+    protected static int IMAGE_SIZE = IMAGE_WIDTH * IMAGE_HEIGHT * IMAGE_CHANNELS;
 
     /**
      * Row size (in bytes).
      */
-    protected final static int ROW_SIZE = LABEL_SIZE + IMAGE_SIZE;
+    protected static int ROW_SIZE = LABEL_SIZE + IMAGE_SIZE;
 
     /**
      * Local file repository.
@@ -53,20 +56,22 @@ public class BaseCifar10Loader implements ICifar10Loader {
     /**
      * Logger.
      */
-    private static final Logger _logger = LoggerFactory.getLogger(BaseCifar10Loader.class);
+    private static final Logger _logger = LoggerFactory.getLogger(Cifar10DatasetLoader.class);
 
     private long rowCount = -1;
 
     /**
      * Instantiate <code>MyCifar10Loader</code>
+     * 
      * @param _localRepository an instance of <code>ILocalRepository</code>
      */
-    public BaseCifar10Loader(IClientLocalRepository _localRepository) {
+    public Cifar10DatasetLoader(IClientLocalRepository _localRepository) {
         localRepository = _localRepository;
     }
 
     /**
      * Count the number of elements in the dataset
+     * 
      * @return the number of elements in the dataset
      */
     public long count() throws IOException {
@@ -78,6 +83,7 @@ public class BaseCifar10Loader implements ICifar10Loader {
 
     /**
      * Count the number of occurrences of each label
+     * 
      * @return a map showing the data distribution for all labels
      * @throws IOException if I/O errors happen
      */
@@ -101,10 +107,11 @@ public class BaseCifar10Loader implements ICifar10Loader {
 
     /**
      * Create dataset.
+     * 
      * @param batchSize batch size
      * @param fromIndex starting index
      * @return a dataset that contains images from index <code>fromIndex</code>
-     * to <code>fromIndex + batchSize - 1</code> inclusive
+     *         to <code>fromIndex + batchSize - 1</code> inclusive
      * @throws IOException if I/O errors occur
      */
     public DataSet createDataSet(int batchSize, int fromIndex) throws IOException {
@@ -130,6 +137,7 @@ public class BaseCifar10Loader implements ICifar10Loader {
 
     /**
      * Convert image byte array to <code>INDArray</code>.
+     * 
      * @param imageBytes byte array of an image
      * @return a corresponding <code>INDArray</code> instance
      * @throws IOException if I/O errors happen
@@ -159,6 +167,7 @@ public class BaseCifar10Loader implements ICifar10Loader {
 
     /**
      * Read one row in the dataset.
+     * 
      * @param inputStream the input stream to the dataset
      * @return a pair contains a label and an image
      * @throws IOException if I/O errors happen

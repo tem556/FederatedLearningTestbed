@@ -4,13 +4,13 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <name>Thang Bui's Federated Learning Testbed Common Utils</name>
+    <name>RealFL Common Utils</name>
     <url>https://github.com/bnnthang/RealFL</url>
     <description>Shared resources between different components in my implementation of a Federated Learning system.</description>
 
     <groupId>com.bnnthang.fltestbed</groupId>
     <artifactId>commonutils</artifactId>
-    <version>1.29-SNAPSHOT</version>
+    <version>1.32-SNAPSHOT</version>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
