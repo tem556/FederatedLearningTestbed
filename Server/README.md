@@ -14,7 +14,7 @@ The `newmodel.zip` file is an untrained cifar-10 model stored in deeplearning4j'
 ## Run Server jar file
 To run the Server file, the user must have Java 8 installed. Java 11 and above can lead to segfault issues due to instability of Deeplearning4j.
 ```
-java -jar [path] [--fl/--ml] --workdir [workdir] --config [OPTION] --minClients [minClients] --datasetratio [datasetratio] --rounds [#rounds] --port [port]
+java -jar [path] [--fl/--ml] --workdir [workdir] [--config] --numClients [numClients] --datasetratio [datasetratio] --rounds [#rounds] --port [port]
 ```
 
 
@@ -23,8 +23,8 @@ java -jar [path] [--fl/--ml] --workdir [workdir] --config [OPTION] --minClients 
 | `path` | Path to jar file | path|  None 
 | `--fl/--ml`   | Use `--fl` for decentralized Federated Learning and `--ml` for centralized normal Machine Learning| `option` | `--fl`  
 | `workdir` | Working directory where the server saves the model and the training results. The server also expects the `cifar-10` folder and the `newmodel.zip` mentioned above. | path | Current Directory 
-| `OPTION` | Set to true if config.json file is to be used, otherwise data will be divided evenly among clients | bool | false
-| `minClients` | The minimum amount of Clients before that server starts training | Int | 1  
+| `[--config]` | Include if config.json file is to be used, otherwise data will be divided evenly among clients | bool | not included
+| `numClients` | The minimum amount of Clients before that server starts training | Int | 1  
 | `datasetratio`| Percentage of the total dataset that is to be used for training. Ranges from 0 (min) to 1 (max) | float | 1
 | `rounds` | Number of rounds the training should be done | Int | 3
 | `port` | Port that will be used by the client to connect | Int | 4062
