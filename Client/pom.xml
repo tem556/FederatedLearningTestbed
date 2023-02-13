@@ -6,7 +6,7 @@
 
   <groupId>com.bnnthang.fltestbed</groupId>
   <artifactId>Client</artifactId>
-  <version>1.1-STABLE</version>
+  <version>1.2-SNAPSHOT</version>
   <packaging>jar</packaging>
 
   <name>RealFL Client</name>
@@ -34,7 +34,7 @@
     <dependency>
       <groupId>com.bnnthang.fltestbed</groupId>
       <artifactId>commonutils</artifactId>
-      <version>1.32-SNAPSHOT</version>
+      <version>1.33-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>junit</groupId>

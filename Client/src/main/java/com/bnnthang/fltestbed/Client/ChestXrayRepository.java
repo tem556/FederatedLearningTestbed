@@ -1,6 +1,7 @@
 package com.bnnthang.fltestbed.Client;
 
 import com.bnnthang.fltestbed.commonutils.clients.IClientLocalRepository;
+import com.bnnthang.fltestbed.commonutils.models.TimedValue;
 import com.bnnthang.fltestbed.commonutils.utils.SocketUtils;
 import lombok.NonNull;
 import org.apache.commons.lang3.SerializationUtils;
@@ -8,10 +9,14 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.deeplearning4j.nn.multilayer.MultiLayerNetwork;
 import org.deeplearning4j.util.ModelSerializer;
-import org.nd4j.common.primitives.Pair;
 import org.nd4j.linalg.api.ndarray.INDArray;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.Socket;
 
 public class ChestXrayRepository implements IClientLocalRepository {
@@ -29,7 +34,7 @@ public class ChestXrayRepository implements IClientLocalRepository {
     }
 
     @Override
-    public Pair<Long, Long> downloadModel(Socket socket) throws IOException {
+    public TimedValue<Long> downloadModel(Socket socket) throws IOException {
         File modelFile = new File(pathToModel);
 
         // create file if not exists
@@ -37,27 +42,25 @@ public class ChestXrayRepository implements IClientLocalRepository {
 
         // download and write to model file
         FileOutputStream modelFileOutputStream = new FileOutputStream(modelFile);
-        Long readBytes = SocketUtils.readAndSaveBytes(socket, modelFileOutputStream);
-        Long configurationEnd = System.currentTimeMillis();
+        TimedValue<Long> foo = SocketUtils.readAndSaveBytes(socket, modelFileOutputStream);
         modelFileOutputStream.close();
 
-        return new Pair<>(readBytes, configurationEnd);
+        return foo;
     }
 
     @Override
-    public Pair<Long, Long> updateModel(Socket socket) throws IOException {
-        byte[] bytes = SocketUtils.readBytesWrapper(socket);
-        Long configurationEnd = System.currentTimeMillis();
+    public TimedValue<Long> updateModel(Socket socket) throws IOException {
+        TimedValue<byte[]> foo = SocketUtils.readBytesWrapper(socket);
 
-        _logger.debug("recv weights length = " + bytes.length);
+        _logger.debug("recv weights length = " + foo.getValue().length);
 
-        INDArray params = SerializationUtils.deserialize(bytes);
+        INDArray params = SerializationUtils.deserialize(foo.getValue());
         MultiLayerNetwork model = ModelSerializer.restoreMultiLayerNetwork(pathToModel);
         model.setParams(params);
         model.save(new File(pathToModel), true);
         model.close();
 
-        return new Pair<>((long) bytes.length, configurationEnd);
+        return new TimedValue<Long>((long) foo.getValue().length, foo.getElapsedTime());
     }
 
     @Override
@@ -81,7 +84,7 @@ public class ChestXrayRepository implements IClientLocalRepository {
 
         // download and write to model file
         FileOutputStream datasetFileOutputStream = new FileOutputStream(datasetFile);
-        Long readBytes = SocketUtils.readAndSaveBytes(socket, datasetFileOutputStream);
+        Long readBytes = SocketUtils.readAndSaveBytes(socket, datasetFileOutputStream).getValue();
         datasetFileOutputStream.close();
 
         return readBytes;

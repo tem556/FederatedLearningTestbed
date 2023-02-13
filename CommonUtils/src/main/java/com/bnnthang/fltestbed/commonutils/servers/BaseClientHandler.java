@@ -1,7 +1,9 @@
 package com.bnnthang.fltestbed.commonutils.servers;
 
+import com.bnnthang.fltestbed.commonutils.clients.IClientNetworkStatManager;
+import com.bnnthang.fltestbed.commonutils.clients.IClientTrainingStatManager;
 import com.bnnthang.fltestbed.commonutils.enums.ClientCommandEnum;
-import com.bnnthang.fltestbed.commonutils.models.TrainingReport;
+import com.bnnthang.fltestbed.commonutils.models.ModelUpdate;
 import com.bnnthang.fltestbed.commonutils.utils.SocketUtils;
 import com.opencsv.CSVWriter;
 import com.opencsv.ICSVWriter;
@@ -15,34 +17,38 @@ import java.io.IOException;
 import java.net.Socket;
 
 public class BaseClientHandler implements IClientHandler {
+    /**
+     * Logger.
+     */
     private static final Logger LOGGER = LoggerFactory.getLogger(BaseClientHandler.class);
 
+    /**
+     * Client ID.
+     */
     protected int _id;
 
+    /**
+     * Socket for communication.
+     */
     protected final Socket _socket;
 
+    /**
+     * Whether the client has a local model.
+     */
     protected boolean localModel;
 
-    protected ICSVWriter _logWriter;
+    /**
+     * Client's stat log folder.
+     */
+    protected File _logFolder;
 
     protected long configurationStartTime;
 
     public BaseClientHandler(int id, Socket socket, File logFolder) throws IOException {
         _id = id;
         _socket = socket;
+        _logFolder = logFolder;
         localModel = false;
-
-        File logFile = new File(logFolder, "client" + _id + "-log.csv");
-        logFile.createNewFile();
-        _logWriter = new CSVWriter(new FileWriter(logFile));
-        _logWriter.writeNext(new String[] {
-                "training time (ms)",
-                "uplink bytes (bytes)",
-                "uplink time (ms)",
-                "downlink bytes (bytes)",
-                "downlink time (ms)"
-        });
-
         configurationStartTime = -1L;
     }
 
@@ -53,7 +59,7 @@ public class BaseClientHandler implements IClientHandler {
 
         // check if client has local model
         // TODO: read 1 byte only
-        localModel = SocketUtils.readInteger(_socket) == 1;
+        localModel = SocketUtils.readInteger(_socket).getValue() == 1;
     }
 
     @Override
@@ -89,29 +95,52 @@ public class BaseClientHandler implements IClientHandler {
     }
 
     @Override
-    public TrainingReport getTrainingReport() throws IOException {
+    public ModelUpdate getTrainingReport() throws IOException {
         SocketUtils.sendInteger(_socket, ClientCommandEnum.REPORT.ordinal());
-
-        byte[] bytes = SocketUtils.readBytesWrapper(_socket);
-        long reportingEndTime = System.currentTimeMillis();
-
-        TrainingReport report = SerializationUtils.deserialize(bytes);
-
-        report.getMetrics().setUplinkBytes((long) bytes.length);
-        report.getMetrics().setUplinkTime(reportingEndTime - report.getMetrics().getUplinkTime());
-        report.getMetrics().setDownlinkTime(report.getMetrics().getDownlinkTime() - configurationStartTime);
-
-        _logWriter.writeNext(report.getMetrics().toCsvLine());
-        _logWriter.flush();
-
+        byte[] bytes = SocketUtils.readBytesWrapper(_socket).getValue();
+        ModelUpdate report = SerializationUtils.deserialize(bytes);
         return report;
     }
 
     @Override
     public void done() throws IOException {
         SocketUtils.sendInteger(_socket, ClientCommandEnum.DONE.ordinal());
+
+        // read final report
+        // TODO: check the node dropping experiments
+        // client download stat
+        IClientNetworkStatManager downloadStat = readAndDeserializeReports();
+        // client upload stat
+        IClientNetworkStatManager uploadStat = readAndDeserializeReports();
+        // training stat
+        IClientTrainingStatManager trainingStat = readAndDeserializeReports();
+        
+        // create file and write headers
+        File logFile = new File(_logFolder, "client" + _id + "-log.csv");
+        logFile.createNewFile();
+        ICSVWriter logWriter = new CSVWriter(new FileWriter(logFile));
+        logWriter.writeNext(new String[] {
+                "training time (ms)",
+                "uplink bytes (bytes)",
+                "uplink time (ms)",
+                "downlink bytes (bytes)",
+                "downlink time (ms)"
+        });
+        // write log
+        Integer rounds = downloadStat.getRounds();
+        for (Integer round = 0; round < rounds; ++round) {
+            logWriter.writeNext(new String[] {
+                trainingStat.getTrainingTime(round).toString(),
+                uploadStat.getBytes(round).toString(),
+                uploadStat.getCommTime(round).toString(),
+                downloadStat.getBytes(round).toString(),
+                downloadStat.getCommTime(round).toString()
+            });
+        }
+        logWriter.close();
+
+        // End communication.
         _socket.close();
-        _logWriter.close();
     }
 
     @Override
@@ -120,7 +149,7 @@ public class BaseClientHandler implements IClientHandler {
         try {
             SocketUtils.sendInteger(_socket, ClientCommandEnum.ISTRAINING.ordinal());
             // TODO: read 1 byte only
-            int flag = SocketUtils.readInteger(_socket);
+            int flag = SocketUtils.readInteger(_socket).getValue();
             res = flag != 0;
         } catch (IOException e) {
             LOGGER.error("EXCEPTION", e);
@@ -136,5 +165,10 @@ public class BaseClientHandler implements IClientHandler {
     @Override
     public Boolean hasLocalModel() {
         return localModel;
+    }
+
+    protected <T> T readAndDeserializeReports() throws IOException {
+        T report = SerializationUtils.deserialize(SocketUtils.readBytesWrapper(_socket).getValue());
+        return report;
     }
 }

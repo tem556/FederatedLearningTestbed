@@ -9,9 +9,6 @@ import java.util.List;
 import java.util.Scanner;
 
 public class AndroidDevices {
-//    private static final String BASH_DIR = "bash -c";
-//    private static final String ADBP_PATH = "/mnt/c/Users/buinn/Repos/FederatedLearningTestbed/Server/src/main/resources/scripts/adbp.sh";
-//    private static final String APK_PATH = "/mnt/c/Users/buinn/Repos/FederatedLearningTestbed/AndroidClient/app/build/intermediates/apk/debug/app-debug.apk";
     private static final String APK_PATH = "C:\\Users\\buinn\\Repos\\FederatedLearningTestbed\\AndroidClient\\app\\build\\intermediates\\apk\\debug\\app-debug.apk";
 
     private static final String DEVICE_LIST_CMD = "adb devices -l";

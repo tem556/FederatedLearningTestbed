@@ -32,9 +32,7 @@ public class ML {
     private static final Logger _logger = LoggerFactory.getLogger(ML.class);
 
     /**
-     * Adopted from
-     * <url>https://github.com/deeplearning4j/deeplearning4j-examples/blob/master/dl4j-examples/src/main/java/org/deeplearning4j/examples/quickstart/modeling/convolution/CIFARClassifier.java</url>.
-     * 
+     * Adopted from <url>https://github.com/deeplearning4j/deeplearning4j-examples/blob/master/dl4j-examples/src/main/java/org/deeplearning4j/examples/quickstart/modeling/convolution/CIFARClassifier.java</url>.
      * @return sample neural network for CIFAR-10 training.
      */
     public static MultiLayerNetwork getModelCifar10() {

@@ -7,7 +7,17 @@ import java.io.Serializable;
 
 @Data
 public class ModelUpdate implements Serializable {
-    private INDArray weight;
+    /**
+     * Weight update.
+     */
+    private INDArray weight = null;
+
+    public void dispose() {
+        if (weight != null) {
+            weight.close();
+            weight = null;
+        }
+    }
 
     public ModelUpdate() {
         weight = null;

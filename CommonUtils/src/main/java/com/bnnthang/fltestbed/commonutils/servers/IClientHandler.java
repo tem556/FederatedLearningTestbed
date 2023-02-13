@@ -1,6 +1,6 @@
 package com.bnnthang.fltestbed.commonutils.servers;
 
-import com.bnnthang.fltestbed.commonutils.models.TrainingReport;
+import com.bnnthang.fltestbed.commonutils.models.ModelUpdate;
 
 import java.io.IOException;
 
@@ -36,10 +36,10 @@ public interface IClientHandler {
      * Retrieve training report from client.
      * @return the training report
      */
-    TrainingReport getTrainingReport() throws IOException;
+    ModelUpdate getTrainingReport() throws IOException;
 
     /**
-     * Close connection.
+     * Get the final report and close connections.
      */
     void done() throws Exception;
 
@@ -56,5 +56,9 @@ public interface IClientHandler {
      */
     Boolean isAlive();
 
+    /**
+     * Check if the client has a version of the model.
+     * @return <code>true</code> iff the client does.
+     */
     Boolean hasLocalModel();
 }

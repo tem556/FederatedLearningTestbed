@@ -2,7 +2,6 @@ package com.bnnthang.fltestbed.commonutils.servers;
 
 import com.bnnthang.fltestbed.commonutils.models.ModelUpdate;
 import com.bnnthang.fltestbed.commonutils.models.ServerParameters;
-import com.bnnthang.fltestbed.commonutils.models.TrainingReport;
 
 import java.io.IOException;
 import java.net.Socket;
@@ -59,7 +58,7 @@ public interface IServerOperations {
      */
     Boolean isTraining();
 
-    void evaluateCurrentModel(List<TrainingReport> trainingReports) throws IOException;
+    void evaluateCurrentModel(List<ModelUpdate> trainingReports) throws IOException;
 
     void done() throws Exception;
 }

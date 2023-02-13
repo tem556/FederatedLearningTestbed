@@ -6,7 +6,7 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.bnnthang.fltestbed.commonutils.models.TrainingReport;
+import com.bnnthang.fltestbed.commonutils.models.ModelUpdate;
 
 public class EvaluationRunnable implements Runnable {
     /**
@@ -17,14 +17,14 @@ public class EvaluationRunnable implements Runnable {
     /**
      * Training reports from clients.
      */
-    List<TrainingReport> _reports;
+    List<ModelUpdate> _reports;
 
     /**
      * Logger.
      */
     private static final Logger LOGGER = LoggerFactory.getLogger(EvaluationRunnable.class);
 
-    public EvaluationRunnable(IServerOperations serverOperations, List<TrainingReport> reports) {
+    public EvaluationRunnable(IServerOperations serverOperations, List<ModelUpdate> reports) {
         _serverOperations = serverOperations;
         _reports = reports;
     }

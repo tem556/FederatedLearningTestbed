@@ -10,8 +10,8 @@ import org.nd4j.linalg.dataset.api.iterator.DataSetIterator;
 import com.bnnthang.fltestbed.commonutils.models.ChestXrayDatasetLoader;
 import com.bnnthang.fltestbed.commonutils.models.IDatasetLoader;
 import com.bnnthang.fltestbed.commonutils.models.MemoryListener;
+import com.bnnthang.fltestbed.commonutils.models.ModelUpdate;
 import com.bnnthang.fltestbed.commonutils.models.NewChestXrayDSIterator;
-import com.bnnthang.fltestbed.commonutils.models.TrainingReport;
 import com.bnnthang.fltestbed.commonutils.utils.TimeUtils;
 
 public class ChestXrayTrainingWorker extends Thread {
@@ -31,37 +31,50 @@ public class ChestXrayTrainingWorker extends Thread {
     private int epochs;
 
     /**
-     * Training report.
+     * Model update here.
      */
-    private TrainingReport report;
+    private ModelUpdate modelUpdate;
 
-    public ChestXrayTrainingWorker(IClientLocalRepository _localRepository,
-                                   TrainingReport _report,
-                                   int _batchSize,
-                                   int _epochs) {
-        localRepository = _localRepository;
-        report = _report;
-        batchSize = _batchSize;
-        epochs = _epochs;
+    /**
+     * Training time update here.
+     */
+    private IClientTrainingStatManager trainingStatManager;
+
+    /**
+     * Constructor for ChestXray training worker.
+     * @param localRepository client local repository.
+     * @param modelUpdate object to pass the update for IPC.
+     * @param batchSize batch size.
+     * @param epochs epochs.
+     */
+    public ChestXrayTrainingWorker(IClientLocalRepository localRepository, ModelUpdate modelUpdate, int batchSize, int epochs, IClientTrainingStatManager trainingStatManager) {
+        this.localRepository = localRepository;
+        this.modelUpdate = modelUpdate;
+        this.batchSize = batchSize;
+        this.epochs = epochs;
+        this.trainingStatManager = trainingStatManager;
     }
 
     @Override
     public void run() {
         try {
+            // load model
             MultiLayerNetwork model = ModelSerializer.restoreMultiLayerNetwork(localRepository.getModelFile(), true);
 
+            // load dataset
             IDatasetLoader loader = new ChestXrayDatasetLoader(localRepository);
-
             DataSetIterator iterator = new NewChestXrayDSIterator(loader, batchSize);
 
             model.setListeners(new MemoryListener());
 
+            // train and time track
             LocalDateTime startTime = LocalDateTime.now();
             model.fit(iterator, epochs);
             LocalDateTime endTime = LocalDateTime.now();
 
-            report.getMetrics().setTrainingTime(TimeUtils.millisecondsBetween(startTime, endTime));
-            report.getModelUpdate().setWeight(model.params().dup());
+            // update
+            modelUpdate.setWeight(model.params().dup());
+            trainingStatManager.setTrainingTime(TimeUtils.millisecondsBetween(startTime, endTime));
 
             model.close();
         } catch (IOException e) {

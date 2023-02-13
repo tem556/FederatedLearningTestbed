@@ -10,7 +10,7 @@
 
     <groupId>com.bnnthang.fltestbed</groupId>
     <artifactId>commonutils</artifactId>
-    <version>1.32-SNAPSHOT</version>
+    <version>1.33-SNAPSHOT</version>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>

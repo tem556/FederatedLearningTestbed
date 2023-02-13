@@ -1,7 +1,7 @@
 package com.bnnthang.fltestbed.commonutils.servers;
 
+import com.bnnthang.fltestbed.commonutils.models.ModelUpdate;
 import com.bnnthang.fltestbed.commonutils.models.TrainingConfiguration;
-import com.bnnthang.fltestbed.commonutils.models.TrainingReport;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NonNull;
@@ -12,7 +12,6 @@ import java.rmi.UnexpectedException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
-import java.util.stream.Collectors;
 
 /**
  * Simple implementation for a training iteration.
@@ -99,25 +98,23 @@ public final class BaseTrainingIterator extends Thread {
 
                 // aggregate results
                 // TODO: parallelize this
-                List<TrainingReport> reports = new ArrayList<>();
+                List<ModelUpdate> updates = new ArrayList<>();
                 LOGGER.info("getting training reports...");
                 for (IClientHandler client : clients) {
-                    TrainingReport report = client.getTrainingReport();
+                    ModelUpdate report = client.getTrainingReport();
                     if (report == null) {
                         throw new UnexpectedException("received null training report");
                     }
-                    reports.add(report);
+                    updates.add(report);
                 }
                 LOGGER.info("got all training reports");
 
                 Long t3 = System.currentTimeMillis();
 
-                operations.aggregateResults(
-                        reports.stream().map(TrainingReport::getModelUpdate).collect(Collectors.toList()),
-                        configuration.getAggregationStrategy());
+                operations.aggregateResults(updates, configuration.getAggregationStrategy());
                 LOGGER.info("aggregated updates");
 
-                Thread evalThread = new Thread(new EvaluationRunnable(operations, reports));
+                Thread evalThread = new Thread(new EvaluationRunnable(operations, updates));
                 evalThread.start();
 
                 // keep the connections alive
@@ -132,8 +129,8 @@ public final class BaseTrainingIterator extends Thread {
                 LOGGER.info("evaluated new model");
 
                 // deallocate arrays
-                for (TrainingReport report : reports) {
-                    report.getModelUpdate().getWeight().close();
+                for (ModelUpdate update : updates) {
+                    update.dispose();
                 }
 
                 Long t4 = System.currentTimeMillis();
