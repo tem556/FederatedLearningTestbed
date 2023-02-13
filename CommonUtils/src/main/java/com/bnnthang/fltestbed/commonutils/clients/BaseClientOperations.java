@@ -2,7 +2,6 @@ package com.bnnthang.fltestbed.commonutils.clients;
 
 import com.bnnthang.fltestbed.commonutils.models.*;
 import com.bnnthang.fltestbed.commonutils.utils.SocketUtils;
-import org.nd4j.common.primitives.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -62,6 +61,7 @@ public class BaseClientOperations implements IClientOperations {
         modelUpdate = new ModelUpdate();
         downloadStat = new ClientNetworkStatManager();
         uploadStat = new ClientNetworkStatManager();
+        trainingStat = new ClientTrainingStatManager();
         batchSize = _batchSize;
     }
 
@@ -70,6 +70,7 @@ public class BaseClientOperations implements IClientOperations {
         // initialize first round
         downloadStat.newRound();
         uploadStat.newRound();
+        trainingStat.newRound();
 
         // send model existence information
         SocketUtils.clientTrackedSendInteger(socket, hasLocalModel() ? 1 : 0, uploadStat);
@@ -142,6 +143,11 @@ public class BaseClientOperations implements IClientOperations {
 
         bos.close();
         out.close();
+
+        // new round here
+        downloadStat.newRound();
+        uploadStat.newRound();
+        trainingStat.newRound();
     }
 
     @Override
