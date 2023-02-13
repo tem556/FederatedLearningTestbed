@@ -1,6 +1,7 @@
 package com.bnnthang.fltestbed.androidclient;
 
 import com.bnnthang.fltestbed.commonutils.clients.IClientLocalRepository;
+import com.bnnthang.fltestbed.commonutils.models.TimedValue;
 import com.bnnthang.fltestbed.commonutils.utils.SocketUtils;
 
 import org.apache.commons.lang3.SerializationUtils;
@@ -30,16 +31,15 @@ public class AndroidLocalRepository implements IClientLocalRepository {
     }
 
     @Override
-    public Pair<Long, Long> downloadModel(Socket socket) throws IOException {
+    public TimedValue<Long> downloadModel(Socket socket) throws IOException {
         File datasetFile = new File(localFileDir, MODEL_FILENAME);
         datasetFile.createNewFile();
 
         FileOutputStream fos = new FileOutputStream(datasetFile);
-        Long readBytes = SocketUtils.readAndSaveBytes(socket, fos);
-        Long configurationEnd = System.currentTimeMillis();
+        TimedValue<Long> foo = SocketUtils.readAndSaveBytes(socket, fos);
         fos.close();
 
-        return new Pair<>(readBytes, configurationEnd);
+        return foo;
     }
 
     @Override
@@ -51,27 +51,26 @@ public class AndroidLocalRepository implements IClientLocalRepository {
 
         // download and write to model file
         FileOutputStream datasetFileOutputStream = new FileOutputStream(datasetFile);
-        Long readBytes = SocketUtils.readAndSaveBytes(socket, datasetFileOutputStream);
+        Long readBytes = SocketUtils.readAndSaveBytes(socket, datasetFileOutputStream).getValue();
         datasetFileOutputStream.close();
 
         return readBytes;
     }
 
     @Override
-    public Pair<Long, Long> updateModel(Socket socket) throws IOException {
-        byte[] bytes = SocketUtils.readBytesWrapper(socket);
+    public TimedValue<Long> updateModel(Socket socket) throws IOException {
+        TimedValue<byte[]> foo = SocketUtils.readBytesWrapper(socket);
         Long configurationEnd = System.currentTimeMillis();
 
-//        _logger.debug("recv weights length = " + bytes.length);
-        System.err.println("recv weights length = " + bytes.length);
+        System.err.println("recv weights length = " + foo.getValue().length);
 
-        INDArray params = SerializationUtils.deserialize(bytes);
+        INDArray params = SerializationUtils.deserialize(foo.getValue());
         MultiLayerNetwork model = ModelSerializer.restoreMultiLayerNetwork(new File(localFileDir, MODEL_FILENAME));
         model.setParams(params);
         model.save(new File(localFileDir, MODEL_FILENAME), true);
         model.close();
 
-        return new Pair<>((long) bytes.length, configurationEnd);
+        return new TimedValue<Long>((long) foo.getValue().length, foo.getElapsedTime());
     }
 
     @Override
