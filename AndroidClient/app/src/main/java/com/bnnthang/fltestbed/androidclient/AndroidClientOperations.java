@@ -23,7 +23,7 @@ public class AndroidClientOperations<T> extends BaseClientOperations {
 
     @Override
     public void handleTrain() {
-        trainingWorker = new Thread(WorkerFactory.getTrainingWorker(datasetIndex, localRepository, trainingReport, ANDROID_BATCH_SIZE, EPOCHS));
+        trainingWorker = new Thread(WorkerFactory.getTrainingWorker(datasetIndex, localRepository, modelUpdate, ANDROID_BATCH_SIZE, EPOCHS, trainingStat));
         trainingWorker.start();
     }
 }
